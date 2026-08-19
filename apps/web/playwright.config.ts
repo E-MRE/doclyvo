@@ -13,6 +13,11 @@ export default defineConfig({
       url: "http://localhost:8100/health",
       reuseExistingServer: !process.env.CI,
       timeout: 30_000,
+      // On Linux/CI, `soffice` is normally already on PATH and the api's own default applies.
+      // On macOS, the Homebrew cask doesn't symlink it — pass LIBREOFFICE_BINARY through if set.
+      env: process.env.LIBREOFFICE_BINARY
+        ? { LIBREOFFICE_BINARY: process.env.LIBREOFFICE_BINARY }
+        : {},
     },
     {
       command: "npm run dev -- --port 3100",

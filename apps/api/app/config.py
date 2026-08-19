@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     max_upload_size_mb: int = 100
     temp_dir: Path = Path("/tmp/doclyvo")
     retention_hours: int = 24
+    libreoffice_binary: str = "soffice"
+    libreoffice_timeout_seconds: int = 60
 
 
 @lru_cache

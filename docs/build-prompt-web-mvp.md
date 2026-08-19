@@ -69,14 +69,16 @@ Build the MVP of Doclyvo's web app inside the existing `doclyvo` monorepo:
 
 ## Deferred to a later phase (tracked, not forgotten)
 
-- **PostgreSQL / job history / docker-compose.** Phase A's five operations are synchronous
-  request/response (upload → process → return the file) with no job history yet, so there's
-  nothing for a database to store — wiring up SQLAlchemy + Alembic + `docker-compose.yml` is
-  deferred to whichever Phase B feature first needs persistent records. See
-  `apps/api/README.md`.
-- Watermark, redact, OCR, Office-to-PDF conversion.
+- **PostgreSQL / job history / docker-compose.** All nine of Phase A's operations are
+  synchronous request/response (upload → process → return the file) with no job history yet,
+  so there's nothing for a database to store — wiring up SQLAlchemy + Alembic +
+  `docker-compose.yml` is deferred to whichever Phase B feature first needs persistent
+  records. See `apps/api/README.md`.
+- ~~Watermark, OCR, Office-to-PDF conversion.~~ **Done 2026-08-20** — see `ROADMAP.md`'s Phase
+  A entry. Redact is still deferred (no design, no scope decision made on it yet).
 - Signature mode with field placement, signer invites, consent recording, and final PDF hash
-  sealing; an append-only event log with timestamps/hashes/delivery outcomes.
+  sealing; an append-only event log with timestamps/hashes/delivery outcomes. (`Sign.dc.html`'s
+  simplified draw/type/upload design still doesn't cover this multi-party workflow.)
 - File-level backup strategy beyond the retention window.
 - Accounts, billing/premium tier, telemetry/analytics.
 - Qualified/regulated e-signatures, government identity verification, full Acrobat-level

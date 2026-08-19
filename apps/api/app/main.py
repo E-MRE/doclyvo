@@ -10,9 +10,13 @@ from app.config import get_settings
 from app.core.errors import DoclyvoError
 from app.features.compress.router import router as compress_router
 from app.features.merge.router import router as merge_router
+from app.features.ocr.router import router as ocr_router
+from app.features.pdf_to_word.router import router as pdf_to_word_router
+from app.features.protect.router import router as protect_router
 from app.features.reorder.router import router as reorder_router
 from app.features.rotate.router import router as rotate_router
 from app.features.split.router import router as split_router
+from app.features.watermark.router import router as watermark_router
 
 logger = logging.getLogger("doclyvo")
 
@@ -32,6 +36,10 @@ app.include_router(split_router)
 app.include_router(compress_router)
 app.include_router(rotate_router)
 app.include_router(reorder_router)
+app.include_router(watermark_router)
+app.include_router(protect_router)
+app.include_router(ocr_router)
+app.include_router(pdf_to_word_router)
 
 
 @app.exception_handler(DoclyvoError)

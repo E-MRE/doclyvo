@@ -2,11 +2,13 @@
 
 Doclyvo's web application — Next.js 15, TypeScript, Tailwind CSS v4, App Router.
 
-**Phase A scope (current):** Compress, Merge, Split, Rotate, and Reorder, each implemented from
-its `design/*.dc.html` source. Watermark, Protect, OCR, and PDF-to-Word have neither a design
-nor a page yet (Phase B — see `design/README.md`'s known gaps). See
-`../../docs/build-prompt-web-mvp.md` for the full scope rationale and
+**Phase A scope (current, done):** all nine tools — Compress, Merge, Split, Rotate, Reorder,
+Watermark, Protect, OCR, and PDF-to-Word — each implemented from its `design/*.dc.html`
+source. See `../../docs/build-prompt-web-mvp.md` for the full scope rationale and
 `../../.claude/reference/web/` for the coding conventions this app follows.
+
+`apps/api` must have its own system dependencies installed for OCR and PDF-to-Word to work —
+see `../api/README.md`'s Setup section (Tesseract, LibreOffice headless).
 
 ## Setup
 
@@ -30,8 +32,8 @@ Open `http://localhost:3000`.
 - `app/` — routes only (`page.tsx`, `layout.tsx`, `app/tools/<tool>/page.tsx`), server-rendered
   by default so tool landing pages stay crawlable.
 - `features/<name>/` — one folder per feature (`home`, `compress`, `merge`, `split`, `rotate`,
-  `reorder`): feature-local components, a server-action `actions.ts` that's the only thing
-  calling `lib/api-client.ts`, and `types.ts`.
+  `reorder`, `watermark`, `protect`, `ocr`, `pdf-to-word`): feature-local components, a
+  server-action `actions.ts` that's the only thing calling `lib/api-client.ts`, and `types.ts`.
 - `lib/hooks/use-pdf-page-count.ts` — reads a PDF's page count client-side via `pdf-lib` (no
   server round-trip); used by Split/Rotate/Reorder to render per-page selection UI before the
   file is ever sent to `apps/api`.
@@ -47,11 +49,19 @@ Each tool page renders explicit empty → idle → processing → done/error UI 
 
 ## Testing
 
-End-to-end — one spec per tool (compress, split, rotate, reorder), spins up both `apps/api`
-and `apps/web` automatically:
+End-to-end — one spec per tool (compress, split, rotate, reorder, watermark, protect, ocr,
+pdf-to-word), spins up both `apps/api` and `apps/web` automatically:
 
 ```bash
 npm run test:e2e
+```
+
+The `ocr` and `pdf-to-word` specs exercise `apps/api`'s real Tesseract/LibreOffice calls (no
+mocking at this boundary) — install those system dependencies first (see `../api/README.md`).
+On macOS, pass `LIBREOFFICE_BINARY` through since the Homebrew cask isn't on `PATH`:
+
+```bash
+LIBREOFFICE_BINARY=/Applications/LibreOffice.app/Contents/MacOS/soffice npm run test:e2e
 ```
 
 Type checking and lint:

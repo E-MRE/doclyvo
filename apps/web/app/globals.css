@@ -16,6 +16,9 @@
   --color-text-dark: #f5f5f7;
   --color-text-soft-dark: #98989d;
 
+  /* Microsoft Word's brand blue — not part of our palette, used only to badge a .docx output */
+  --color-word-brand: #2b579a;
+
   --radius-card: 16px;
   --radius-panel: 12px;
   --radius-capsule: 10px;

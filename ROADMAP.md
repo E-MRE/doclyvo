@@ -59,47 +59,52 @@ retrofitted later:
 reference automatically; the web/api ones don't have an automated auditor yet — apply them
 by reading, since no equivalent skill exists for those stacks.
 
-## Phase A (done — 2026-08-19)
+## Phase A (done — 2026-08-20)
 
 `apps/web` (Next.js 15 + Tailwind v4) and `apps/api` (Python 3.12 + FastAPI + pikepdf) are
-scaffolded and working end-to-end:
+scaffolded and working end-to-end, all nine tools from the original scope implemented on both
+sides:
 
-- `apps/api`: merge, split, compress, rotate, reorder — each a thin router + a `service.py`
-  doing the real pikepdf work, a per-request temp workspace cleaned up via `BackgroundTask`
-  after the response is sent, and a `DoclyvoError` → JSON exception handler. No database yet —
-  see `apps/api/README.md`'s "Deferred to a later phase" for why. 14 pytest tests pass.
-- `apps/web`: Home, Compress, Merge, Split, Rotate, and Reorder pages, all implementing their
-  `design/*.dc.html` sources with real empty/idle/processing/done/error states wired to
-  `apps/api` through server actions. Rotate/Reorder read the page count client-side via
-  `pdf-lib` (`lib/hooks/use-pdf-page-count.ts`) to drive per-page select/rotate and
-  reorder-with-arrows UI — no new backend endpoint needed for that. Four Playwright end-to-end
-  tests (compress, split, rotate, reorder) each drive the real flow through both servers
-  together (`npm run test:e2e`). Watermark/Protect/OCR/PDF-to-Word are now designed
-  (2026-08-20, see `design/README.md`) but still have no `apps/api` endpoint and no
-  `apps/web` page — that's the next coding task, see Open work below.
-- Next session picking up Phase B: read `docs/build-prompt-web-mvp.md`'s "Deferred to a later
-  phase" section for what's left (redact/signatures-with-audit-log/accounts, plus the
+- `apps/api`: merge, split, compress, rotate, reorder, watermark, protect, OCR, and PDF-to-Word
+  — each a thin router + a `service.py` doing the real work, a per-request temp workspace
+  cleaned up via `BackgroundTask` after the response is sent, and a `DoclyvoError` → JSON
+  exception handler. Watermark uses pikepdf + reportlab (with a bundled DejaVu Sans font for
+  Turkish characters — Helvetica's built-in encoding can't render İ/ı/ğ/ş); protect uses
+  pikepdf's encryption/permissions support; OCR renders pages via PyMuPDF and recognizes text
+  with `pytesseract` (offloaded to a thread pool); PDF-to-Word is the first real use of the
+  LibreOffice headless integration (`app/core/libreoffice.py`), deferred since day one. No
+  database yet — see `apps/api/README.md`'s "Deferred to a later phase" for why. 31 pytest
+  tests pass (28 default + 3 `@pytest.mark.integration` tests that need real
+  tesseract/LibreOffice, excluded from the default run).
+- `apps/web`: all nine tool pages, implementing their `design/*.dc.html` sources with real
+  empty/idle/processing/done/error states wired to `apps/api` through server actions.
+  Rotate/Reorder read the page count client-side via `pdf-lib`
+  (`lib/hooks/use-pdf-page-count.ts`) to drive per-page select/rotate and reorder-with-arrows
+  UI — no backend endpoint needed for that. Eight Playwright end-to-end tests (one per tool)
+  each drive the real flow through both servers together (`npm run test:e2e`), including real
+  Tesseract/LibreOffice calls for OCR and PDF-to-Word.
+- One deliberate scope cut from the designs: PDF-to-Word's "Düzeni koru" (keep layout) checkbox
+  wasn't wired up — LibreOffice's PDF import doesn't expose a real alternate-layout mode via
+  the command-line convert path, so a toggle here would do nothing. Shipped without it rather
+  than as a fake option; noted in `apps/api/README.md`.
+- Next session: Phase B. Read `docs/build-prompt-web-mvp.md`'s "Deferred to a later phase"
+  section for what's left (redact/signatures-with-audit-log/accounts, plus the
   PostgreSQL/job-history wiring Phase A intentionally skipped).
 
 ## Open / follow-up work
 
 - [x] Design Watermark, Protect, OCR, PDF to Word — done 2026-08-20, see `design/README.md`.
       Every tool from the original scope is now designed.
-- [ ] **Build the `apps/web` pages for Watermark, Protect, OCR, and PDF-to-Word.** No API
-      endpoints exist yet for any of these four — unlike Split/Rotate/Reorder, this needs new
-      `apps/api` work too (pikepdf watermark/encrypt support exists; OCR needs a library choice
-      — see `.claude/reference/api/skills/pdf_processing.md`; PDF-to-Word is the one that
-      actually needs the previously-deferred LibreOffice headless integration).
 - [x] Build the `apps/web` pages for Split, Rotate, and Reorder — done 2026-08-20, see Phase A
       above.
+- [x] Build `apps/api` endpoints and `apps/web` pages for Watermark, Protect, OCR, and
+      PDF-to-Word — done 2026-08-20, see Phase A above. This is what finally activated the
+      LibreOffice headless integration deferred since Phase 0.
 - [x] Scaffold `apps/web` with `create-next-app` (TypeScript) — done, see Phase A above.
 - [ ] Scaffold `apps/native` with `flutter create`.
-- [x] Scaffold `apps/api` with FastAPI; wire up pikepdf — done, see Phase A above. LibreOffice
-      headless still deferred to the Office-conversion phase.
+- [x] Scaffold `apps/api` with FastAPI; wire up pikepdf — done, see Phase A above.
 - [ ] Phase B (deferred, not started): redact, signature-with-consent-and-hash + append-only
-      audit log, accounts/premium tier. (Watermark/OCR/Office-conversion are now designed —
-      see the item above; they've moved from "not started" to "needs apps/api + apps/web
-      implementation".)
+      audit log, accounts/premium tier. Every other tool from the original scope is now built.
 - [ ] Design the PostgreSQL schema (job/history records first; user accounts later for the
       premium tier).
 - [ ] Pick and configure the hosting provider for `apps/api` + PostgreSQL.

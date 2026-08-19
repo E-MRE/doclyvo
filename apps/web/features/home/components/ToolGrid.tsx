@@ -25,9 +25,16 @@ const TOOLS: ToolCard[] = [
     description: "Sayfaları istediğin sıraya getir.",
     href: "/tools/reorder",
   },
-  { id: "convert", title: "PDF to Word", description: "Düzenlenebilir Word'e çevir.", href: null },
+  {
+    id: "convert",
+    title: "PDF to Word",
+    description: "Düzenlenebilir Word'e çevir.",
+    href: "/tools/pdf-to-word",
+  },
+  { id: "watermark", title: "Filigran Ekle", description: "Metin filigranı yerleştir.", href: "/tools/watermark" },
+  { id: "ocr", title: "OCR", description: "Taranmış metni tanı.", href: "/tools/ocr" },
+  { id: "protect", title: "Koru", description: "Şifre ile kilitle.", href: "/tools/protect" },
   { id: "sign", title: "İmzala", description: "Elektronik imza ekle.", href: null },
-  { id: "protect", title: "Koru", description: "Şifre ile kilitle.", href: null },
 ];
 
 export function ToolGrid() {
