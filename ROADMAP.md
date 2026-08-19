@@ -57,13 +57,24 @@ retrofitted later:
 reference automatically; the web/api ones don't have an automated auditor yet — apply them
 by reading, since no equivalent skill exists for those stacks.
 
+## Next session: start here
+
+Coding phase begins with `apps/web` + `apps/api`. The execution prompt (adapted from a
+personal-tool reference prompt, with an explicit MVP scope cut) is written out in
+`docs/build-prompt-web-mvp.md` — read that file and follow its "Phase A execution prompt"
+section rather than re-deriving scope from this file or from conversation history.
+
 ## Open / follow-up work
 
 - [ ] Design the remaining tools when needed: Split, Watermark, Protect, OCR, PDF to Word —
       adapt from `Compress.dc.html`, not from scratch.
-- [ ] Scaffold `apps/web` with `create-next-app` (TypeScript).
+- [ ] Scaffold `apps/web` with `create-next-app` (TypeScript) — **in progress, see
+      `docs/build-prompt-web-mvp.md`**.
 - [ ] Scaffold `apps/native` with `flutter create`.
-- [ ] Scaffold `apps/api` with FastAPI; wire up pikepdf and LibreOffice headless.
+- [ ] Scaffold `apps/api` with FastAPI; wire up pikepdf (LibreOffice headless deferred to the
+      Office-conversion phase, see `docs/build-prompt-web-mvp.md`) — **in progress**.
+- [ ] Phase B (deferred, not started): watermark, redact, OCR, Office-to-PDF conversion,
+      signature-with-consent-and-hash + append-only audit log, accounts/premium tier.
 - [ ] Design the PostgreSQL schema (job/history records first; user accounts later for the
       premium tier).
 - [ ] Pick and configure the hosting provider for `apps/api` + PostgreSQL.
