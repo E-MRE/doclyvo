@@ -84,7 +84,7 @@ export function ReorderWorkspace() {
               </p>
             </div>
             {pageCount ? (
-              <div className="grid grid-cols-6 gap-3">
+              <div className="grid grid-cols-3 gap-3 md:grid-cols-6">
                 {order.map((originalNumber, index) => (
                   <div key={originalNumber} className="flex flex-col items-center gap-1.5">
                     <div className="relative w-full">

@@ -77,7 +77,7 @@ export function SplitWorkspace() {
               </button>
             </div>
             {pageCount ? (
-              <div className="grid grid-cols-6 gap-2.5">
+              <div className="grid grid-cols-4 gap-2.5 md:grid-cols-6">
                 {Array.from({ length: pageCount }, (_, index) => (
                   <div key={index} className="relative">
                     <div className="aspect-page rounded-md border border-border bg-bg dark:border-border-dark dark:bg-black" />
