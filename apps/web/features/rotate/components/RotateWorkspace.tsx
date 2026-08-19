@@ -109,7 +109,7 @@ export function RotateWorkspace() {
               ) : null}
             </div>
             {pageCount ? (
-              <div className="grid grid-cols-6 gap-2.5">
+              <div className="grid grid-cols-3 gap-2.5 md:grid-cols-6">
                 {Array.from({ length: pageCount }, (_, index) => {
                   const pageNumber = index + 1;
                   const isSelected = selected.includes(pageNumber);
