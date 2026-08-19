@@ -36,6 +36,27 @@ All-in-one PDF toolkit to convert, merge, split, compress, edit, and manage docu
 - A `StyleGuide.dc.html` artboard documents the color palette, typography, spacing/radius scale,
   and component tokens for anyone (human or agent) picking this project back up.
 
+## Coding conventions (Phase 1.5 — done)
+
+Each app has a written house-style reference under `.claude/reference/`, installed/authored
+before any of the three apps were scaffolded, so they start compliant instead of being
+retrofitted later:
+
+- `.claude/reference/flutter/` — `apps/native` (feature-based Clean Architecture, Cubit +
+  BaseCubit, design tokens instead of hardcoded values, private widgets each in their own
+  `part` file — see `feedback-flutter-conventions-enforcement` memory for the resolved
+  part-file rule).
+- `.claude/reference/web/` — `apps/web` (Next.js App Router feature folders, Tailwind theme
+  tokens mirroring the same accent/radius/font as `design/`, server-components-by-default,
+  one API client).
+- `.claude/reference/api/` — `apps/api` (feature-based routers/services, pikepdf/LibreOffice
+  isolated in a service layer, per-request temp workspace with guaranteed cleanup, a shared
+  `DoclyvoError` contract that `apps/web`'s error handling depends on).
+
+`.claude/skills/mars-project-overview` (`/mars-overview`) audits `apps/native` against its
+reference automatically; the web/api ones don't have an automated auditor yet — apply them
+by reading, since no equivalent skill exists for those stacks.
+
 ## Open / follow-up work
 
 - [ ] Design the remaining tools when needed: Split, Watermark, Protect, OCR, PDF to Word —
