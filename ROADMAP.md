@@ -67,13 +67,14 @@ scaffolded and working end-to-end:
   doing the real pikepdf work, a per-request temp workspace cleaned up via `BackgroundTask`
   after the response is sent, and a `DoclyvoError` → JSON exception handler. No database yet —
   see `apps/api/README.md`'s "Deferred to a later phase" for why. 14 pytest tests pass.
-- `apps/web`: Home, Compress, and Merge pages implementing `design/Main.dc.html`,
-  `Compress.dc.html`, `Merge.dc.html` with real empty/idle/processing/done/error states wired
-  to `apps/api` through server actions. Split/rotate/reorder have API support; their designs
-  (`Split.dc.html`, `Rotate.dc.html`, `Reorder.dc.html` + `Mobile*` counterparts) were added
-  2026-08-20, following the Compress/Merge template — building their `apps/web` pages is next
-  (see Open work below). A Playwright end-to-end test drives the real Compress flow through
-  both servers together (`npm run test:e2e`).
+- `apps/web`: Home, Compress, Merge, Split, Rotate, and Reorder pages, all implementing their
+  `design/*.dc.html` sources with real empty/idle/processing/done/error states wired to
+  `apps/api` through server actions. Rotate/Reorder read the page count client-side via
+  `pdf-lib` (`lib/hooks/use-pdf-page-count.ts`) to drive per-page select/rotate and
+  reorder-with-arrows UI — no new backend endpoint needed for that. Four Playwright end-to-end
+  tests (compress, split, rotate, reorder) each drive the real flow through both servers
+  together (`npm run test:e2e`). Watermark/Protect/OCR/PDF-to-Word still have no design and no
+  page (Phase B).
 - Next session picking up Phase B: read `docs/build-prompt-web-mvp.md`'s "Deferred to a later
   phase" section for what's left (watermark/redact/OCR/Office-conversion/signatures/accounts,
   plus the PostgreSQL/job-history wiring Phase A intentionally skipped).
@@ -82,13 +83,8 @@ scaffolded and working end-to-end:
 
 - [ ] Design the remaining tools when needed: Watermark, Protect, OCR, PDF to Word — adapt
       from `Compress.dc.html`, not from scratch.
-- [ ] **Build the `apps/web` pages for Split, Rotate, and Reorder** — designs are done
-      (`design/Split.dc.html`, `Rotate.dc.html`, `Reorder.dc.html` + mobile), API endpoints
-      already exist; this is the next coding task, mirroring the Compress/Merge
-      `features/<tool>/{actions.ts,components/,types.ts}` + `app/tools/<tool>/page.tsx`
-      pattern. Rotate needs a page-thumbnail multi-select + angle picker; Reorder needs a
-      page-thumbnail list with left/right move buttons (same interaction as Merge's file
-      reorder, applied to pages).
+- [x] Build the `apps/web` pages for Split, Rotate, and Reorder — done 2026-08-20, see Phase A
+      above.
 - [x] Scaffold `apps/web` with `create-next-app` (TypeScript) — done, see Phase A above.
 - [ ] Scaffold `apps/native` with `flutter create`.
 - [x] Scaffold `apps/api` with FastAPI; wire up pikepdf — done, see Phase A above. LibreOffice

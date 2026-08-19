@@ -20,6 +20,8 @@
   --radius-panel: 12px;
   --radius-capsule: 10px;
 
+  --aspect-page: 3 / 4;
+
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial,
     sans-serif;
 }

@@ -68,3 +68,28 @@ export async function mergePdfs(files: File[]): Promise<ApiFileResult> {
   files.forEach((file) => formData.append("files", file));
   return postForFile("/tools/merge", formData, "merged.pdf");
 }
+
+export async function splitPdf(file: File): Promise<ApiFileResult> {
+  const formData = new FormData();
+  formData.append("file", file);
+  return postForFile("/tools/split", formData, "pages.zip");
+}
+
+export async function rotatePdf(
+  file: File,
+  angle: 90 | 180 | 270,
+  pages: number[],
+): Promise<ApiFileResult> {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("angle", String(angle));
+  formData.append("pages", pages.join(","));
+  return postForFile("/tools/rotate", formData, "rotated.pdf");
+}
+
+export async function reorderPdf(file: File, order: number[]): Promise<ApiFileResult> {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("order", order.join(","));
+  return postForFile("/tools/reorder", formData, "reordered.pdf");
+}

@@ -2,9 +2,9 @@
 
 Doclyvo's web application — Next.js 15, TypeScript, Tailwind CSS v4, App Router.
 
-**Phase A scope (current):** the Compress and Merge tools, implemented from
-`design/Compress.dc.html` and `design/Merge.dc.html`. Split/rotate/reorder have API support in
-`apps/api` but no web UI yet (not designed — see `design/README.md`'s known gaps). See
+**Phase A scope (current):** Compress, Merge, Split, Rotate, and Reorder, each implemented from
+its `design/*.dc.html` source. Watermark, Protect, OCR, and PDF-to-Word have neither a design
+nor a page yet (Phase B — see `design/README.md`'s known gaps). See
 `../../docs/build-prompt-web-mvp.md` for the full scope rationale and
 `../../.claude/reference/web/` for the coding conventions this app follows.
 
@@ -29,9 +29,12 @@ Open `http://localhost:3000`.
 
 - `app/` — routes only (`page.tsx`, `layout.tsx`, `app/tools/<tool>/page.tsx`), server-rendered
   by default so tool landing pages stay crawlable.
-- `features/<name>/` — one folder per feature (`home`, `compress`, `merge`): feature-local
-  components, a server-action `actions.ts` that's the only thing calling `lib/api-client.ts`,
-  and `types.ts`.
+- `features/<name>/` — one folder per feature (`home`, `compress`, `merge`, `split`, `rotate`,
+  `reorder`): feature-local components, a server-action `actions.ts` that's the only thing
+  calling `lib/api-client.ts`, and `types.ts`.
+- `lib/hooks/use-pdf-page-count.ts` — reads a PDF's page count client-side via `pdf-lib` (no
+  server round-trip); used by Split/Rotate/Reorder to render per-page selection UI before the
+  file is ever sent to `apps/api`.
 - `components/` — shared, cross-feature UI (`Header`, `ErrorState`, `UploadDropzone`).
 - `lib/api-client.ts` — the one place that knows the FastAPI base URL and turns non-2xx
   responses into a typed `ApiError`.
@@ -44,7 +47,8 @@ Each tool page renders explicit empty → idle → processing → done/error UI 
 
 ## Testing
 
-End-to-end (spins up both `apps/api` and `apps/web` automatically):
+End-to-end — one spec per tool (compress, split, rotate, reorder), spins up both `apps/api`
+and `apps/web` automatically:
 
 ```bash
 npm run test:e2e
