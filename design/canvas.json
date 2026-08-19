@@ -5,14 +5,20 @@
     { "file": "Result.dc.html", "x": 3040, "y": 0, "w": 1440, "h": 900, "title": "Sonuç" },
     { "file": "Merge.dc.html", "x": 4560, "y": 0, "w": 1440, "h": 900, "title": "Birleştir - İşlem" },
     { "file": "Sign.dc.html", "x": 6080, "y": 0, "w": 1440, "h": 900, "title": "İmzala - İşlem" },
+    { "file": "Split.dc.html", "x": 7600, "y": 0, "w": 1440, "h": 900, "title": "Sayfalara Ayır" },
+    { "file": "Rotate.dc.html", "x": 9120, "y": 0, "w": 1440, "h": 900, "title": "Döndür" },
+    { "file": "Reorder.dc.html", "x": 10640, "y": 0, "w": 1440, "h": 900, "title": "Sayfaları Sırala" },
 
     { "file": "MobileHome.dc.html", "x": 0, "y": 1140, "w": 390, "h": 900, "title": "Mobil - Ana Sayfa" },
     { "file": "MobileCompress.dc.html", "x": 470, "y": 1140, "w": 390, "h": 900, "title": "Mobil - Sıkıştır" },
     { "file": "MobileResult.dc.html", "x": 940, "y": 1140, "w": 390, "h": 900, "title": "Mobil - Sonuç" },
     { "file": "MobileMerge.dc.html", "x": 1410, "y": 1140, "w": 390, "h": 900, "title": "Mobil - Birleştir" },
     { "file": "MobileSign.dc.html", "x": 1880, "y": 1140, "w": 390, "h": 900, "title": "Mobil - İmzala" },
+    { "file": "MobileSplit.dc.html", "x": 2350, "y": 1140, "w": 390, "h": 900, "title": "Mobil - Ayır" },
+    { "file": "MobileRotate.dc.html", "x": 2820, "y": 1140, "w": 390, "h": 900, "title": "Mobil - Döndür" },
+    { "file": "MobileReorder.dc.html", "x": 3290, "y": 1140, "w": 390, "h": 900, "title": "Mobil - Sırala" },
 
-    { "file": "StyleGuide.dc.html", "x": 2350, "y": 1140, "w": 1200, "h": 1700, "title": "Tasarım Sistemi" }
+    { "file": "StyleGuide.dc.html", "x": 3760, "y": 1140, "w": 1200, "h": 1700, "title": "Tasarım Sistemi" }
   ],
   "launch": { "view": "canvas" }
 }

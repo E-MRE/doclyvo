@@ -15,6 +15,11 @@ renders as one artboard on the canvas. `canvas.json` lays out their positions.
 - `Result.dc.html` — Result/download screen (desktop)
 - `Merge.dc.html` — Merge tool flow, multi-file reorder (desktop)
 - `Sign.dc.html` — Sign tool flow, draw/type/upload tabs (desktop)
+- `Split.dc.html` — split-to-individual-pages flow, no settings, single action (desktop)
+- `Rotate.dc.html` — per-page selection (click a thumbnail to toggle) + 90°/180°/270° angle
+  picker, live rotation preview on selected thumbnails (desktop)
+- `Reorder.dc.html` — page-level reorder via left/right arrows under each thumbnail, same
+  pattern as `Merge.dc.html`'s file reorder but applied to pages (desktop)
 - `Mobile*.dc.html` — mobile (390px) counterparts of the above
 - `StyleGuide.dc.html` — color palette, typography, spacing/radius, component tokens, and a
   note aimed at AI agents picking up this project later
@@ -33,9 +38,10 @@ renders as one artboard on the canvas. `canvas.json` lays out their positions.
 - Buttons/icon buttons use `:active { transform: scale(0.97) }` for press feedback; top bars
   use `position: sticky` + `backdrop-filter: blur(20px) saturate(180%)`
 
-**Known gaps / not yet designed:** Split, Watermark, Protect, OCR, PDF to Word — build these
+**Known gaps / not yet designed:** Watermark, Protect, OCR, PDF to Word — build these
 by adapting `Compress.dc.html`'s layout (file panel + settings panel + action button with
-idle/processing/done phases), not from scratch.
+idle/processing/done phases), not from scratch. (Split, Rotate, and Reorder are now designed —
+see above.)
 
 **If editing these files further:** use the `design` skill's `seed-canvas.mjs` helper to
 re-seed and republish to the same artifact URL above — don't hand-edit a seeded output file.

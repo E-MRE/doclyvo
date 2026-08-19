@@ -29,7 +29,8 @@ All-in-one PDF toolkit to convert, merge, split, compress, edit, and manage docu
   https://claude.ai/code/artifact/1a44a2b4-c1a1-4167-9367-b7930137703f
 - Source files live in `design/` (see `design/README.md` for the full breakdown of tokens and
   artboards).
-- Screens designed so far, desktop + mobile: Home, Compress, Result, Merge, Sign.
+- Screens designed so far, desktop + mobile: Home, Compress, Result, Merge, Sign, Split,
+  Rotate, Reorder.
 - `Compress.dc.html` is the reference template for other simple single-file tools — reuse its
   layout (file panel + settings panel + action button with idle/processing/done phases) rather
   than designing each tool from scratch.
@@ -68,18 +69,26 @@ scaffolded and working end-to-end:
   see `apps/api/README.md`'s "Deferred to a later phase" for why. 14 pytest tests pass.
 - `apps/web`: Home, Compress, and Merge pages implementing `design/Main.dc.html`,
   `Compress.dc.html`, `Merge.dc.html` with real empty/idle/processing/done/error states wired
-  to `apps/api` through server actions. Split/rotate/reorder have API support but no page yet
-  (not designed — see `design/README.md`). A Playwright end-to-end test drives the real
-  Compress flow through both servers together (`npm run test:e2e`).
+  to `apps/api` through server actions. Split/rotate/reorder have API support; their designs
+  (`Split.dc.html`, `Rotate.dc.html`, `Reorder.dc.html` + `Mobile*` counterparts) were added
+  2026-08-20, following the Compress/Merge template — building their `apps/web` pages is next
+  (see Open work below). A Playwright end-to-end test drives the real Compress flow through
+  both servers together (`npm run test:e2e`).
 - Next session picking up Phase B: read `docs/build-prompt-web-mvp.md`'s "Deferred to a later
   phase" section for what's left (watermark/redact/OCR/Office-conversion/signatures/accounts,
   plus the PostgreSQL/job-history wiring Phase A intentionally skipped).
 
 ## Open / follow-up work
 
-- [ ] Design the remaining tools when needed: Split, Watermark, Protect, OCR, PDF to Word —
-      adapt from `Compress.dc.html`, not from scratch. (Split has an API endpoint but no page —
-      build its page once designed.)
+- [ ] Design the remaining tools when needed: Watermark, Protect, OCR, PDF to Word — adapt
+      from `Compress.dc.html`, not from scratch.
+- [ ] **Build the `apps/web` pages for Split, Rotate, and Reorder** — designs are done
+      (`design/Split.dc.html`, `Rotate.dc.html`, `Reorder.dc.html` + mobile), API endpoints
+      already exist; this is the next coding task, mirroring the Compress/Merge
+      `features/<tool>/{actions.ts,components/,types.ts}` + `app/tools/<tool>/page.tsx`
+      pattern. Rotate needs a page-thumbnail multi-select + angle picker; Reorder needs a
+      page-thumbnail list with left/right move buttons (same interaction as Merge's file
+      reorder, applied to pages).
 - [x] Scaffold `apps/web` with `create-next-app` (TypeScript) — done, see Phase A above.
 - [ ] Scaffold `apps/native` with `flutter create`.
 - [x] Scaffold `apps/api` with FastAPI; wire up pikepdf — done, see Phase A above. LibreOffice
