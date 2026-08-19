@@ -10,8 +10,8 @@ renders as one artboard on the canvas. `canvas.json` lays out their positions.
 
 **Artboards:**
 - `Main.dc.html` — Home (desktop)
-- `Compress.dc.html` — Compress tool flow (desktop) — the reference template for other
-  simple single-file tools (Split, Watermark, Protect, PDF to Word, etc.)
+- `Compress.dc.html` — Compress tool flow (desktop) — the reference template every other
+  single-file tool below was adapted from
 - `Result.dc.html` — Result/download screen (desktop)
 - `Merge.dc.html` — Merge tool flow, multi-file reorder (desktop)
 - `Sign.dc.html` — Sign tool flow, draw/type/upload tabs (desktop)
@@ -20,7 +20,16 @@ renders as one artboard on the canvas. `canvas.json` lays out their positions.
   picker, live rotation preview on selected thumbnails (desktop)
 - `Reorder.dc.html` — page-level reorder via left/right arrows under each thumbnail, same
   pattern as `Merge.dc.html`'s file reorder but applied to pages (desktop)
-- `Mobile*.dc.html` — mobile (390px) counterparts of the above
+- `Watermark.dc.html` — live-preview text watermark on a single representative page; text
+  cycles through presets (no free-text input in this preview runtime), position (center/
+  diagonal/corner) and opacity (light/medium/strong) pills (desktop)
+- `Protect.dc.html` — password field (masked, reveal toggle, "generate new" regenerates a
+  demo password) + permission checkboxes (no print/copy/edit) (desktop)
+- `Ocr.dc.html` — language pills (Türkçe/English) + output-format pills (searchable PDF /
+  plain text), with a recognized-text preview panel that appears once done (desktop)
+- `PdfToWord.dc.html` — the simplest of the four: a "keep layout" checkbox and a
+  pdf-icon → arrow → docx-icon visual, no other settings (desktop)
+- `Mobile*.dc.html` — mobile (390px) counterparts of all of the above
 - `StyleGuide.dc.html` — color palette, typography, spacing/radius, component tokens, and a
   note aimed at AI agents picking up this project later
 
@@ -38,10 +47,10 @@ renders as one artboard on the canvas. `canvas.json` lays out their positions.
 - Buttons/icon buttons use `:active { transform: scale(0.97) }` for press feedback; top bars
   use `position: sticky` + `backdrop-filter: blur(20px) saturate(180%)`
 
-**Known gaps / not yet designed:** Watermark, Protect, OCR, PDF to Word — build these
-by adapting `Compress.dc.html`'s layout (file panel + settings panel + action button with
-idle/processing/done phases), not from scratch. (Split, Rotate, and Reorder are now designed —
-see above.)
+**Known gaps / not yet designed:** none of the tools listed in `docs/build-prompt-web-mvp.md`
+remain — every tool from the original scope now has a design. Any *new* tool added later
+should still adapt `Compress.dc.html`'s layout (file panel + settings panel + action button
+with idle/processing/done phases) rather than starting from scratch.
 
 **If editing these files further:** use the `design` skill's `seed-canvas.mjs` helper to
 re-seed and republish to the same artifact URL above — don't hand-edit a seeded output file.

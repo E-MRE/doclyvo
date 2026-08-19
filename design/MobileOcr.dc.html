@@ -1,0 +1,144 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    .pill { cursor: pointer; transition: border-color 0.15s ease, background 0.15s ease; }
+    .primarybtn { cursor: pointer; border: none; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif; font-weight: 600; transition: transform 100ms ease-out; }
+    .primarybtn:active { transform: scale(0.97); }
+    .iconbtn { cursor: pointer; border: none; background: none; padding: 6px; border-radius: 8px; display:flex; align-items:center; justify-content:center; }
+    @keyframes barmove { 0% { transform: translateX(-60%); } 100% { transform: translateX(160%); } }
+    .bar-indeterminate { animation: barmove 1.1s ease-in-out infinite; }
+    @media (prefers-reduced-motion: reduce) {
+      .bar-indeterminate { animation: none; left:0; width:100%; opacity:0.5; }
+      .primarybtn:active { transform: none; }
+    }
+  </style>
+</helmet>
+<div style="width:390px; min-height:844px; background:{{bg}}; font-family:-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif; color:{{text}};">
+
+  <div style="display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid {{surfaceBorder}}; background:color-mix(in srgb, {{surface}} 72%, transparent); backdrop-filter:blur(20px) saturate(180%); position:sticky; top:0; z-index:5;">
+    <button class="iconbtn" style="color:{{textSoft}}; padding:4px;" aria-label="Geri">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+    </button>
+    <span style="font-weight:700; font-size:16px;">Metni Tanı (OCR)</span>
+  </div>
+
+  <div style="padding:20px 16px 32px;">
+    <div style="display:flex; align-items:center; gap:10px; padding:12px 14px; border-radius:12px; background:{{surface}}; border:1px solid {{surfaceBorder}}; margin-bottom:16px;">
+      <div style="width:32px; height:40px; border-radius:6px; background:{{accentSoft}}; border:1px solid {{surfaceBorder}}; flex-shrink:0; display:flex; align-items:center; justify-content:center;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{accent}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+      </div>
+      <div>
+        <div style="font-size:13px; font-weight:600;">taranan-belge.pdf</div>
+        <div style="font-size:11px; color:{{textSoft}};">Görüntü tabanlı</div>
+      </div>
+    </div>
+
+    <sc-if value="{{isDone}}" hint-placeholder-val="{{false}}">
+      <div style="border:1px solid {{surfaceBorder}}; border-radius:10px; padding:16px; background:{{surface}}; margin-bottom:20px;">
+        <div style="font-size:10px; font-weight:700; color:{{textSoft}}; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:8px;">Tanınan metin</div>
+        <p style="font-size:12px; line-height:1.6; margin:0;">Bu rapor, 2024 yılı üçüncü çeyrek verilerini özetlemektedir. Gelir tablosu %12 artış göstermektedir…</p>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{isIdle}}" hint-placeholder-val="{{true}}">
+      <div>
+        <div style="font-size:12px; font-weight:600; margin-bottom:8px; color:{{textSoft}}; text-transform:uppercase; letter-spacing:0.03em;">Dil</div>
+        <div style="display:flex; gap:8px; margin-bottom:16px;">
+          <div class="pill" onClick="{{pickTr}}" style="flex:1; text-align:center; border:2px solid {{border_tr}}; border-radius:12px; padding:11px; font-size:13px; font-weight:600;">Türkçe</div>
+          <div class="pill" onClick="{{pickEn}}" style="flex:1; text-align:center; border:2px solid {{border_en}}; border-radius:12px; padding:11px; font-size:13px; font-weight:600;">English</div>
+        </div>
+        <div style="font-size:12px; font-weight:600; margin-bottom:8px; color:{{textSoft}}; text-transform:uppercase; letter-spacing:0.03em;">Çıktı formatı</div>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:24px;">
+          <div class="pill" onClick="{{pickSearchable}}" style="border:2px solid {{border_searchable}}; border-radius:12px; padding:12px 14px; font-size:13px; font-weight:600;">Aranabilir PDF</div>
+          <div class="pill" onClick="{{pickText}}" style="border:2px solid {{border_text}}; border-radius:12px; padding:12px 14px; font-size:13px; font-weight:600;">Düz Metin (.txt)</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{isProcessing}}" hint-placeholder-val="{{false}}">
+      <div style="text-align:center; padding:20px 4px; margin-bottom:24px;">
+        <div style="font-weight:600; font-size:14px; margin-bottom:14px;">Metin taranıyor…</div>
+        <div style="height:8px; border-radius:8px; background:{{surface}}; overflow:hidden; position:relative;">
+          <div class="bar-indeterminate" style="position:absolute; top:0; left:0; width:40%; height:100%; border-radius:8px; background:{{accent}};"></div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{isDone}}" hint-placeholder-val="{{false}}">
+      <div style="text-align:center; padding:4px; margin-bottom:24px;">
+        <div style="width:44px; height:44px; border-radius:50%; background:{{accentSoft}}; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{accent}}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </div>
+        <div style="font-weight:700; font-size:14px;">%98 tahmini doğruluk</div>
+      </div>
+    </sc-if>
+
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <sc-if value="{{isIdle}}" hint-placeholder-val="{{true}}">
+        <button class="primarybtn" onClick="{{startOcr}}" style="width:100%; background:{{accent}}; color:#FFFFFF; padding:15px; border-radius:12px; font-size:15px;">Metni Tanı</button>
+      </sc-if>
+      <sc-if value="{{isProcessing}}" hint-placeholder-val="{{false}}">
+        <button class="primarybtn" disabled style="width:100%; background:{{accent}}; color:#FFFFFF; padding:15px; border-radius:12px; font-size:15px;">İşleniyor…</button>
+      </sc-if>
+      <sc-if value="{{isDone}}" hint-placeholder-val="{{false}}">
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <button class="primarybtn" style="width:100%; background:{{accent}}; color:#FFFFFF; padding:15px; border-radius:12px; font-size:15px;">İndir</button>
+          <button class="primarybtn" onClick="{{reset}}" style="width:100%; background:transparent; color:{{text}}; padding:13px; border-radius:12px; font-size:14px; border:1px solid {{surfaceBorder}};">Yeni İşlem</button>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Tema"},"accent":{"editor":"color","default":"#DC4731","section":"Marka"}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { phase: 'idle', language: 'tr', format: 'searchable' };
+  }
+  renderVals() {
+    const dark = this.props.dark ?? false;
+    const accent = this.props.accent ?? '#DC4731';
+    const inactiveBorder = dark ? '#38383A' : '#D2D2D7';
+    const border = (id, current) => (current === id ? accent : inactiveBorder);
+    return {
+      dark: dark,
+      accent: accent,
+      bg: dark ? '#000000' : '#F5F5F7',
+      surface: dark ? '#1C1C1E' : '#FFFFFF',
+      surfaceBorder: inactiveBorder,
+      text: dark ? '#F5F5F7' : '#1D1D1F',
+      textSoft: dark ? '#98989D' : '#6E6E73',
+      accentSoft: 'color-mix(in oklch, ' + accent + ' ' + (dark ? '22%' : '12%') + ', ' + (dark ? 'black' : 'white') + ')',
+      isIdle: this.state.phase === 'idle',
+      isProcessing: this.state.phase === 'processing',
+      isDone: this.state.phase === 'done',
+      border_tr: border('tr', this.state.language),
+      border_en: border('en', this.state.language),
+      border_searchable: border('searchable', this.state.format),
+      border_text: border('text', this.state.format),
+      pickTr: () => this.setState({ language: 'tr' }),
+      pickEn: () => this.setState({ language: 'en' }),
+      pickSearchable: () => this.setState({ format: 'searchable' }),
+      pickText: () => this.setState({ format: 'text' }),
+      startOcr: () => {
+        this.setState({ phase: 'processing' });
+        setTimeout(() => this.setState({ phase: 'done' }), 1600);
+      },
+      reset: () => this.setState({ phase: 'idle' }),
+    };
+  }
+}
+</script>
+</body>
+</html>

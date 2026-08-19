@@ -29,8 +29,9 @@ All-in-one PDF toolkit to convert, merge, split, compress, edit, and manage docu
   https://claude.ai/code/artifact/1a44a2b4-c1a1-4167-9367-b7930137703f
 - Source files live in `design/` (see `design/README.md` for the full breakdown of tokens and
   artboards).
-- Screens designed so far, desktop + mobile: Home, Compress, Result, Merge, Sign, Split,
-  Rotate, Reorder.
+- Screens designed, desktop + mobile: Home, Compress, Result, Merge, Sign, Split, Rotate,
+  Reorder, Watermark, Protect, OCR, PDF-to-Word — every tool from the original scope now has
+  a design (2026-08-20).
 - `Compress.dc.html` is the reference template for other simple single-file tools — reuse its
   layout (file panel + settings panel + action button with idle/processing/done phases) rather
   than designing each tool from scratch.
@@ -73,24 +74,32 @@ scaffolded and working end-to-end:
   `pdf-lib` (`lib/hooks/use-pdf-page-count.ts`) to drive per-page select/rotate and
   reorder-with-arrows UI — no new backend endpoint needed for that. Four Playwright end-to-end
   tests (compress, split, rotate, reorder) each drive the real flow through both servers
-  together (`npm run test:e2e`). Watermark/Protect/OCR/PDF-to-Word still have no design and no
-  page (Phase B).
+  together (`npm run test:e2e`). Watermark/Protect/OCR/PDF-to-Word are now designed
+  (2026-08-20, see `design/README.md`) but still have no `apps/api` endpoint and no
+  `apps/web` page — that's the next coding task, see Open work below.
 - Next session picking up Phase B: read `docs/build-prompt-web-mvp.md`'s "Deferred to a later
-  phase" section for what's left (watermark/redact/OCR/Office-conversion/signatures/accounts,
-  plus the PostgreSQL/job-history wiring Phase A intentionally skipped).
+  phase" section for what's left (redact/signatures-with-audit-log/accounts, plus the
+  PostgreSQL/job-history wiring Phase A intentionally skipped).
 
 ## Open / follow-up work
 
-- [ ] Design the remaining tools when needed: Watermark, Protect, OCR, PDF to Word — adapt
-      from `Compress.dc.html`, not from scratch.
+- [x] Design Watermark, Protect, OCR, PDF to Word — done 2026-08-20, see `design/README.md`.
+      Every tool from the original scope is now designed.
+- [ ] **Build the `apps/web` pages for Watermark, Protect, OCR, and PDF-to-Word.** No API
+      endpoints exist yet for any of these four — unlike Split/Rotate/Reorder, this needs new
+      `apps/api` work too (pikepdf watermark/encrypt support exists; OCR needs a library choice
+      — see `.claude/reference/api/skills/pdf_processing.md`; PDF-to-Word is the one that
+      actually needs the previously-deferred LibreOffice headless integration).
 - [x] Build the `apps/web` pages for Split, Rotate, and Reorder — done 2026-08-20, see Phase A
       above.
 - [x] Scaffold `apps/web` with `create-next-app` (TypeScript) — done, see Phase A above.
 - [ ] Scaffold `apps/native` with `flutter create`.
 - [x] Scaffold `apps/api` with FastAPI; wire up pikepdf — done, see Phase A above. LibreOffice
       headless still deferred to the Office-conversion phase.
-- [ ] Phase B (deferred, not started): watermark, redact, OCR, Office-to-PDF conversion,
-      signature-with-consent-and-hash + append-only audit log, accounts/premium tier.
+- [ ] Phase B (deferred, not started): redact, signature-with-consent-and-hash + append-only
+      audit log, accounts/premium tier. (Watermark/OCR/Office-conversion are now designed —
+      see the item above; they've moved from "not started" to "needs apps/api + apps/web
+      implementation".)
 - [ ] Design the PostgreSQL schema (job/history records first; user accounts later for the
       premium tier).
 - [ ] Pick and configure the hosting provider for `apps/api` + PostgreSQL.

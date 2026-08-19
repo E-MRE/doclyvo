@@ -1,0 +1,158 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    .pill { cursor: pointer; transition: border-color 0.15s ease, background 0.15s ease; }
+    .primarybtn { cursor: pointer; border: none; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif; font-weight: 600; transition: transform 100ms ease-out; }
+    .primarybtn:active { transform: scale(0.97); }
+    .iconbtn { cursor: pointer; border: none; background: none; padding: 6px; border-radius: 8px; display:flex; align-items:center; justify-content:center; }
+    @keyframes barmove { 0% { transform: translateX(-60%); } 100% { transform: translateX(160%); } }
+    .bar-indeterminate { animation: barmove 1.1s ease-in-out infinite; }
+    @media (prefers-reduced-motion: reduce) {
+      .bar-indeterminate { animation: none; left:0; width:100%; opacity:0.5; }
+      .primarybtn:active { transform: none; }
+    }
+  </style>
+</helmet>
+<div style="width:390px; min-height:844px; background:{{bg}}; font-family:-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif; color:{{text}};">
+
+  <div style="display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid {{surfaceBorder}}; background:color-mix(in srgb, {{surface}} 72%, transparent); backdrop-filter:blur(20px) saturate(180%); position:sticky; top:0; z-index:5;">
+    <button class="iconbtn" style="color:{{textSoft}}; padding:4px;" aria-label="Geri">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+    </button>
+    <span style="font-weight:700; font-size:16px;">Filigran Ekle</span>
+  </div>
+
+  <div style="padding:20px 16px 32px;">
+    <div style="width:100%; aspect-ratio:3/4; background:{{surface}}; border:1px solid {{surfaceBorder}}; border-radius:12px; position:relative; padding:24px; margin-bottom:20px; overflow:hidden;">
+      <div style="height:7px; width:60%; background:{{surfaceBorder}}; border-radius:4px; margin-bottom:12px;"></div>
+      <div style="height:7px; width:85%; background:{{surfaceBorder}}; border-radius:4px; margin-bottom:12px;"></div>
+      <div style="height:7px; width:75%; background:{{surfaceBorder}}; border-radius:4px;"></div>
+      <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; transform:{{watermarkTransform}}; pointer-events:none;">
+        <span style="font-size:24px; font-weight:800; letter-spacing:0.04em; color:{{accent}}; opacity:{{opacityValue}}; white-space:nowrap;">{{watermarkText}}</span>
+      </div>
+    </div>
+
+    <sc-if value="{{isIdle}}" hint-placeholder-val="{{true}}">
+      <div>
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+          <span style="font-size:12px; font-weight:600; color:{{textSoft}}; text-transform:uppercase; letter-spacing:0.03em;">Metin</span>
+          <button onClick="{{cycleText}}" style="font-size:12px; color:{{accent}}; font-weight:600; background:none; border:none;">Değiştir</button>
+        </div>
+        <div style="padding:12px 14px; border-radius:12px; background:{{surface}}; font-weight:700; font-size:14px; text-align:center; margin-bottom:16px;">{{watermarkText}}</div>
+
+        <div style="font-size:12px; font-weight:600; margin-bottom:8px; color:{{textSoft}}; text-transform:uppercase; letter-spacing:0.03em;">Konum</div>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px;">
+          <div class="pill" onClick="{{pickCenter}}" style="border:2px solid {{border_center}}; border-radius:12px; padding:11px 14px; font-size:13px; font-weight:600;">Ortala</div>
+          <div class="pill" onClick="{{pickDiagonal}}" style="border:2px solid {{border_diagonal}}; border-radius:12px; padding:11px 14px; font-size:13px; font-weight:600;">Çapraz</div>
+          <div class="pill" onClick="{{pickCorner}}" style="border:2px solid {{border_corner}}; border-radius:12px; padding:11px 14px; font-size:13px; font-weight:600;">Alt Köşe</div>
+        </div>
+
+        <div style="font-size:12px; font-weight:600; margin-bottom:8px; color:{{textSoft}}; text-transform:uppercase; letter-spacing:0.03em;">Şeffaflık</div>
+        <div style="display:flex; gap:8px; margin-bottom:24px;">
+          <div class="pill" onClick="{{pickLight}}" style="flex:1; text-align:center; border:2px solid {{border_light}}; border-radius:12px; padding:10px; font-size:12px; font-weight:600;">Hafif</div>
+          <div class="pill" onClick="{{pickMedium}}" style="flex:1; text-align:center; border:2px solid {{border_medium}}; border-radius:12px; padding:10px; font-size:12px; font-weight:600;">Orta</div>
+          <div class="pill" onClick="{{pickStrong}}" style="flex:1; text-align:center; border:2px solid {{border_strong}}; border-radius:12px; padding:10px; font-size:12px; font-weight:600;">Koyu</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{isProcessing}}" hint-placeholder-val="{{false}}">
+      <div style="text-align:center; padding:20px 4px; margin-bottom:24px;">
+        <div style="font-weight:600; font-size:14px; margin-bottom:14px;">Filigran ekleniyor…</div>
+        <div style="height:8px; border-radius:8px; background:{{surface}}; overflow:hidden; position:relative;">
+          <div class="bar-indeterminate" style="position:absolute; top:0; left:0; width:40%; height:100%; border-radius:8px; background:{{accent}};"></div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{isDone}}" hint-placeholder-val="{{false}}">
+      <div style="text-align:center; padding:8px 4px; margin-bottom:24px;">
+        <div style="width:48px; height:48px; border-radius:50%; background:{{accentSoft}}; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{accent}}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </div>
+        <div style="font-weight:700; font-size:15px;">Filigran eklendi</div>
+      </div>
+    </sc-if>
+
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <sc-if value="{{isIdle}}" hint-placeholder-val="{{true}}">
+        <button class="primarybtn" onClick="{{startWatermark}}" style="width:100%; background:{{accent}}; color:#FFFFFF; padding:15px; border-radius:12px; font-size:15px;">Filigran Ekle</button>
+      </sc-if>
+      <sc-if value="{{isProcessing}}" hint-placeholder-val="{{false}}">
+        <button class="primarybtn" disabled style="width:100%; background:{{accent}}; color:#FFFFFF; padding:15px; border-radius:12px; font-size:15px;">İşleniyor…</button>
+      </sc-if>
+      <sc-if value="{{isDone}}" hint-placeholder-val="{{false}}">
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <button class="primarybtn" style="width:100%; background:{{accent}}; color:#FFFFFF; padding:15px; border-radius:12px; font-size:15px;">İndir</button>
+          <button class="primarybtn" onClick="{{reset}}" style="width:100%; background:transparent; color:{{text}}; padding:13px; border-radius:12px; font-size:14px; border:1px solid {{surfaceBorder}};">Yeni İşlem</button>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Tema"},"accent":{"editor":"color","default":"#DC4731","section":"Marka"}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { phase: 'idle', position: 'diagonal', opacity: 'medium', textIndex: 0 };
+  }
+  renderVals() {
+    const dark = this.props.dark ?? false;
+    const accent = this.props.accent ?? '#DC4731';
+    const inactiveBorder = dark ? '#38383A' : '#D2D2D7';
+    const position = this.state.position;
+    const opacity = this.state.opacity;
+    const texts = ['TASLAK', 'GİZLİ', 'ÖRNEK'];
+    const border = (id, current) => (current === id ? accent : inactiveBorder);
+    const opacityMap = { light: 0.18, medium: 0.35, strong: 0.55 };
+    const rotationMap = { center: '0deg', diagonal: '-30deg', corner: '0deg' };
+    return {
+      dark: dark,
+      accent: accent,
+      bg: dark ? '#000000' : '#F5F5F7',
+      surface: dark ? '#1C1C1E' : '#FFFFFF',
+      surfaceBorder: inactiveBorder,
+      text: dark ? '#F5F5F7' : '#1D1D1F',
+      textSoft: dark ? '#98989D' : '#6E6E73',
+      accentSoft: 'color-mix(in oklch, ' + accent + ' ' + (dark ? '22%' : '12%') + ', ' + (dark ? 'black' : 'white') + ')',
+      isIdle: this.state.phase === 'idle',
+      isProcessing: this.state.phase === 'processing',
+      isDone: this.state.phase === 'done',
+      watermarkText: texts[this.state.textIndex],
+      watermarkTransform: 'rotate(' + rotationMap[position] + ')' + (position === 'corner' ? ' translate(50px, 90px)' : ''),
+      opacityValue: opacityMap[opacity],
+      border_center: border('center', position),
+      border_diagonal: border('diagonal', position),
+      border_corner: border('corner', position),
+      border_light: border('light', opacity),
+      border_medium: border('medium', opacity),
+      border_strong: border('strong', opacity),
+      cycleText: () => this.setState({ textIndex: (this.state.textIndex + 1) % texts.length }),
+      pickCenter: () => this.setState({ position: 'center' }),
+      pickDiagonal: () => this.setState({ position: 'diagonal' }),
+      pickCorner: () => this.setState({ position: 'corner' }),
+      pickLight: () => this.setState({ opacity: 'light' }),
+      pickMedium: () => this.setState({ opacity: 'medium' }),
+      pickStrong: () => this.setState({ opacity: 'strong' }),
+      startWatermark: () => {
+        this.setState({ phase: 'processing' });
+        setTimeout(() => this.setState({ phase: 'done' }), 1600);
+      },
+      reset: () => this.setState({ phase: 'idle' }),
+    };
+  }
+}
+</script>
+</body>
+</html>

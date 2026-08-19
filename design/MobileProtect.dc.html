@@ -1,0 +1,172 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    .checkrow { cursor: pointer; transition: border-color 0.15s ease, background 0.15s ease; }
+    .primarybtn { cursor: pointer; border: none; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif; font-weight: 600; transition: transform 100ms ease-out; }
+    .primarybtn:active { transform: scale(0.97); }
+    .iconbtn { cursor: pointer; border: none; background: none; padding: 6px; border-radius: 8px; display:flex; align-items:center; justify-content:center; }
+    @keyframes barmove { 0% { transform: translateX(-60%); } 100% { transform: translateX(160%); } }
+    .bar-indeterminate { animation: barmove 1.1s ease-in-out infinite; }
+    @media (prefers-reduced-motion: reduce) {
+      .bar-indeterminate { animation: none; left:0; width:100%; opacity:0.5; }
+      .primarybtn:active { transform: none; }
+    }
+  </style>
+</helmet>
+<div style="width:390px; min-height:844px; background:{{bg}}; font-family:-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif; color:{{text}};">
+
+  <div style="display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid {{surfaceBorder}}; background:color-mix(in srgb, {{surface}} 72%, transparent); backdrop-filter:blur(20px) saturate(180%); position:sticky; top:0; z-index:5;">
+    <button class="iconbtn" style="color:{{textSoft}}; padding:4px;" aria-label="Geri">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+    </button>
+    <span style="font-weight:700; font-size:16px;">PDF'i Koru</span>
+  </div>
+
+  <div style="padding:20px 16px 32px;">
+    <div style="display:flex; flex-direction:column; align-items:center; padding:20px; border-radius:14px; background:{{surface}}; border:1px solid {{surfaceBorder}}; margin-bottom:20px;">
+      <div style="width:88px; height:88px; border-radius:22px; background:{{lockBg}}; display:flex; align-items:center; justify-content:center; margin-bottom:12px;">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="{{lockColor}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+      </div>
+      <p style="font-size:13px; color:{{textSoft}}; margin:0;">{{lockStatusText}}</p>
+    </div>
+
+    <sc-if value="{{isIdle}}" hint-placeholder-val="{{true}}">
+      <div>
+        <div style="font-size:12px; font-weight:600; margin-bottom:8px; color:{{textSoft}}; text-transform:uppercase; letter-spacing:0.03em;">Şifre</div>
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+          <div style="flex:1; padding:11px 14px; border-radius:12px; border:1px solid {{surfaceBorder}}; font-family:monospace; font-size:14px; letter-spacing:0.1em;">{{passwordDisplay}}</div>
+          <button class="iconbtn" onClick="{{toggleReveal}}" style="color:{{textSoft}}; border:1px solid {{surfaceBorder}}; border-radius:10px; width:38px; height:38px;" aria-label="Göster/Gizle">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <button class="checkrow" onClick="{{regenerate}}" style="width:100%; text-align:center; padding:10px; border-radius:10px; border:1px solid {{surfaceBorder}}; font-size:13px; font-weight:600; color:{{accent}}; background:none; margin-bottom:20px;">Yeni Şifre Oluştur</button>
+
+        <div style="font-size:12px; font-weight:600; margin-bottom:8px; color:{{textSoft}}; text-transform:uppercase; letter-spacing:0.03em;">İzinler</div>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:24px;">
+          <div class="checkrow" onClick="{{toggleNoPrint}}" style="display:flex; align-items:center; gap:10px; padding:11px 14px; border:2px solid {{border_noPrint}}; border-radius:12px;">
+            <div style="width:17px; height:17px; border-radius:5px; background:{{check_noPrint}}; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            </div>
+            <span style="font-size:13px; font-weight:600;">Yazdırmayı engelle</span>
+          </div>
+          <div class="checkrow" onClick="{{toggleNoCopy}}" style="display:flex; align-items:center; gap:10px; padding:11px 14px; border:2px solid {{border_noCopy}}; border-radius:12px;">
+            <div style="width:17px; height:17px; border-radius:5px; background:{{check_noCopy}}; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            </div>
+            <span style="font-size:13px; font-weight:600;">Kopyalamayı engelle</span>
+          </div>
+          <div class="checkrow" onClick="{{toggleNoEdit}}" style="display:flex; align-items:center; gap:10px; padding:11px 14px; border:2px solid {{border_noEdit}}; border-radius:12px;">
+            <div style="width:17px; height:17px; border-radius:5px; background:{{check_noEdit}}; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            </div>
+            <span style="font-size:13px; font-weight:600;">Düzenlemeyi engelle</span>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{isProcessing}}" hint-placeholder-val="{{false}}">
+      <div style="text-align:center; padding:20px 4px; margin-bottom:24px;">
+        <div style="font-weight:600; font-size:14px; margin-bottom:14px;">Korunuyor…</div>
+        <div style="height:8px; border-radius:8px; background:{{surface}}; overflow:hidden; position:relative;">
+          <div class="bar-indeterminate" style="position:absolute; top:0; left:0; width:40%; height:100%; border-radius:8px; background:{{accent}};"></div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{isDone}}" hint-placeholder-val="{{false}}">
+      <div style="text-align:center; padding:8px 4px; margin-bottom:24px;">
+        <div style="font-weight:700; font-size:15px; margin-bottom:4px;">Belge korundu</div>
+        <div style="font-size:12px; color:{{textSoft}};">Şifreyi güvenli bir yerde sakla.</div>
+      </div>
+    </sc-if>
+
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <sc-if value="{{isIdle}}" hint-placeholder-val="{{true}}">
+        <button class="primarybtn" onClick="{{startProtect}}" style="width:100%; background:{{accent}}; color:#FFFFFF; padding:15px; border-radius:12px; font-size:15px;">Koru</button>
+      </sc-if>
+      <sc-if value="{{isProcessing}}" hint-placeholder-val="{{false}}">
+        <button class="primarybtn" disabled style="width:100%; background:{{accent}}; color:#FFFFFF; padding:15px; border-radius:12px; font-size:15px;">İşleniyor…</button>
+      </sc-if>
+      <sc-if value="{{isDone}}" hint-placeholder-val="{{false}}">
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <button class="primarybtn" style="width:100%; background:{{accent}}; color:#FFFFFF; padding:15px; border-radius:12px; font-size:15px;">İndir</button>
+          <button class="primarybtn" onClick="{{reset}}" style="width:100%; background:transparent; color:{{text}}; padding:13px; border-radius:12px; font-size:14px; border:1px solid {{surfaceBorder}};">Yeni İşlem</button>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Tema"},"accent":{"editor":"color","default":"#DC4731","section":"Marka"}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      phase: 'idle',
+      password: 'K7m!qR2xZ',
+      revealed: false,
+      noPrint: true,
+      noCopy: false,
+      noEdit: false,
+    };
+  }
+  renderVals() {
+    const dark = this.props.dark ?? false;
+    const accent = this.props.accent ?? '#DC4731';
+    const inactiveBorder = dark ? '#38383A' : '#D2D2D7';
+    const isDone = this.state.phase === 'done';
+    const checkColor = (v) => (v ? accent : inactiveBorder);
+    return {
+      dark: dark,
+      accent: accent,
+      bg: dark ? '#000000' : '#F5F5F7',
+      surface: dark ? '#1C1C1E' : '#FFFFFF',
+      surfaceBorder: inactiveBorder,
+      text: dark ? '#F5F5F7' : '#1D1D1F',
+      textSoft: dark ? '#98989D' : '#6E6E73',
+      accentSoft: 'color-mix(in oklch, ' + accent + ' ' + (dark ? '22%' : '12%') + ', ' + (dark ? 'black' : 'white') + ')',
+      isIdle: this.state.phase === 'idle',
+      isProcessing: this.state.phase === 'processing',
+      isDone: isDone,
+      lockBg: isDone ? 'color-mix(in oklch, ' + accent + ' 16%, ' + (dark ? 'black' : 'white') + ')' : (dark ? '#000000' : '#F5F5F7'),
+      lockColor: isDone ? accent : inactiveBorder,
+      lockStatusText: isDone ? 'Belge şifreyle korunuyor' : 'Henüz korunmadı',
+      passwordDisplay: this.state.revealed ? this.state.password : '•'.repeat(this.state.password.length),
+      toggleReveal: () => this.setState({ revealed: !this.state.revealed }),
+      regenerate: () => {
+        const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$';
+        let next = '';
+        for (let i = 0; i < 9; i += 1) next += chars[Math.floor((i * 37 + 11) % chars.length)];
+        this.setState({ password: next, revealed: true });
+      },
+      border_noPrint: checkColor(this.state.noPrint),
+      border_noCopy: checkColor(this.state.noCopy),
+      border_noEdit: checkColor(this.state.noEdit),
+      check_noPrint: checkColor(this.state.noPrint),
+      check_noCopy: checkColor(this.state.noCopy),
+      check_noEdit: checkColor(this.state.noEdit),
+      toggleNoPrint: () => this.setState({ noPrint: !this.state.noPrint }),
+      toggleNoCopy: () => this.setState({ noCopy: !this.state.noCopy }),
+      toggleNoEdit: () => this.setState({ noEdit: !this.state.noEdit }),
+      startProtect: () => {
+        this.setState({ phase: 'processing' });
+        setTimeout(() => this.setState({ phase: 'done' }), 1600);
+      },
+      reset: () => this.setState({ phase: 'idle' }),
+    };
+  }
+}
+</script>
+</body>
+</html>
