@@ -57,22 +57,33 @@ retrofitted later:
 reference automatically; the web/api ones don't have an automated auditor yet — apply them
 by reading, since no equivalent skill exists for those stacks.
 
-## Next session: start here
+## Phase A (done — 2026-08-19)
 
-Coding phase begins with `apps/web` + `apps/api`. The execution prompt (adapted from a
-personal-tool reference prompt, with an explicit MVP scope cut) is written out in
-`docs/build-prompt-web-mvp.md` — read that file and follow its "Phase A execution prompt"
-section rather than re-deriving scope from this file or from conversation history.
+`apps/web` (Next.js 15 + Tailwind v4) and `apps/api` (Python 3.12 + FastAPI + pikepdf) are
+scaffolded and working end-to-end:
+
+- `apps/api`: merge, split, compress, rotate, reorder — each a thin router + a `service.py`
+  doing the real pikepdf work, a per-request temp workspace cleaned up via `BackgroundTask`
+  after the response is sent, and a `DoclyvoError` → JSON exception handler. No database yet —
+  see `apps/api/README.md`'s "Deferred to a later phase" for why. 14 pytest tests pass.
+- `apps/web`: Home, Compress, and Merge pages implementing `design/Main.dc.html`,
+  `Compress.dc.html`, `Merge.dc.html` with real empty/idle/processing/done/error states wired
+  to `apps/api` through server actions. Split/rotate/reorder have API support but no page yet
+  (not designed — see `design/README.md`). A Playwright end-to-end test drives the real
+  Compress flow through both servers together (`npm run test:e2e`).
+- Next session picking up Phase B: read `docs/build-prompt-web-mvp.md`'s "Deferred to a later
+  phase" section for what's left (watermark/redact/OCR/Office-conversion/signatures/accounts,
+  plus the PostgreSQL/job-history wiring Phase A intentionally skipped).
 
 ## Open / follow-up work
 
 - [ ] Design the remaining tools when needed: Split, Watermark, Protect, OCR, PDF to Word —
-      adapt from `Compress.dc.html`, not from scratch.
-- [ ] Scaffold `apps/web` with `create-next-app` (TypeScript) — **in progress, see
-      `docs/build-prompt-web-mvp.md`**.
+      adapt from `Compress.dc.html`, not from scratch. (Split has an API endpoint but no page —
+      build its page once designed.)
+- [x] Scaffold `apps/web` with `create-next-app` (TypeScript) — done, see Phase A above.
 - [ ] Scaffold `apps/native` with `flutter create`.
-- [ ] Scaffold `apps/api` with FastAPI; wire up pikepdf (LibreOffice headless deferred to the
-      Office-conversion phase, see `docs/build-prompt-web-mvp.md`) — **in progress**.
+- [x] Scaffold `apps/api` with FastAPI; wire up pikepdf — done, see Phase A above. LibreOffice
+      headless still deferred to the Office-conversion phase.
 - [ ] Phase B (deferred, not started): watermark, redact, OCR, Office-to-PDF conversion,
       signature-with-consent-and-hash + append-only audit log, accounts/premium tier.
 - [ ] Design the PostgreSQL schema (job/history records first; user accounts later for the

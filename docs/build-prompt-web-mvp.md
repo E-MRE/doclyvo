@@ -69,6 +69,11 @@ Build the MVP of Doclyvo's web app inside the existing `doclyvo` monorepo:
 
 ## Deferred to a later phase (tracked, not forgotten)
 
+- **PostgreSQL / job history / docker-compose.** Phase A's five operations are synchronous
+  request/response (upload → process → return the file) with no job history yet, so there's
+  nothing for a database to store — wiring up SQLAlchemy + Alembic + `docker-compose.yml` is
+  deferred to whichever Phase B feature first needs persistent records. See
+  `apps/api/README.md`.
 - Watermark, redact, OCR, Office-to-PDF conversion.
 - Signature mode with field placement, signer invites, consent recording, and final PDF hash
   sealing; an append-only event log with timestamps/hashes/delivery outcomes.
