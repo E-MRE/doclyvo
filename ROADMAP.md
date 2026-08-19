@@ -1,0 +1,57 @@
+# Doclyvo — Roadmap
+
+All-in-one PDF toolkit to convert, merge, split, compress, edit, and manage documents online.
+
+## Architecture decisions (Phase 0 — done)
+
+- **Web:** Next.js 15 + TypeScript (frontend) talking to a **FastAPI** (Python 3.12) backend
+  that uses **pikepdf** for core PDF ops and **LibreOffice headless** for Office↔PDF
+  conversion, backed by **PostgreSQL**. This came from the reference prompt
+  ("Use Next.js 15, TypeScript, Python 3.12, FastAPI, pikepdf, LibreOffice headless, and
+  PostgreSQL; do not offer alternative stacks") and supersedes an earlier idea of a
+  backend-free, WASM-only web client — that idea was dropped because Office conversion has no
+  practical WASM equivalent yet.
+- **Mobile + Desktop:** Flutter, one codebase for iOS/Android/Windows/macOS/Linux. Simple
+  operations run with native Dart packages; heavy operations (Office conversion, OCR) call the
+  same FastAPI backend. Desktop may additionally shell out to a local LibreOffice/Ghostscript
+  binary later, since desktop apps aren't sandboxed like the browser.
+- **Backend hosting:** start on a free/hobby-tier PaaS (Render, Railway, or Fly.io); revisit if
+  traffic grows.
+- **Auth model:** anonymous usage stays free with no account; an optional account exists for a
+  premium/subscription tier.
+- **Repo layout:** a monorepo with plain folder separation — `apps/web`, `apps/native`,
+  `apps/api` — no Turborepo/Melos. The three apps don't share code (different languages/package
+  managers); they only share the design language and, later, an API contract.
+
+## Design (Phase 1 — mostly done)
+
+- Design canvas (Claude Design):
+  https://claude.ai/code/artifact/1a44a2b4-c1a1-4167-9367-b7930137703f
+- Source files live in `design/` (see `design/README.md` for the full breakdown of tokens and
+  artboards).
+- Screens designed so far, desktop + mobile: Home, Compress, Result, Merge, Sign.
+- `Compress.dc.html` is the reference template for other simple single-file tools — reuse its
+  layout (file panel + settings panel + action button with idle/processing/done phases) rather
+  than designing each tool from scratch.
+- A `StyleGuide.dc.html` artboard documents the color palette, typography, spacing/radius scale,
+  and component tokens for anyone (human or agent) picking this project back up.
+
+## Open / follow-up work
+
+- [ ] Design the remaining tools when needed: Split, Watermark, Protect, OCR, PDF to Word —
+      adapt from `Compress.dc.html`, not from scratch.
+- [ ] Scaffold `apps/web` with `create-next-app` (TypeScript).
+- [ ] Scaffold `apps/native` with `flutter create`.
+- [ ] Scaffold `apps/api` with FastAPI; wire up pikepdf and LibreOffice headless.
+- [ ] Design the PostgreSQL schema (job/history records first; user accounts later for the
+      premium tier).
+- [ ] Pick and configure the hosting provider for `apps/api` + PostgreSQL.
+- [ ] Next.js SEO strategy for the marketing/tool landing pages (SSR or static export).
+- [ ] Decide whether `apps/native` desktop should shell out to local LibreOffice/Ghostscript
+      instead of calling the backend for some operations.
+
+## Working notes
+
+- This file is meant to prevent re-deriving context in a future session — read this first,
+  then `design/README.md`, before asking the user to re-explain decisions already made here.
+- Keep this file updated as decisions are made or superseded; don't let it silently go stale.

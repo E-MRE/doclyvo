@@ -1,0 +1,113 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    .toolchip { cursor: pointer; transition: transform 0.15s ease; }
+    .toolchip:active { transform: scale(0.96); }
+    .primarybtn { cursor: pointer; border: none; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif; font-weight: 600; transition: transform 100ms ease-out; }
+    .primarybtn:active { transform: scale(0.97); }
+    @keyframes pop { 0% { transform: scale(0.6); opacity: 0; } 60% { transform: scale(1.08); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+    .pop-in { animation: pop 0.4s ease; }
+    @media (prefers-reduced-motion: reduce) {
+      .pop-in { animation: none; }
+      .toolchip:active, .primarybtn:active { transform: none; }
+    }
+  </style>
+</helmet>
+<div style="width:390px; min-height:844px; background:{{bg}}; font-family:-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif; color:{{text}}; text-align:center;">
+
+  <div style="padding:36px 16px 24px;">
+    <div class="pop-in" style="width:56px; height:56px; border-radius:50%; background:{{accentSoft}}; display:flex; align-items:center; justify-content:center; margin:0 auto 18px;">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="{{accent}}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+    </div>
+    <h1 style="font-weight:800; font-size:24px; margin:0 0 8px;">Dosyan hazır</h1>
+    <p style="font-size:14px; color:{{textSoft}}; margin:0 0 24px;">rapor-2024.pdf sıkıştırıldı.</p>
+
+    <div style="background:{{surface}}; border:1px solid {{surfaceBorder}}; border-radius:14px; padding:18px; margin-bottom:18px; text-align:left;">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+        <div style="width:38px; height:46px; border-radius:6px; background:{{accentSoft}}; border:1px solid {{surfaceBorder}}; flex-shrink:0; display:flex; align-items:center; justify-content:center;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="{{accent}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+        </div>
+        <div style="flex:1;">
+          <div style="font-weight:600; font-size:13px;">rapor-2024-sikistirilmis.pdf</div>
+          <div style="font-size:12px; color:{{textSoft}};">18 sayfa</div>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div style="flex:1;">
+          <div style="font-size:11px; color:{{textSoft}}; margin-bottom:4px;">Önce</div>
+          <div style="font-size:13px; font-weight:600;">8.6 MB</div>
+        </div>
+        <div style="flex:1;">
+          <div style="font-size:11px; color:{{textSoft}}; margin-bottom:4px;">Sonra</div>
+          <div style="font-size:13px; font-weight:600; color:{{accent}};">3.6 MB · -58%</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:12px;">
+      <button class="primarybtn" style="background:{{accent}}; color:#FFFFFF; padding:15px; border-radius:12px; font-size:15px; display:flex; align-items:center; justify-content:center; gap:8px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3m0 0 4 4m-4-4L8 7"/><path d="M20 15v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4"/></svg>
+        İndir
+      </button>
+      <button class="primarybtn" style="background:transparent; color:{{text}}; padding:13px; border-radius:12px; font-size:14px; border:1px solid {{surfaceBorder}};">Bağlantıyı Kopyala</button>
+    </div>
+    <div style="font-size:11px; color:{{textSoft}}; margin-bottom:28px;">Dosyan 24 saat sonra otomatik silinir.</div>
+
+    <div style="text-align:center; font-size:12px; font-weight:600; color:{{textSoft}}; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:14px;">Başka bir işlem yap</div>
+    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;">
+      <div class="toolchip" style="background:{{surface}}; border:1px solid {{surfaceBorder}}; border-radius:14px; padding:14px 8px;">
+        <div style="width:30px; height:30px; border-radius:9px; background:{{accentSoft}}; display:flex; align-items:center; justify-content:center; margin:0 auto 8px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{accent}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Z"/><path d="M9 9h6M9 13h6M9 17h4"/></svg>
+        </div>
+        <div style="font-size:11px; font-weight:600;">Birleştir</div>
+      </div>
+      <div class="toolchip" style="background:{{surface}}; border:1px solid {{surfaceBorder}}; border-radius:14px; padding:14px 8px;">
+        <div style="width:30px; height:30px; border-radius:9px; background:{{accentSoft}}; display:flex; align-items:center; justify-content:center; margin:0 auto 8px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{accent}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3M16 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3M12 3v18"/></svg>
+        </div>
+        <div style="font-size:11px; font-weight:600;">Böl</div>
+      </div>
+      <div class="toolchip" style="background:{{surface}}; border:1px solid {{surfaceBorder}}; border-radius:14px; padding:14px 8px;">
+        <div style="width:30px; height:30px; border-radius:9px; background:{{accentSoft}}; display:flex; align-items:center; justify-content:center; margin:0 auto 8px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{accent}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17s2-1 4-1 3 1 5 1 3-1 5-1 4 1 4 1M4 14 14 4l3 3-10 10H4z"/></svg>
+        </div>
+        <div style="font-size:11px; font-weight:600;">İmzala</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Tema"},"accent":{"editor":"color","default":"#DC4731","section":"Marka"}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { darkOverride: null };
+  }
+  renderVals() {
+    const dark = this.state.darkOverride ?? (this.props.dark ?? false);
+    const accent = this.props.accent ?? '#DC4731';
+    return {
+      dark: dark,
+      accent: accent,
+      bg: dark ? '#000000' : '#F5F5F7',
+      surface: dark ? '#1C1C1E' : '#FFFFFF',
+      surfaceBorder: dark ? '#38383A' : '#D2D2D7',
+      text: dark ? '#F5F5F7' : '#1D1D1F',
+      textSoft: dark ? '#98989D' : '#6E6E73',
+      accentSoft: 'color-mix(in oklch, ' + accent + ' ' + (dark ? '22%' : '12%') + ', ' + (dark ? 'black' : 'white') + ')',
+    };
+  }
+}
+</script>
+</body>
+</html>
