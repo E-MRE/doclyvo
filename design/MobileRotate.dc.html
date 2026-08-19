@@ -41,12 +41,12 @@
       <button class="linkbtn" onClick="{{toggleAll}}" style="font-size:12px; color:{{accent}}; font-weight:600;">{{toggleAllLabel}}</button>
     </div>
 
-    <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-bottom:20px;">
+    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:20px;">
       <sc-for list="{{pages}}" as="p" hint-placeholder-count="6">
         <div class="page-thumb" onClick="{{p.toggle}}" style="position:relative;">
-          <div style="aspect-ratio:3/4; border-radius:5px; background:{{bg}}; border:2px solid {{p.borderColor}}; transform:{{p.rotationPreview}}; transition:transform 200ms ease;"></div>
-          <div style="position:absolute; top:3px; left:3px; width:13px; height:13px; border-radius:4px; background:{{p.badgeBg}}; display:flex; align-items:center; justify-content:center;">
-            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          <div style="aspect-ratio:3/4; border-radius:6px; background:{{bg}}; border:2px solid {{p.borderColor}}; transform:{{p.rotationPreview}}; transition:transform 200ms ease;"></div>
+          <div style="position:absolute; top:4px; left:4px; width:15px; height:15px; border-radius:5px; background:{{p.badgeBg}}; display:flex; align-items:center; justify-content:center;">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
           </div>
         </div>
       </sc-for>
@@ -127,6 +127,7 @@ class Component extends DCLogic {
     const selected = this.state.selected;
     const inactiveBorder = dark ? '#38383A' : '#D2D2D7';
     const angleDeg = angle === 'cw' ? '90deg' : angle === 'half' ? '180deg' : '-90deg';
+    const angleScale = angle === 'half' ? 1 : 0.75;
     const border = (id) => (angle === id ? accent : inactiveBorder);
     return {
       dark: dark,
@@ -151,7 +152,7 @@ class Component extends DCLogic {
           number: n,
           borderColor: isSelected ? accent : inactiveBorder,
           badgeBg: isSelected ? accent : inactiveBorder,
-          rotationPreview: isSelected ? 'rotate(' + angleDeg + ')' : 'rotate(0deg)',
+          rotationPreview: isSelected ? 'rotate(' + angleDeg + ') scale(' + angleScale + ')' : 'rotate(0deg)',
           toggle: () => this.toggleSelected(n),
         };
       }),

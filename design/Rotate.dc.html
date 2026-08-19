@@ -182,6 +182,7 @@ class Component extends DCLogic {
     const selected = this.state.selected;
     const inactiveBorder = dark ? '#38383A' : '#D2D2D7';
     const angleDeg = angle === 'cw' ? '90deg' : angle === 'half' ? '180deg' : '-90deg';
+    const angleScale = angle === 'half' ? 1 : 0.75;
     const angleLabel = angle === 'cw' ? '90° sağa' : angle === 'half' ? '180°' : '90° sola';
     const border = (id) => (angle === id ? accent : inactiveBorder);
     return {
@@ -208,7 +209,7 @@ class Component extends DCLogic {
           number: n,
           borderColor: isSelected ? accent : inactiveBorder,
           badgeBg: isSelected ? accent : inactiveBorder,
-          rotationPreview: isSelected ? 'rotate(' + angleDeg + ')' : 'rotate(0deg)',
+          rotationPreview: isSelected ? 'rotate(' + angleDeg + ') scale(' + angleScale + ')' : 'rotate(0deg)',
           toggle: () => this.toggleSelected(n),
         };
       }),
