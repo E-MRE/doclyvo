@@ -66,6 +66,7 @@ flutter:
 
   assets:
     - assets/translations/
+    - assets/colors/colors.xml
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
@@ -93,9 +94,9 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
 
-# flutter_gen_runner output config. `colors` and asset `integrations` are added
-# in P0-7 once assets/colors/colors.xml and real assets exist — see
-# NATIVE-TASKS.md.
 flutter_gen:
   output: lib/generated/
   line_length: 80
+  colors:
+    inputs:
+      - assets/colors/colors.xml

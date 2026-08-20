@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Accent -->
+  <color name="accent">#DC4731</color>
+
+  <!-- Light Theme -->
+  <color name="light_background">#F5F5F7</color>
+  <color name="light_surface">#FFFFFF</color>
+  <color name="light_border">#D2D2D7</color>
+  <color name="light_text">#1D1D1F</color>
+  <color name="light_text_soft">#6E6E73</color>
+  <color name="light_accent_soft">#F5E8E4</color>
+
+  <!-- Dark Theme -->
+  <color name="dark_background">#000000</color>
+  <color name="dark_surface">#1C1C1E</color>
+  <color name="dark_border">#38383A</color>
+  <color name="dark_text">#F5F5F7</color>
+  <color name="dark_text_soft">#98989D</color>
+  <color name="dark_accent_soft">#4A342F</color>
+</resources>
