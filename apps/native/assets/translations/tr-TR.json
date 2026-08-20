@@ -1,0 +1,51 @@
+{
+  "appName": "Doclyvo",
+  "home": {
+    "title": "Doclyvo",
+    "subtitle": "PDF Araçları",
+    "selectTool": "Bir araç seç"
+  },
+  "tools": {
+    "compress": "Sıkıştır",
+    "merge": "Birleştir",
+    "split": "Böl",
+    "rotate": "Döndür",
+    "reorder": "Yeniden Düzenle",
+    "watermark": "Filigran",
+    "protect": "Koru",
+    "sign": "İmzala",
+    "redact": "Redakte Et",
+    "ocr": "OCR",
+    "pdfToWord": "PDF'i Word'e Çevir"
+  },
+  "upload": {
+    "title": "Dosya Seç",
+    "selectFile": "Dosya Seç",
+    "orDragDrop": "veya sürükle bırak",
+    "fileName": "Dosya Adı",
+    "fileSize": "Dosya Boyutu",
+    "remove": "Kaldır",
+    "selectPdf": "Lütfen bir PDF dosyası seçin"
+  },
+  "progress": {
+    "title": "İşleniyor",
+    "processing": "İşleniyor...",
+    "percent": "{percent}%"
+  },
+  "result": {
+    "title": "Tamamlandı",
+    "success": "İşlem başarıyla tamamlandı",
+    "download": "İndir",
+    "beforeSize": "Orijinal Boyut",
+    "afterSize": "Yeni Boyut",
+    "saved": "Kaydedildi",
+    "autoDelete": "Dosya 24 saat sonra otomatik olarak silinecektir"
+  },
+  "error": {
+    "title": "Hata",
+    "tryAgain": "Tekrar Dene",
+    "unknownError": "Bilinmeyen bir hata oluştu",
+    "networkError": "Ağ hatası",
+    "invalidFile": "Geçersiz dosya"
+  }
+}

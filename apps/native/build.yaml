@@ -8,3 +8,6 @@ targets:
       envied_generator:
         generate_for:
           - lib/core/config/**
+      easy_localization_generator:
+        options:
+          output_dir: lib/generated/localization/lang
