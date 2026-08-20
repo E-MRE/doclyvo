@@ -180,6 +180,18 @@ not a shortcut worth taking. Concretely:
 - [x] Scaffold `apps/web` with `create-next-app` (TypeScript) — done, see Phase A above.
 - [x] Scaffold `apps/native` with `flutter create` — done 2026-08-21 (`com.doclyvo` org,
       iOS/Android/macOS/Windows/Linux platforms). Bare template only, no features yet.
+- [x] Plan `apps/native` implementation — done 2026-08-21, see `NATIVE-TASKS.md` at the repo
+      root for the full phased, per-session task breakdown (foundation → home → shared
+      widgets → the eleven tools → polish), plus `apps/native/CLAUDE.md` for the standing
+      architecture/design rules every native session must follow. Not started yet.
+- [x] Decide the native tool architecture: fully backend-dependent vs. client-side —
+      decided 2026-08-21 (same day, revised): hybrid, risk-tiered. 8 tools (Merge, Split,
+      Rotate, Reorder, Watermark, Compress, Protect, Sign) run fully on-device via the
+      `pdf_manipulator` package (MIT, prebuilt binaries per platform) to avoid the free-tier
+      backend's cold-start delay; 3 tools (Redact, OCR, PDF-to-Word) keep calling `apps/api`
+      since their client-side equivalents are unproven or missing. Full reasoning and a
+      revisit trigger in `NATIVE-TASKS.md`'s Decisions log.
+- [ ] Implement `apps/native` per `NATIVE-TASKS.md`, one task per session, starting at P0-1.
 - [x] Scaffold `apps/api` with FastAPI; wire up pikepdf — done, see Phase A above.
 - [x] Sign — self-sign only (draw/type/upload + place + download), plus an optional-auth
       hash + append-only audit-log path for whenever login exists — done 2026-08-20, see the
@@ -207,8 +219,11 @@ not a shortcut worth taking. Concretely:
       authenticated path is unreachable in production until login ships, per the "Sign —
       self-sign slice" section above.
 - [ ] Next.js SEO strategy for the marketing/tool landing pages (SSR or static export).
-- [ ] Decide whether `apps/native` desktop should shell out to local LibreOffice/Ghostscript
-      instead of calling the backend for some operations.
+- [x] Decide whether `apps/native` desktop should shell out to local LibreOffice/Ghostscript
+      instead of calling the backend for some operations — decided 2026-08-21: no, not
+      needed. 8 of 11 tools run fully on-device via `pdf_manipulator` instead (no backend,
+      no LibreOffice shell-out); the remaining 3 (Redact, OCR, PDF-to-Word) already have a
+      working backend. See `NATIVE-TASKS.md`'s Decisions log for the full reasoning.
 
 ## Working notes
 
