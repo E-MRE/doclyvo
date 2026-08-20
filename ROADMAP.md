@@ -15,8 +15,11 @@ All-in-one PDF toolkit to convert, merge, split, compress, edit, and manage docu
   operations run with native Dart packages; heavy operations (Office conversion, OCR) call the
   same FastAPI backend. Desktop may additionally shell out to a local LibreOffice/Ghostscript
   binary later, since desktop apps aren't sandboxed like the browser.
-- **Backend hosting:** start on a free/hobby-tier PaaS (Render, Railway, or Fly.io); revisit if
-  traffic grows.
+- **Backend hosting:** [Render](https://render.com) free tier, chosen 2026-08-20 — Railway and
+  Fly.io had both dropped their free tiers by this point (Railway is now paid usage-metered,
+  Fly.io requires a card and bills per-second), leaving Render as the only genuinely free option
+  of the three. Revisit if traffic grows past the free tier's 512MB RAM / cold-start limits — see
+  `docs/deployment.md`.
 - **Auth model:** anonymous usage stays free with no account; an optional account exists for a
   premium/subscription tier.
 - **Repo layout:** a monorepo with plain folder separation — `apps/web`, `apps/native`,
@@ -91,6 +94,17 @@ sides:
   section for what's left (redact/signatures-with-audit-log/accounts, plus the
   PostgreSQL/job-history wiring Phase A intentionally skipped).
 
+## Hosting (Phase A.5 — deployed, 2026-08-20)
+
+`apps/api` and `apps/web` are both deployed to Render's free tier via the root `render.yaml`
+blueprint. See `docs/deployment.md` for the why-Render tradeoff, the free-tier caveats (512MB
+RAM, 15-min cold-start spin-down), and first-deploy steps. `apps/api/Dockerfile` installs
+`libreoffice-writer` + `tesseract-ocr`/`tesseract-ocr-tur` on top of
+`ghcr.io/astral-sh/uv:python3.12-bookworm-slim` so the same LibreOffice/Tesseract integrations
+that work locally (per `apps/api/README.md`) work in the hosted container too — no code changes
+needed, only deploy config. PostgreSQL is explicitly not part of this: still no database
+integration anywhere in `apps/api`, so there's nothing to host yet.
+
 ## Open / follow-up work
 
 - [x] Design Watermark, Protect, OCR, PDF to Word — done 2026-08-20, see `design/README.md`.
@@ -107,7 +121,9 @@ sides:
       audit log, accounts/premium tier. Every other tool from the original scope is now built.
 - [ ] Design the PostgreSQL schema (job/history records first; user accounts later for the
       premium tier).
-- [ ] Pick and configure the hosting provider for `apps/api` + PostgreSQL.
+- [x] Pick and configure the hosting provider for `apps/api` + `apps/web` — done 2026-08-20,
+      Render free tier, see the "Hosting" section above and `docs/deployment.md`. PostgreSQL
+      hosting deliberately deferred — no database integration exists yet to host.
 - [ ] Next.js SEO strategy for the marketing/tool landing pages (SSR or static export).
 - [ ] Decide whether `apps/native` desktop should shell out to local LibreOffice/Ghostscript
       instead of calling the backend for some operations.

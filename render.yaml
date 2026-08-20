@@ -1,0 +1,41 @@
+services:
+  - type: web
+    name: doclyvo-api
+    runtime: docker
+    plan: free
+    region: oregon
+    rootDir: apps/api
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      # Update this if doclyvo-web ends up on a different onrender.com subdomain
+      # (name collision at service creation) — see docs/deployment.md.
+      - key: CORS_ORIGINS
+        value: '["https://doclyvo-web.onrender.com"]'
+      - key: MAX_UPLOAD_SIZE_MB
+        value: "100"
+      - key: TEMP_DIR
+        value: /tmp/doclyvo
+      - key: RETENTION_HOURS
+        value: "24"
+      - key: LIBREOFFICE_BINARY
+        value: soffice
+      - key: LIBREOFFICE_TIMEOUT_SECONDS
+        value: "60"
+
+  - type: web
+    name: doclyvo-web
+    runtime: node
+    plan: free
+    region: oregon
+    rootDir: apps/web
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    envVars:
+      # Update this if doclyvo-api ends up on a different onrender.com subdomain
+      # (name collision at service creation) — see docs/deployment.md.
+      - key: API_BASE_URL
+        value: https://doclyvo-api.onrender.com
