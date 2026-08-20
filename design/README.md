@@ -9,9 +9,19 @@ Each `.dc.html` is a self-contained "Design Component" (template + a `DCLogic` c
 renders as one artboard on the canvas. `canvas.json` lays out their positions.
 
 **Artboards:**
-- `Main.dc.html` — Home (desktop)
+- `Main.dc.html` — Home (desktop). Tool grid now covers all eleven tools (updated
+  2026-08-20 — it previously only had the original seven and had drifted out of sync
+  with `ToolGrid.tsx`'s full list); each card's icon is the exact same inline SVG used
+  in that tool's own artboard header (see e.g. `Rotate.dc.html`'s header icon), so home
+  and the tool's own page always show a matching icon.
 - `Compress.dc.html` — Compress tool flow (desktop) — the reference template every other
-  single-file tool below was adapted from
+  single-file tool below was adapted from. **Processing-state convention:** every tool's
+  "processing" phase should show a determinate, percentage-labeled bar that climbs from
+  0 toward ~92% while the request is in flight and snaps to 100% on completion (see
+  `Compress.dc.html`'s `startCompress`/`progressPct` for the reference implementation,
+  added 2026-08-20 replacing the earlier indeterminate sliding bar) — this pattern is
+  documented centrally here rather than hand-copied into every other tool's `.dc.html`,
+  per the "adapt from Compress" rule below.
 - `Result.dc.html` — Result/download screen (desktop)
 - `Merge.dc.html` — Merge tool flow, multi-file reorder (desktop)
 - `Sign.dc.html` — Sign tool flow, draw/type/upload tabs (desktop)

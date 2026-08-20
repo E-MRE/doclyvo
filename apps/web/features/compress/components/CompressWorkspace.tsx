@@ -2,9 +2,13 @@
 
 import { useState, useTransition } from "react";
 import { ErrorState } from "@/components/ErrorState";
+import { ProgressBar } from "@/components/ProgressBar";
+import { ResultPanel } from "@/components/ResultPanel";
 import { UploadDropzone } from "@/components/UploadDropzone";
 import { compressPdfAction } from "@/features/compress/actions";
 import type { CompressQuality, CompressResult } from "@/features/compress/types";
+import { useFakeProgress } from "@/lib/hooks/use-fake-progress";
+import { usePendingFile } from "@/lib/hooks/use-pending-file";
 import { formatBytes, formatPercentChange } from "@/lib/utils";
 
 type Phase = "empty" | "idle" | "processing" | "done" | "error";
@@ -16,12 +20,13 @@ const QUALITY_OPTIONS: Array<{ id: CompressQuality; label: string; hint: string 
 ];
 
 export function CompressWorkspace() {
-  const [file, setFile] = useState<File | null>(null);
+  const [file, setFile] = usePendingFile();
   const [quality, setQuality] = useState<CompressQuality>("recommended");
-  const [phase, setPhase] = useState<Phase>("empty");
+  const [phase, setPhase] = useState<Phase>(file ? "idle" : "empty");
   const [result, setResult] = useState<CompressResult | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [, startTransition] = useTransition();
+  const progress = useFakeProgress(phase === "processing");
 
   function handleFilesSelected(files: File[]) {
     const [selected] = files;
@@ -114,66 +119,38 @@ export function CompressWorkspace() {
           </div>
         )}
 
-        {phase === "processing" && (
-          <div className="py-6 text-center">
-            <p className="mb-1.5 text-sm font-semibold">Sıkıştırılıyor…</p>
-            <p className="mb-5 text-xs text-text-soft dark:text-text-soft-dark">
-              Bu birkaç saniye sürebilir.
-            </p>
-            <div className="h-2 animate-pulse rounded-full bg-bg dark:bg-black" />
-          </div>
-        )}
+        {phase === "processing" && <ProgressBar label="Sıkıştırılıyor…" percent={progress} />}
 
         {phase === "error" && <ErrorState message={errorMessage} retry={handleCompress} />}
 
         {phase === "done" && result && (
-          <div className="text-center">
-            <p className="mb-1 text-base font-bold">Sıkıştırma tamamlandı</p>
-            <p className="text-sm text-text-soft dark:text-text-soft-dark">
-              {formatBytes(result.originalSize)} → {formatBytes(result.compressedSize)} (-
-              {formatPercentChange(result.originalSize, result.compressedSize)}%)
-            </p>
-          </div>
+          <ResultPanel
+            currentToolId="compress"
+            title="Sıkıştırma tamamlandı"
+            description={`${formatBytes(result.originalSize)} → ${formatBytes(result.compressedSize)} (-${formatPercentChange(result.originalSize, result.compressedSize)}%)`}
+            onDownload={handleDownload}
+            onReset={handleReset}
+          />
         )}
 
-        <div className="flex flex-col gap-3">
-          {phase === "idle" && (
-            <button
-              type="button"
-              onClick={handleCompress}
-              className="w-full rounded-panel bg-accent px-4 py-3.5 text-sm font-semibold text-white transition hover:opacity-90 active:scale-95"
-            >
-              Sıkıştır
-            </button>
-          )}
-          {phase === "processing" && (
-            <button
-              type="button"
-              disabled
-              className="w-full rounded-panel bg-accent px-4 py-3.5 text-sm font-semibold text-white opacity-60"
-            >
-              İşleniyor…
-            </button>
-          )}
-          {phase === "done" && (
-            <>
-              <button
-                type="button"
-                onClick={handleDownload}
-                className="w-full rounded-panel bg-accent px-4 py-3.5 text-sm font-semibold text-white transition hover:opacity-90 active:scale-95"
-              >
-                İndir
-              </button>
-              <button
-                type="button"
-                onClick={handleReset}
-                className="w-full rounded-panel border border-border px-4 py-3 text-sm font-semibold transition dark:border-border-dark"
-              >
-                Yeni İşlem
-              </button>
-            </>
-          )}
-        </div>
+        {phase === "idle" && (
+          <button
+            type="button"
+            onClick={handleCompress}
+            className="w-full rounded-panel bg-accent px-4 py-3.5 text-sm font-semibold text-white transition hover:opacity-90 active:scale-95"
+          >
+            Sıkıştır
+          </button>
+        )}
+        {phase === "processing" && (
+          <button
+            type="button"
+            disabled
+            className="w-full rounded-panel bg-accent px-4 py-3.5 text-sm font-semibold text-white opacity-60"
+          >
+            İşleniyor…
+          </button>
+        )}
       </div>
     </div>
   );

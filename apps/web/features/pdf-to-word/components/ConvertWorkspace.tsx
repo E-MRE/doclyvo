@@ -2,18 +2,23 @@
 
 import { useState, useTransition } from "react";
 import { ErrorState } from "@/components/ErrorState";
+import { ProgressBar } from "@/components/ProgressBar";
+import { ResultPanel } from "@/components/ResultPanel";
 import { UploadDropzone } from "@/components/UploadDropzone";
 import { convertPdfToWordAction } from "@/features/pdf-to-word/actions";
 import type { ConvertResult } from "@/features/pdf-to-word/types";
+import { useFakeProgress } from "@/lib/hooks/use-fake-progress";
+import { usePendingFile } from "@/lib/hooks/use-pending-file";
 
 type Phase = "empty" | "idle" | "processing" | "done" | "error";
 
 export function ConvertWorkspace() {
-  const [file, setFile] = useState<File | null>(null);
-  const [phase, setPhase] = useState<Phase>("empty");
+  const [file, setFile] = usePendingFile();
+  const [phase, setPhase] = useState<Phase>(file ? "idle" : "empty");
   const [result, setResult] = useState<ConvertResult | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [, startTransition] = useTransition();
+  const progress = useFakeProgress(phase === "processing");
 
   function handleFilesSelected(files: File[]) {
     const [chosen] = files;
@@ -74,7 +79,7 @@ export function ConvertWorkspace() {
                   <path d="M14 2v6h6" />
                 </svg>
               </div>
-              <p className="text-sm font-semibold">{file.name}</p>
+              <p className="truncate text-sm font-semibold">{file.name}</p>
             </div>
             <svg
               width="28"
@@ -129,25 +134,18 @@ export function ConvertWorkspace() {
           </p>
         )}
 
-        {phase === "processing" && (
-          <div className="py-6 text-center">
-            <p className="mb-1.5 text-sm font-semibold">Dönüştürülüyor…</p>
-            <p className="mb-5 text-xs text-text-soft dark:text-text-soft-dark">
-              Bu birkaç saniye sürebilir.
-            </p>
-            <div className="h-2 animate-pulse rounded-full bg-bg dark:bg-black" />
-          </div>
-        )}
+        {phase === "processing" && <ProgressBar label="Dönüştürülüyor…" percent={progress} />}
 
         {phase === "error" && <ErrorState message={errorMessage} retry={handleConvert} />}
 
-        {phase === "done" && (
-          <div className="text-center">
-            <p className="mb-1 text-base font-bold">Dönüştürme tamamlandı</p>
-            <p className="text-sm text-text-soft dark:text-text-soft-dark">
-              {result?.filename} hazır
-            </p>
-          </div>
+        {phase === "done" && result && (
+          <ResultPanel
+            currentToolId="convert"
+            title="Dönüştürme tamamlandı"
+            description={`${result.filename} hazır`}
+            onDownload={handleDownload}
+            onReset={handleReset}
+          />
         )}
 
         <div className="flex flex-col gap-3">
@@ -168,24 +166,6 @@ export function ConvertWorkspace() {
             >
               İşleniyor…
             </button>
-          )}
-          {phase === "done" && (
-            <>
-              <button
-                type="button"
-                onClick={handleDownload}
-                className="w-full rounded-panel bg-accent px-4 py-3.5 text-sm font-semibold text-white transition hover:opacity-90 active:scale-95"
-              >
-                İndir
-              </button>
-              <button
-                type="button"
-                onClick={handleReset}
-                className="w-full rounded-panel border border-border px-4 py-3 text-sm font-semibold transition dark:border-border-dark"
-              >
-                Yeni İşlem
-              </button>
-            </>
           )}
         </div>
       </div>

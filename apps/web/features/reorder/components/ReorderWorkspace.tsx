@@ -2,21 +2,26 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { ErrorState } from "@/components/ErrorState";
+import { ProgressBar } from "@/components/ProgressBar";
+import { ResultPanel } from "@/components/ResultPanel";
 import { UploadDropzone } from "@/components/UploadDropzone";
 import { reorderPdfAction } from "@/features/reorder/actions";
 import type { ReorderResult } from "@/features/reorder/types";
+import { useFakeProgress } from "@/lib/hooks/use-fake-progress";
 import { usePdfPageCount } from "@/lib/hooks/use-pdf-page-count";
+import { usePendingFile } from "@/lib/hooks/use-pending-file";
 
 type Phase = "empty" | "idle" | "processing" | "done" | "error";
 
 export function ReorderWorkspace() {
-  const [file, setFile] = useState<File | null>(null);
+  const [file, setFile] = usePendingFile();
   const [order, setOrder] = useState<number[]>([]);
-  const [phase, setPhase] = useState<Phase>("empty");
+  const [phase, setPhase] = useState<Phase>(file ? "idle" : "empty");
   const [result, setResult] = useState<ReorderResult | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [, startTransition] = useTransition();
   const { pageCount } = usePdfPageCount(file);
+  const progress = useFakeProgress(phase === "processing");
 
   useEffect(() => {
     if (pageCount) {
@@ -78,7 +83,7 @@ export function ReorderWorkspace() {
         {file ? (
           <div>
             <div className="mb-4 flex items-center gap-3 border-b border-border pb-4 dark:border-border-dark">
-              <p className="text-sm font-semibold">{file.name}</p>
+              <p className="truncate text-sm font-semibold">{file.name}</p>
               <p className="text-xs text-text-soft dark:text-text-soft-dark">
                 {pageCount ? `${pageCount} sayfa` : "…"}
               </p>
@@ -144,23 +149,18 @@ export function ReorderWorkspace() {
           </div>
         )}
 
-        {phase === "processing" && (
-          <div className="py-6 text-center">
-            <p className="mb-1.5 text-sm font-semibold">Yeniden sıralanıyor…</p>
-            <p className="mb-5 text-xs text-text-soft dark:text-text-soft-dark">
-              Bu birkaç saniye sürebilir.
-            </p>
-            <div className="h-2 animate-pulse rounded-full bg-bg dark:bg-black" />
-          </div>
-        )}
+        {phase === "processing" && <ProgressBar label="Yeniden sıralanıyor…" percent={progress} />}
 
         {phase === "error" && <ErrorState message={errorMessage} retry={handleReorder} />}
 
         {phase === "done" && (
-          <div className="text-center">
-            <p className="mb-1 text-base font-bold">Sıralama tamamlandı</p>
-            <p className="text-sm text-text-soft dark:text-text-soft-dark">Yeni sıra kaydedildi</p>
-          </div>
+          <ResultPanel
+            currentToolId="reorder"
+            title="Sıralama tamamlandı"
+            description="Yeni sıra kaydedildi"
+            onDownload={handleDownload}
+            onReset={handleReset}
+          />
         )}
 
         <div className="flex flex-col gap-3">
@@ -181,24 +181,6 @@ export function ReorderWorkspace() {
             >
               İşleniyor…
             </button>
-          )}
-          {phase === "done" && (
-            <>
-              <button
-                type="button"
-                onClick={handleDownload}
-                className="w-full rounded-panel bg-accent px-4 py-3.5 text-sm font-semibold text-white transition hover:opacity-90 active:scale-95"
-              >
-                İndir
-              </button>
-              <button
-                type="button"
-                onClick={handleReset}
-                className="w-full rounded-panel border border-border px-4 py-3 text-sm font-semibold transition dark:border-border-dark"
-              >
-                Yeni İşlem
-              </button>
-            </>
           )}
         </div>
       </div>

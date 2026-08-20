@@ -1,6 +1,15 @@
-import Link from "next/link";
+"use client";
 
-export function HeroSection() {
+import { UploadDropzone } from "@/components/UploadDropzone";
+import { formatBytes } from "@/lib/utils";
+
+interface HeroSectionProps {
+  file: File | null;
+  onFileSelected: (file: File) => void;
+  onClearFile: () => void;
+}
+
+export function HeroSection({ file, onFileSelected, onClearFile }: HeroSectionProps) {
   return (
     <section className="grid gap-10 px-6 py-16 sm:px-12 sm:py-20 md:grid-cols-2 md:items-center">
       <div>
@@ -17,12 +26,12 @@ export function HeroSection() {
           işlerini üç tıkla bitirmen için var.
         </p>
         <div className="flex items-center gap-3.5">
-          <Link
-            href="/tools/compress"
+          <a
+            href="#araclar"
             className="rounded-panel bg-accent px-6 py-3.5 text-sm font-semibold text-white transition hover:opacity-90 active:scale-95"
           >
             Ücretsiz Başla
-          </Link>
+          </a>
           <a
             href="#araclar"
             className="rounded-panel border border-border px-5 py-3.5 text-sm font-semibold transition dark:border-border-dark"
@@ -31,22 +40,40 @@ export function HeroSection() {
           </a>
         </div>
       </div>
-      <div className="rounded-card border border-border bg-surface p-7 shadow-xl dark:border-border-dark dark:bg-surface-dark">
-        <div className="rounded-panel border-2 border-dashed border-border p-11 text-center dark:border-border-dark">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-panel bg-accent/10 text-accent">
-            ↑
+      <div className="animate-pop rounded-card border border-border bg-surface p-7 shadow-xl dark:border-border-dark dark:bg-surface-dark">
+        {file ? (
+          <div className="rounded-panel border border-border p-5 dark:border-border-dark">
+            <div className="flex items-center gap-3 rounded-panel bg-accent/10 p-3.5">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-panel bg-accent text-white">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <path d="M14 2v6h6" />
+                </svg>
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold">{file.name}</p>
+                <p className="text-xs text-text-soft dark:text-text-soft-dark">{formatBytes(file.size)}</p>
+              </div>
+              <button
+                type="button"
+                onClick={onClearFile}
+                aria-label="Kaldır"
+                className="text-text-soft transition hover:opacity-70 dark:text-text-soft-dark"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 6 6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <p className="mt-4 text-center text-xs text-text-soft dark:text-text-soft-dark">
+              Aşağıdan bir araç seç, dosyan orada seni bekliyor.
+            </p>
           </div>
-          <p className="mb-1.5 text-sm font-semibold">Dosyalarını buraya bırak</p>
-          <p className="mb-5 text-xs text-text-soft dark:text-text-soft-dark">
-            PDF, PNG veya JPEG · maksimum 100MB
-          </p>
-          <Link
-            href="/tools/compress"
-            className="inline-block rounded-capsule bg-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 active:scale-95"
-          >
-            Dosya Seç
-          </Link>
-        </div>
+        ) : (
+          <UploadDropzone
+            onFilesSelected={([selected]) => selected && onFileSelected(selected)}
+          />
+        )}
       </div>
     </section>
   );

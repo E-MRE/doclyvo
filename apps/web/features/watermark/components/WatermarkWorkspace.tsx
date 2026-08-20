@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { ErrorState } from "@/components/ErrorState";
+import { ProgressBar } from "@/components/ProgressBar";
+import { ResultPanel } from "@/components/ResultPanel";
 import { UploadDropzone } from "@/components/UploadDropzone";
 import { watermarkPdfAction } from "@/features/watermark/actions";
 import type {
@@ -9,6 +11,8 @@ import type {
   WatermarkPosition,
   WatermarkResult,
 } from "@/features/watermark/types";
+import { useFakeProgress } from "@/lib/hooks/use-fake-progress";
+import { usePendingFile } from "@/lib/hooks/use-pending-file";
 
 type Phase = "empty" | "idle" | "processing" | "done" | "error";
 
@@ -27,14 +31,15 @@ const OPACITY_OPTIONS: Array<{ id: WatermarkOpacity; label: string }> = [
 ];
 
 export function WatermarkWorkspace() {
-  const [file, setFile] = useState<File | null>(null);
+  const [file, setFile] = usePendingFile();
   const [textIndex, setTextIndex] = useState(0);
   const [position, setPosition] = useState<WatermarkPosition>("diagonal");
   const [opacity, setOpacity] = useState<WatermarkOpacity>("medium");
-  const [phase, setPhase] = useState<Phase>("empty");
+  const [phase, setPhase] = useState<Phase>(file ? "idle" : "empty");
   const [result, setResult] = useState<WatermarkResult | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [, startTransition] = useTransition();
+  const progress = useFakeProgress(phase === "processing");
 
   const text = PRESET_TEXTS[textIndex];
 
@@ -81,7 +86,7 @@ export function WatermarkWorkspace() {
         {file ? (
           <>
             <div className="mb-4 flex w-full items-center justify-between">
-              <p className="text-sm font-semibold">{file.name}</p>
+              <p className="truncate text-sm font-semibold">{file.name}</p>
               <button
                 type="button"
                 onClick={handleReset}
@@ -191,24 +196,19 @@ export function WatermarkWorkspace() {
         )}
 
         {phase === "processing" && (
-          <div className="py-6 text-center">
-            <p className="mb-1.5 text-sm font-semibold">Filigran ekleniyor…</p>
-            <p className="mb-5 text-xs text-text-soft dark:text-text-soft-dark">
-              Bu birkaç saniye sürebilir.
-            </p>
-            <div className="h-2 animate-pulse rounded-full bg-bg dark:bg-black" />
-          </div>
+          <ProgressBar label="Filigran ekleniyor…" percent={progress} />
         )}
 
         {phase === "error" && <ErrorState message={errorMessage} retry={handleWatermark} />}
 
         {phase === "done" && (
-          <div className="text-center">
-            <p className="mb-1 text-base font-bold">Filigran eklendi</p>
-            <p className="text-sm text-text-soft dark:text-text-soft-dark">
-              Tüm sayfalara uygulandı
-            </p>
-          </div>
+          <ResultPanel
+            currentToolId="watermark"
+            title="Filigran eklendi"
+            description="Tüm sayfalara uygulandı"
+            onDownload={handleDownload}
+            onReset={handleReset}
+          />
         )}
 
         <div className="flex flex-col gap-3">
@@ -229,24 +229,6 @@ export function WatermarkWorkspace() {
             >
               İşleniyor…
             </button>
-          )}
-          {phase === "done" && (
-            <>
-              <button
-                type="button"
-                onClick={handleDownload}
-                className="w-full rounded-panel bg-accent px-4 py-3.5 text-sm font-semibold text-white transition hover:opacity-90 active:scale-95"
-              >
-                İndir
-              </button>
-              <button
-                type="button"
-                onClick={handleReset}
-                className="w-full rounded-panel border border-border px-4 py-3 text-sm font-semibold transition dark:border-border-dark"
-              >
-                Yeni İşlem
-              </button>
-            </>
           )}
         </div>
       </div>

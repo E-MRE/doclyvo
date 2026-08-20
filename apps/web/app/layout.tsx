@@ -12,10 +12,25 @@ export const metadata: Metadata = {
   description: "Birleştir, böl, sıkıştır ve dönüştür — hesap gerekmeden, dosyaların cihazında.",
 };
 
+const THEME_INIT_SCRIPT = `
+(function () {
+  try {
+    var stored = localStorage.getItem("theme");
+    var dark = stored === "dark" || (stored !== "light" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    document.documentElement.classList.toggle("dark", dark);
+  } catch (e) {}
+})();
+`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="tr" className={caveat.variable}>
-      <body className="font-sans antialiased">{children}</body>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
+      <body className="bg-bg font-sans text-text antialiased dark:bg-black dark:text-text-dark">
+        {children}
+      </body>
     </html>
   );
 }

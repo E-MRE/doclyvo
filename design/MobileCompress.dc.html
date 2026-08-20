@@ -78,10 +78,10 @@
 
     <sc-if value="{{isProcessing}}" hint-placeholder-val="{{false}}">
       <div style="text-align:center; padding:32px 4px; margin-bottom:24px;">
-        <div style="font-weight:600; font-size:14px; margin-bottom:6px;">Sıkıştırılıyor…</div>
+        <div style="font-weight:600; font-size:14px; margin-bottom:6px;">Sıkıştırılıyor… {{progressPct}}%</div>
         <div style="font-size:12px; color:{{textSoft}}; margin-bottom:18px;">Bu birkaç saniye sürebilir.</div>
         <div style="height:8px; border-radius:8px; background:{{bg}}; overflow:hidden; position:relative;">
-          <div class="bar-indeterminate" style="position:absolute; top:0; left:0; width:40%; height:100%; border-radius:8px; background:{{accent}};"></div>
+          <div style="width:{{progressPct}}%; height:100%; border-radius:8px; background:{{accent}}; transition:width 0.25s ease;"></div>
         </div>
       </div>
     </sc-if>
@@ -118,7 +118,7 @@
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { quality: 'recommended', phase: 'idle' };
+    this.state = { quality: 'recommended', phase: 'idle', progress: 0 };
   }
   renderVals() {
     const dark = this.props.dark ?? false;
@@ -126,8 +126,16 @@ class Component extends DCLogic {
     const q = this.state.quality;
     const border = (id) => (q === id ? accent : (dark ? '#38383A' : '#D2D2D7'));
     const startCompress = () => {
-      this.setState({ phase: 'processing' });
-      setTimeout(() => this.setState({ phase: 'done' }), 1600);
+      let progress = 0;
+      this.setState({ phase: 'processing', progress: 0 });
+      const timer = setInterval(() => {
+        progress = Math.min(92, progress + 6 + Math.random() * 8);
+        this.setState({ progress });
+      }, 220);
+      setTimeout(() => {
+        clearInterval(timer);
+        this.setState({ phase: 'done', progress: 100 });
+      }, 1600);
     };
     return {
       dark: dark,
@@ -142,6 +150,7 @@ class Component extends DCLogic {
       isIdle: this.state.phase === 'idle',
       isProcessing: this.state.phase === 'processing',
       isDone: this.state.phase === 'done',
+      progressPct: Math.round(this.state.progress ?? 0),
       border_low: border('low'),
       border_recommended: border('recommended'),
       border_high: border('high'),
@@ -149,7 +158,7 @@ class Component extends DCLogic {
       pickRecommended: () => this.setState({ quality: 'recommended' }),
       pickHigh: () => this.setState({ quality: 'high' }),
       startCompress: startCompress,
-      reset: () => this.setState({ phase: 'idle' }),
+      reset: () => this.setState({ phase: 'idle', progress: 0 }),
     };
   }
 }

@@ -1,97 +1,64 @@
-import Link from "next/link";
+"use client";
 
-interface ToolCard {
-  id: string;
-  title: string;
-  description: string;
-  href: string | null;
-  featured?: boolean;
+import Link from "next/link";
+import { setPendingFile } from "@/lib/pending-file";
+import { TOOLS, type ToolDefinition } from "@/lib/tools";
+
+interface ToolGridProps {
+  file: File | null;
 }
 
-const TOOLS: ToolCard[] = [
-  {
-    id: "compress",
-    title: "Sıkıştır",
-    description: "Kaliteyi koruyarak dosya boyutunu küçült.",
-    href: "/tools/compress",
-    featured: true,
-  },
-  { id: "merge", title: "Birleştir", description: "PDF'leri tek dosyada topla.", href: "/tools/merge" },
-  { id: "split", title: "Böl", description: "Sayfaları ayrı dosyalara ayır.", href: "/tools/split" },
-  { id: "rotate", title: "Döndür", description: "Sayfaları istediğin yöne çevir.", href: "/tools/rotate" },
-  {
-    id: "reorder",
-    title: "Yeniden Sırala",
-    description: "Sayfaları istediğin sıraya getir.",
-    href: "/tools/reorder",
-  },
-  {
-    id: "convert",
-    title: "PDF to Word",
-    description: "Düzenlenebilir Word'e çevir.",
-    href: "/tools/pdf-to-word",
-  },
-  { id: "watermark", title: "Filigran Ekle", description: "Metin filigranı yerleştir.", href: "/tools/watermark" },
-  { id: "ocr", title: "OCR", description: "Taranmış metni tanı.", href: "/tools/ocr" },
-  { id: "protect", title: "Koru", description: "Şifre ile kilitle.", href: "/tools/protect" },
-  { id: "sign", title: "İmzala", description: "Elektronik imza ekle.", href: "/tools/sign" },
-  {
-    id: "redact",
-    title: "Redakte Et",
-    description: "Hassas alanları kalıcı olarak karart.",
-    href: "/tools/redact",
-  },
-];
-
-export function ToolGrid() {
+export function ToolGrid({ file }: ToolGridProps) {
   return (
     <section id="araclar" className="px-6 pb-18 sm:px-12">
       <h2 className="mb-1 text-2xl font-extrabold">En çok kullanılan araçlar</h2>
       <p className="mb-6 text-sm text-text-soft dark:text-text-soft-dark">
         Bir araç seç, dosyanı bırak, işini bitir.
       </p>
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {TOOLS.map((tool) => (
-          <ToolTile key={tool.id} tool={tool} />
+          <ToolTile key={tool.id} tool={tool} file={file} />
         ))}
       </div>
     </section>
   );
 }
 
-function ToolTile({ tool }: { tool: ToolCard }) {
-  const content = (
-    <div
-      className={`flex h-full flex-col justify-between rounded-card border-2 p-5 transition ${
-        tool.featured ? "sm:col-span-2 sm:row-span-2" : ""
-      } ${
-        tool.href
-          ? "border-transparent bg-bg hover:-translate-y-0.5 dark:bg-black"
-          : "cursor-default border-transparent bg-bg opacity-60 dark:bg-black"
+function ToolTile({ tool, file }: { tool: ToolDefinition; file: File | null }) {
+  function handleClick() {
+    if (file) {
+      setPendingFile(file);
+    }
+  }
+
+  return (
+    <Link
+      href={tool.href}
+      onClick={handleClick}
+      className={`toolcard group flex h-full flex-col justify-between rounded-card border-2 p-5 transition hover:-translate-y-0.5 hover:border-accent active:scale-[0.98] ${
+        tool.featured
+          ? "col-span-2 border-accent bg-accent/10 p-6 sm:row-span-2"
+          : "border-border dark:border-border-dark"
       }`}
     >
       <div className="flex items-center justify-between">
-        <div className="flex h-10 w-10 items-center justify-center rounded-panel bg-accent/10 text-accent">
-          ●
-        </div>
-        {!tool.href && (
-          <span className="rounded-full bg-surface px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-text-soft dark:bg-surface-dark dark:text-text-soft-dark">
-            Yakında
+        <span
+          className={`flex items-center justify-center rounded-panel ${
+            tool.featured ? "h-11 w-11 bg-accent text-white" : "h-10 w-10 bg-accent/10 text-accent"
+          }`}
+        >
+          {tool.icon}
+        </span>
+        {tool.featured && (
+          <span className="rounded-full bg-surface px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-accent dark:bg-surface-dark">
+            Öne Çıkan
           </span>
         )}
       </div>
-      <div>
-        <p className="mb-1 font-bold">{tool.title}</p>
+      <div className={tool.featured ? "mt-4" : "mt-3"}>
+        <p className={`mb-1 font-bold ${tool.featured ? "text-lg" : ""}`}>{tool.title}</p>
         <p className="text-xs text-text-soft dark:text-text-soft-dark">{tool.description}</p>
       </div>
-    </div>
-  );
-
-  if (!tool.href) return content;
-
-  return (
-    <Link href={tool.href} className="block h-full">
-      {content}
     </Link>
   );
 }

@@ -2,9 +2,13 @@
 
 import { useState, useTransition } from "react";
 import { ErrorState } from "@/components/ErrorState";
+import { ProgressBar } from "@/components/ProgressBar";
+import { ResultPanel } from "@/components/ResultPanel";
 import { UploadDropzone } from "@/components/UploadDropzone";
 import { ocrPdfAction } from "@/features/ocr/actions";
 import type { OcrLanguage, OcrOutputFormat, OcrResult } from "@/features/ocr/types";
+import { useFakeProgress } from "@/lib/hooks/use-fake-progress";
+import { usePendingFile } from "@/lib/hooks/use-pending-file";
 
 type Phase = "empty" | "idle" | "processing" | "done" | "error";
 
@@ -26,13 +30,14 @@ function decodeBase64Text(base64: string): string {
 }
 
 export function OcrWorkspace() {
-  const [file, setFile] = useState<File | null>(null);
+  const [file, setFile] = usePendingFile();
   const [language, setLanguage] = useState<OcrLanguage>("tr");
   const [outputFormat, setOutputFormat] = useState<OcrOutputFormat>("searchable");
-  const [phase, setPhase] = useState<Phase>("empty");
+  const [phase, setPhase] = useState<Phase>(file ? "idle" : "empty");
   const [result, setResult] = useState<OcrResult | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [, startTransition] = useTransition();
+  const progress = useFakeProgress(phase === "processing");
 
   function handleFilesSelected(files: File[]) {
     const [chosen] = files;
@@ -80,7 +85,7 @@ export function OcrWorkspace() {
       <div className="rounded-card border border-border bg-surface p-6 dark:border-border-dark dark:bg-surface-dark">
         {file ? (
           <>
-            <p className="mb-4 text-sm font-semibold">{file.name}</p>
+            <p className="mb-4 truncate text-sm font-semibold">{file.name}</p>
             {recognizedText ? (
               <div className="rounded-panel border border-border bg-bg p-5 dark:border-border-dark dark:bg-black">
                 <p className="mb-2.5 text-[11px] font-bold uppercase tracking-wide text-text-soft dark:text-text-soft-dark">
@@ -157,25 +162,20 @@ export function OcrWorkspace() {
           </div>
         )}
 
-        {phase === "processing" && (
-          <div className="py-6 text-center">
-            <p className="mb-1.5 text-sm font-semibold">Metin taranıyor…</p>
-            <p className="mb-5 text-xs text-text-soft dark:text-text-soft-dark">
-              Bu birkaç saniye sürebilir.
-            </p>
-            <div className="h-2 animate-pulse rounded-full bg-bg dark:bg-black" />
-          </div>
-        )}
+        {phase === "processing" && <ProgressBar label="Metin taranıyor…" percent={progress} />}
 
         {phase === "error" && <ErrorState message={errorMessage} retry={handleOcr} />}
 
         {phase === "done" && (
-          <div className="text-center">
-            <p className="mb-1 text-base font-bold">Tanıma tamamlandı</p>
-            <p className="text-sm text-text-soft dark:text-text-soft-dark">
-              {result?.outputFormat === "text" ? "recognized.txt hazır" : "searchable.pdf hazır"}
-            </p>
-          </div>
+          <ResultPanel
+            currentToolId="ocr"
+            title="Tanıma tamamlandı"
+            description={
+              result?.outputFormat === "text" ? "recognized.txt hazır" : "searchable.pdf hazır"
+            }
+            onDownload={handleDownload}
+            onReset={handleReset}
+          />
         )}
 
         <div className="flex flex-col gap-3">
@@ -196,24 +196,6 @@ export function OcrWorkspace() {
             >
               İşleniyor…
             </button>
-          )}
-          {phase === "done" && (
-            <>
-              <button
-                type="button"
-                onClick={handleDownload}
-                className="w-full rounded-panel bg-accent px-4 py-3.5 text-sm font-semibold text-white transition hover:opacity-90 active:scale-95"
-              >
-                İndir
-              </button>
-              <button
-                type="button"
-                onClick={handleReset}
-                className="w-full rounded-panel border border-border px-4 py-3 text-sm font-semibold transition dark:border-border-dark"
-              >
-                Yeni İşlem
-              </button>
-            </>
           )}
         </div>
       </div>

@@ -2,9 +2,13 @@
 
 import { useState, useTransition } from "react";
 import { ErrorState } from "@/components/ErrorState";
+import { ProgressBar } from "@/components/ProgressBar";
+import { ResultPanel } from "@/components/ResultPanel";
 import { UploadDropzone } from "@/components/UploadDropzone";
 import { protectPdfAction } from "@/features/protect/actions";
 import type { ProtectResult } from "@/features/protect/types";
+import { useFakeProgress } from "@/lib/hooks/use-fake-progress";
+import { usePendingFile } from "@/lib/hooks/use-pending-file";
 
 type Phase = "empty" | "idle" | "processing" | "done" | "error";
 
@@ -19,16 +23,17 @@ function generatePassword(): string {
 }
 
 export function ProtectWorkspace() {
-  const [file, setFile] = useState<File | null>(null);
+  const [file, setFile] = usePendingFile();
   const [password, setPassword] = useState(generatePassword);
   const [isRevealed, setIsRevealed] = useState(false);
   const [noPrint, setNoPrint] = useState(true);
   const [noCopy, setNoCopy] = useState(false);
   const [noEdit, setNoEdit] = useState(false);
-  const [phase, setPhase] = useState<Phase>("empty");
+  const [phase, setPhase] = useState<Phase>(file ? "idle" : "empty");
   const [result, setResult] = useState<ProtectResult | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [, startTransition] = useTransition();
+  const progress = useFakeProgress(phase === "processing");
 
   function handleFilesSelected(files: File[]) {
     const [chosen] = files;
@@ -77,7 +82,7 @@ export function ProtectWorkspace() {
         {file ? (
           <>
             <div className="mb-6 w-full">
-              <p className="text-sm font-semibold">{file.name}</p>
+              <p className="truncate text-sm font-semibold">{file.name}</p>
             </div>
             <div
               className={`flex h-24 w-24 items-center justify-center rounded-card transition ${
@@ -178,25 +183,18 @@ export function ProtectWorkspace() {
           </div>
         )}
 
-        {phase === "processing" && (
-          <div className="py-6 text-center">
-            <p className="mb-1.5 text-sm font-semibold">Korunuyor…</p>
-            <p className="mb-5 text-xs text-text-soft dark:text-text-soft-dark">
-              Bu birkaç saniye sürebilir.
-            </p>
-            <div className="h-2 animate-pulse rounded-full bg-bg dark:bg-black" />
-          </div>
-        )}
+        {phase === "processing" && <ProgressBar label="Korunuyor…" percent={progress} />}
 
         {phase === "error" && <ErrorState message={errorMessage} retry={handleProtect} />}
 
         {phase === "done" && (
-          <div className="text-center">
-            <p className="mb-1 text-base font-bold">Belge korundu</p>
-            <p className="text-sm text-text-soft dark:text-text-soft-dark">
-              Şifreyi güvenli bir yerde sakla, bu ekrandan sonra tekrar gösterilmez.
-            </p>
-          </div>
+          <ResultPanel
+            currentToolId="protect"
+            title="Belge korundu"
+            description="Şifreyi güvenli bir yerde sakla, bu ekrandan sonra tekrar gösterilmez."
+            onDownload={handleDownload}
+            onReset={handleReset}
+          />
         )}
 
         <div className="flex flex-col gap-3">
@@ -217,24 +215,6 @@ export function ProtectWorkspace() {
             >
               İşleniyor…
             </button>
-          )}
-          {phase === "done" && (
-            <>
-              <button
-                type="button"
-                onClick={handleDownload}
-                className="w-full rounded-panel bg-accent px-4 py-3.5 text-sm font-semibold text-white transition hover:opacity-90 active:scale-95"
-              >
-                İndir
-              </button>
-              <button
-                type="button"
-                onClick={handleReset}
-                className="w-full rounded-panel border border-border px-4 py-3 text-sm font-semibold transition dark:border-border-dark"
-              >
-                Yeni İşlem
-              </button>
-            </>
           )}
         </div>
       </div>

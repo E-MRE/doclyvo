@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-accent: #dc4731;
   --color-accent-hover: color-mix(in oklch, #dc4731 85%, black);
@@ -34,14 +36,27 @@
   --font-signature: var(--font-caveat), cursive;
 }
 
-body {
-  background: var(--color-bg);
-  color: var(--color-text);
+@keyframes pop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
-@media (prefers-color-scheme: dark) {
-  body {
-    background: var(--color-bg-dark);
-    color: var(--color-text-dark);
+.animate-pop {
+  animation: pop 0.4s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pop {
+    animation: none;
   }
 }

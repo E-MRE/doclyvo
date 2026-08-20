@@ -2,9 +2,12 @@
 
 import { useState, useTransition } from "react";
 import { ErrorState } from "@/components/ErrorState";
+import { ProgressBar } from "@/components/ProgressBar";
+import { ResultPanel } from "@/components/ResultPanel";
 import { UploadDropzone } from "@/components/UploadDropzone";
 import { mergePdfsAction } from "@/features/merge/actions";
 import type { MergeFileItem, MergeResult } from "@/features/merge/types";
+import { useFakeProgress } from "@/lib/hooks/use-fake-progress";
 import { formatBytes } from "@/lib/utils";
 
 type Phase = "empty" | "idle" | "processing" | "done" | "error";
@@ -21,6 +24,7 @@ export function MergeWorkspace() {
   const [result, setResult] = useState<MergeResult | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [, startTransition] = useTransition();
+  const progress = useFakeProgress(phase === "processing");
 
   function handleFilesSelected(files: File[]) {
     setItems((current) => [...current, ...toItems(files)]);
@@ -152,25 +156,18 @@ export function MergeWorkspace() {
           </div>
         )}
 
-        {phase === "processing" && (
-          <div className="py-6 text-center">
-            <p className="mb-1.5 text-sm font-semibold">Birleştiriliyor…</p>
-            <p className="mb-5 text-xs text-text-soft dark:text-text-soft-dark">
-              Bu birkaç saniye sürebilir.
-            </p>
-            <div className="h-2 animate-pulse rounded-full bg-bg dark:bg-black" />
-          </div>
-        )}
+        {phase === "processing" && <ProgressBar label="Birleştiriliyor…" percent={progress} />}
 
         {phase === "error" && <ErrorState message={errorMessage} retry={handleMerge} />}
 
         {phase === "done" && result && (
-          <div className="text-center">
-            <p className="mb-1 text-base font-bold">Birleştirme tamamlandı</p>
-            <p className="text-sm text-text-soft dark:text-text-soft-dark">
-              {result.fileCount} dosya → 1 PDF · {result.pageCount} sayfa
-            </p>
-          </div>
+          <ResultPanel
+            currentToolId="merge"
+            title="Birleştirme tamamlandı"
+            description={`${result.fileCount} dosya → 1 PDF · ${result.pageCount} sayfa`}
+            onDownload={handleDownload}
+            onReset={handleReset}
+          />
         )}
 
         <div className="flex flex-col gap-3">
@@ -192,24 +189,6 @@ export function MergeWorkspace() {
             >
               İşleniyor…
             </button>
-          )}
-          {phase === "done" && (
-            <>
-              <button
-                type="button"
-                onClick={handleDownload}
-                className="w-full rounded-panel bg-accent px-4 py-3.5 text-sm font-semibold text-white transition hover:opacity-90 active:scale-95"
-              >
-                İndir
-              </button>
-              <button
-                type="button"
-                onClick={handleReset}
-                className="w-full rounded-panel border border-border px-4 py-3 text-sm font-semibold transition dark:border-border-dark"
-              >
-                Yeni İşlem
-              </button>
-            </>
           )}
         </div>
       </div>

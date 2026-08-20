@@ -2,11 +2,15 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { ErrorState } from "@/components/ErrorState";
+import { ProgressBar } from "@/components/ProgressBar";
+import { ResultPanel } from "@/components/ResultPanel";
 import { UploadDropzone } from "@/components/UploadDropzone";
 import { signPdfAction } from "@/features/sign/actions";
 import { SignatureCanvas } from "@/features/sign/components/SignatureCanvas";
 import type { SignMode, SignResult } from "@/features/sign/types";
+import { useFakeProgress } from "@/lib/hooks/use-fake-progress";
 import { usePdfPageCount } from "@/lib/hooks/use-pdf-page-count";
+import { usePendingFile } from "@/lib/hooks/use-pending-file";
 
 type Phase = "empty" | "idle" | "processing" | "done" | "error";
 
@@ -26,8 +30,8 @@ const MODE_OPTIONS: Array<{ id: SignMode; label: string }> = [
 const PLACEMENT_BOX = { x: 0.6, y: 0.78, width: 0.32, height: 0.1 };
 
 export function SignWorkspace() {
-  const [file, setFile] = useState<File | null>(null);
-  const [phase, setPhase] = useState<Phase>("empty");
+  const [file, setFile] = usePendingFile();
+  const [phase, setPhase] = useState<Phase>(file ? "idle" : "empty");
   const [mode, setMode] = useState<SignMode>("draw");
   const [signatureText, setSignatureText] = useState("");
   const [signatureImageFile, setSignatureImageFile] = useState<File | null>(null);
@@ -37,6 +41,7 @@ export function SignWorkspace() {
   const [result, setResult] = useState<SignResult | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [, startTransition] = useTransition();
+  const progress = useFakeProgress(phase === "processing");
   const { pageCount } = usePdfPageCount(file);
 
   useEffect(() => {
@@ -126,7 +131,7 @@ export function SignWorkspace() {
         {file ? (
           <>
             <div className="mb-4 flex w-full items-center justify-between">
-              <p className="text-sm font-semibold">{file.name}</p>
+              <p className="truncate text-sm font-semibold">{file.name}</p>
               {pageCount ? (
                 <div className="flex items-center gap-2 text-xs text-text-soft dark:text-text-soft-dark">
                   <button
@@ -236,25 +241,18 @@ export function SignWorkspace() {
           </>
         )}
 
-        {phase === "processing" && (
-          <div className="py-6 text-center">
-            <p className="mb-1.5 text-sm font-semibold">İmzalanıyor…</p>
-            <p className="mb-5 text-xs text-text-soft dark:text-text-soft-dark">
-              Bu birkaç saniye sürebilir.
-            </p>
-            <div className="h-2 animate-pulse rounded-full bg-bg dark:bg-black" />
-          </div>
-        )}
+        {phase === "processing" && <ProgressBar label="İmzalanıyor…" percent={progress} />}
 
         {phase === "error" && <ErrorState message={errorMessage} retry={handleSign} />}
 
         {phase === "done" && (
-          <div className="text-center">
-            <p className="mb-1 text-base font-bold">İmzalı PDF hazır</p>
-            <p className="text-sm text-text-soft dark:text-text-soft-dark">
-              Sayfa {currentPage} imzalandı
-            </p>
-          </div>
+          <ResultPanel
+            currentToolId="sign"
+            title="İmzalı PDF hazır"
+            description={`Sayfa ${currentPage} imzalandı`}
+            onDownload={handleDownload}
+            onReset={handleReset}
+          />
         )}
 
         <div className="flex flex-col gap-3">
@@ -276,24 +274,6 @@ export function SignWorkspace() {
             >
               İşleniyor…
             </button>
-          )}
-          {phase === "done" && (
-            <>
-              <button
-                type="button"
-                onClick={handleDownload}
-                className="w-full rounded-panel bg-accent px-4 py-3.5 text-sm font-semibold text-white transition hover:opacity-90 active:scale-95"
-              >
-                İndir
-              </button>
-              <button
-                type="button"
-                onClick={handleReset}
-                className="w-full rounded-panel border border-border px-4 py-3 text-sm font-semibold transition dark:border-border-dark"
-              >
-                Yeni İşlem
-              </button>
-            </>
           )}
         </div>
       </div>

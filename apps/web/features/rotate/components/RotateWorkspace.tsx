@@ -2,10 +2,14 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { ErrorState } from "@/components/ErrorState";
+import { ProgressBar } from "@/components/ProgressBar";
+import { ResultPanel } from "@/components/ResultPanel";
 import { UploadDropzone } from "@/components/UploadDropzone";
 import { rotatePdfAction } from "@/features/rotate/actions";
 import type { RotateResult, RotationAngle } from "@/features/rotate/types";
+import { useFakeProgress } from "@/lib/hooks/use-fake-progress";
 import { usePdfPageCount } from "@/lib/hooks/use-pdf-page-count";
+import { usePendingFile } from "@/lib/hooks/use-pending-file";
 
 type Phase = "empty" | "idle" | "processing" | "done" | "error";
 
@@ -16,14 +20,15 @@ const ANGLE_OPTIONS: Array<{ id: RotationAngle; label: string; hint: string }> =
 ];
 
 export function RotateWorkspace() {
-  const [file, setFile] = useState<File | null>(null);
+  const [file, setFile] = usePendingFile();
   const [angle, setAngle] = useState<RotationAngle>(90);
   const [selected, setSelected] = useState<number[]>([]);
-  const [phase, setPhase] = useState<Phase>("empty");
+  const [phase, setPhase] = useState<Phase>(file ? "idle" : "empty");
   const [result, setResult] = useState<RotateResult | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [, startTransition] = useTransition();
   const { pageCount } = usePdfPageCount(file);
+  const progress = useFakeProgress(phase === "processing");
 
   useEffect(() => {
     if (pageCount) {
@@ -93,7 +98,7 @@ export function RotateWorkspace() {
           <div>
             <div className="mb-4 flex items-center justify-between border-b border-border pb-4 dark:border-border-dark">
               <div>
-                <p className="text-sm font-semibold">{file.name}</p>
+                <p className="truncate text-sm font-semibold">{file.name}</p>
                 <p className="text-xs text-text-soft dark:text-text-soft-dark">
                   {pageCount ? `${pageCount} sayfa` : "…"}
                 </p>
@@ -177,25 +182,18 @@ export function RotateWorkspace() {
           </div>
         )}
 
-        {phase === "processing" && (
-          <div className="py-6 text-center">
-            <p className="mb-1.5 text-sm font-semibold">Döndürülüyor…</p>
-            <p className="mb-5 text-xs text-text-soft dark:text-text-soft-dark">
-              Bu birkaç saniye sürebilir.
-            </p>
-            <div className="h-2 animate-pulse rounded-full bg-bg dark:bg-black" />
-          </div>
-        )}
+        {phase === "processing" && <ProgressBar label="Döndürülüyor…" percent={progress} />}
 
         {phase === "error" && <ErrorState message={errorMessage} retry={handleRotate} />}
 
-        {phase === "done" && (
-          <div className="text-center">
-            <p className="mb-1 text-base font-bold">Döndürme tamamlandı</p>
-            <p className="text-sm text-text-soft dark:text-text-soft-dark">
-              {selected.length} sayfa · {angleLabel} döndürüldü
-            </p>
-          </div>
+        {phase === "done" && result && (
+          <ResultPanel
+            currentToolId="rotate"
+            title="Döndürme tamamlandı"
+            description={`${selected.length} sayfa · ${angleLabel} döndürüldü`}
+            onDownload={handleDownload}
+            onReset={handleReset}
+          />
         )}
 
         <div className="flex flex-col gap-3">
@@ -217,24 +215,6 @@ export function RotateWorkspace() {
             >
               İşleniyor…
             </button>
-          )}
-          {phase === "done" && (
-            <>
-              <button
-                type="button"
-                onClick={handleDownload}
-                className="w-full rounded-panel bg-accent px-4 py-3.5 text-sm font-semibold text-white transition hover:opacity-90 active:scale-95"
-              >
-                İndir
-              </button>
-              <button
-                type="button"
-                onClick={handleReset}
-                className="w-full rounded-panel border border-border px-4 py-3 text-sm font-semibold transition dark:border-border-dark"
-              >
-                Yeni İşlem
-              </button>
-            </>
           )}
         </div>
       </div>
