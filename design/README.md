@@ -63,6 +63,25 @@ renders as one artboard on the canvas. `canvas.json` lays out their positions.
 - Buttons/icon buttons use `:active { transform: scale(0.97) }` for press feedback; top bars
   use `position: sticky` + `backdrop-filter: blur(20px) saturate(180%)`
 
+**Motion conventions (2026-08-20, code-side — not yet mirrored into the `.dc.html` mockups
+since none of them are structural/visual content changes, just timing/easing on top of
+existing markup):** every route transition fades+slides content in on mount (`apps/web/app/
+template.tsx`, a Next.js App Router template re-mounted per navigation, using the
+`animate-fade-in-up` keyframe in `globals.css`); the same keyframe plays when a processing or
+result panel first appears; the active progress bar's fill has a looping light "shimmer"
+sweep (`animate-shimmer-sweep`); a completed download gives a brief checkmark+label swap on
+the İndir button before reverting. All respect `prefers-reduced-motion: reduce`.
+
+**Filename display convention (2026-08-20, code-side):** most filename labels sit in a
+`min-w-0`/flexible container where CSS `truncate` (ellipsis-by-width) is enough. Where a
+label centers under a fixed-size icon with no bounding width — PdfToWord's pdf→docx visual
+is the first case of this — CSS truncate has nothing to clip against, so instead
+`apps/web/lib/utils.ts`'s `truncateFilename(name, maxLength)` hard-truncates by character
+count, rendered responsively via two spans (`sm:hidden` / `hidden sm:inline`): 16 characters
+on mobile, 24 on desktop. The mockups' own example filenames (`rapor-2024.pdf`) are short
+enough to never hit this, which is why the `.dc.html` markup doesn't show it — this is a
+code-only fallback for real long filenames, documented here so it isn't lost.
+
 **Known gaps / not yet designed:** none — every tool from the original scope, plus `Redact`
 (the first Phase B tool designed beyond `Sign`), now has a design. Any *new* tool added later
 should still adapt `Compress.dc.html`'s layout (file panel + settings panel + action button

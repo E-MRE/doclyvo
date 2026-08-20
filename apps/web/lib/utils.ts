@@ -14,3 +14,8 @@ export function formatPercentChange(originalBytes: number, newBytes: number): nu
   if (originalBytes === 0) return 0;
   return Math.round(((originalBytes - newBytes) / originalBytes) * 100);
 }
+
+export function truncateFilename(name: string, maxLength: number): string {
+  if (name.length <= maxLength) return name;
+  return `${name.slice(0, maxLength)}...`;
+}

@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { TOOLS } from "@/lib/tools";
 
@@ -11,9 +14,16 @@ interface ResultPanelProps {
 
 export function ResultPanel({ title, description, currentToolId, onDownload, onReset }: ResultPanelProps) {
   const otherTools = TOOLS.filter((tool) => tool.id !== currentToolId).slice(0, 3);
+  const [justDownloaded, setJustDownloaded] = useState(false);
+
+  function handleDownloadClick() {
+    onDownload();
+    setJustDownloaded(true);
+    setTimeout(() => setJustDownloaded(false), 1400);
+  }
 
   return (
-    <div>
+    <div className="animate-fade-in-up">
       <div className="text-center">
         <div className="animate-pop mx-auto mb-3.5 flex h-14 w-14 items-center justify-center rounded-full bg-accent/10 text-accent">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
@@ -27,15 +37,26 @@ export function ResultPanel({ title, description, currentToolId, onDownload, onR
       <div className="mt-6 flex flex-col gap-3">
         <button
           type="button"
-          onClick={onDownload}
-          className="w-full rounded-panel bg-accent px-4 py-3.5 text-sm font-semibold text-white transition hover:opacity-90 active:scale-95"
+          onClick={handleDownloadClick}
+          className={`flex w-full items-center justify-center gap-2 rounded-panel px-4 py-3.5 text-sm font-semibold text-white transition hover:opacity-90 active:scale-95 ${
+            justDownloaded ? "bg-accent-hover" : "bg-accent"
+          }`}
         >
-          İndir
+          {justDownloaded ? (
+            <span key="downloaded" className="animate-pop flex items-center gap-2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+              İndirildi
+            </span>
+          ) : (
+            "İndir"
+          )}
         </button>
         <button
           type="button"
           onClick={onReset}
-          className="w-full rounded-panel border border-border px-4 py-3 text-sm font-semibold transition dark:border-border-dark"
+          className="w-full rounded-panel border border-border px-4 py-3 text-sm font-semibold transition hover:opacity-80 active:scale-95 dark:border-border-dark"
         >
           Yeni İşlem
         </button>
@@ -51,7 +72,7 @@ export function ResultPanel({ title, description, currentToolId, onDownload, onR
               <Link
                 key={tool.id}
                 href={tool.href}
-                className="flex flex-col items-center gap-2 rounded-panel border border-border p-3 text-center transition hover:-translate-y-0.5 dark:border-border-dark"
+                className="flex flex-col items-center gap-2 rounded-panel border border-border p-3 text-center transition hover:-translate-y-0.5 hover:border-accent active:scale-95 dark:border-border-dark"
               >
                 <span className="flex h-8 w-8 items-center justify-center rounded-panel bg-accent/10 text-accent">
                   {tool.icon}

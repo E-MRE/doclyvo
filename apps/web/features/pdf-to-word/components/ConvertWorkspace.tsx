@@ -9,6 +9,19 @@ import { convertPdfToWordAction } from "@/features/pdf-to-word/actions";
 import type { ConvertResult } from "@/features/pdf-to-word/types";
 import { useFakeProgress } from "@/lib/hooks/use-fake-progress";
 import { usePendingFile } from "@/lib/hooks/use-pending-file";
+import { truncateFilename } from "@/lib/utils";
+
+const FILENAME_MAX_LENGTH_MOBILE = 16;
+const FILENAME_MAX_LENGTH_DESKTOP = 24;
+
+function ResponsiveFilename({ name }: { name: string }) {
+  return (
+    <>
+      <span className="sm:hidden">{truncateFilename(name, FILENAME_MAX_LENGTH_MOBILE)}</span>
+      <span className="hidden sm:inline">{truncateFilename(name, FILENAME_MAX_LENGTH_DESKTOP)}</span>
+    </>
+  );
+}
 
 type Phase = "empty" | "idle" | "processing" | "done" | "error";
 
@@ -79,7 +92,9 @@ export function ConvertWorkspace() {
                   <path d="M14 2v6h6" />
                 </svg>
               </div>
-              <p className="truncate text-sm font-semibold">{file.name}</p>
+              <p className="text-sm font-semibold">
+                <ResponsiveFilename name={file.name} />
+              </p>
             </div>
             <svg
               width="28"
@@ -112,7 +127,7 @@ export function ConvertWorkspace() {
                 </svg>
               </div>
               <p className="text-sm font-semibold">
-                {file.name.replace(/\.pdf$/i, "")}.docx
+                <ResponsiveFilename name={`${file.name.replace(/\.pdf$/i, "")}.docx`} />
               </p>
             </div>
           </>
