@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     retention_hours: int = 24
     libreoffice_binary: str = "soffice"
     libreoffice_timeout_seconds: int = 60
+    database_url: str | None = None
 
 
 @lru_cache

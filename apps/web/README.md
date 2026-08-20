@@ -2,10 +2,13 @@
 
 Doclyvo's web application — Next.js 15, TypeScript, Tailwind CSS v4, App Router.
 
-**Phase A scope (current, done):** all nine tools — Compress, Merge, Split, Rotate, Reorder,
-Watermark, Protect, OCR, and PDF-to-Word — each implemented from its `design/*.dc.html`
-source. See `../../docs/build-prompt-web-mvp.md` for the full scope rationale and
-`../../.claude/reference/web/` for the coding conventions this app follows.
+**Phase A scope (done):** all nine tools — Compress, Merge, Split, Rotate, Reorder, Watermark,
+Protect, OCR, and PDF-to-Word — each implemented from its `design/*.dc.html` source.
+**Sign** (self-sign only — draw/type/upload a signature, place it, download) is the tenth,
+the first Phase B slice; see `../api/README.md` for the authenticated hash + audit-log path
+it optionally triggers server-side. See `../../docs/build-prompt-web-mvp.md` for the full
+scope rationale and `../../.claude/reference/web/` for the coding conventions this app
+follows.
 
 `apps/api` must have its own system dependencies installed for OCR and PDF-to-Word to work —
 see `../api/README.md`'s Setup section (Tesseract, LibreOffice headless).
@@ -32,7 +35,7 @@ Open `http://localhost:3000`.
 - `app/` — routes only (`page.tsx`, `layout.tsx`, `app/tools/<tool>/page.tsx`), server-rendered
   by default so tool landing pages stay crawlable.
 - `features/<name>/` — one folder per feature (`home`, `compress`, `merge`, `split`, `rotate`,
-  `reorder`, `watermark`, `protect`, `ocr`, `pdf-to-word`): feature-local components, a
+  `reorder`, `watermark`, `protect`, `ocr`, `pdf-to-word`, `sign`): feature-local components, a
   server-action `actions.ts` that's the only thing calling `lib/api-client.ts`, and `types.ts`.
 - `lib/hooks/use-pdf-page-count.ts` — reads a PDF's page count client-side via `pdf-lib` (no
   server round-trip); used by Split/Rotate/Reorder to render per-page selection UI before the
@@ -50,7 +53,7 @@ Each tool page renders explicit empty → idle → processing → done/error UI 
 ## Testing
 
 End-to-end — one spec per tool (compress, split, rotate, reorder, watermark, protect, ocr,
-pdf-to-word), spins up both `apps/api` and `apps/web` automatically:
+pdf-to-word, sign), spins up both `apps/api` and `apps/web` automatically:
 
 ```bash
 npm run test:e2e

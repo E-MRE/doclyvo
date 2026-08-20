@@ -3,9 +3,14 @@
 Doclyvo's backend service — Python 3.12, FastAPI, pikepdf. Shared by `apps/web` and (later)
 `apps/native` for anything that can't run purely on the client.
 
-**Phase A scope (current):** merge, split, compress, rotate, reorder, watermark, protect, OCR,
-and PDF-to-Word — all synchronous request/response over HTTP, no job queue, no database yet.
-See `../../docs/build-prompt-web-mvp.md` for the full scope rationale and
+**Phase A scope:** merge, split, compress, rotate, reorder, watermark, protect, OCR, and
+PDF-to-Word — all synchronous request/response over HTTP, no job queue, no database.
+**`sign`** (self-sign only — draw/type/upload a signature, place it, download) is the first
+Phase B slice and the first endpoint to touch a database: when the request carries an
+`Authorization: Bearer` credential it hash-seals the signed PDF and writes an append-only
+audit-log row to PostgreSQL; anonymous requests (100% of real traffic today, since no login
+exists yet) stay exactly as stateless as the other nine tools. See
+`../../docs/build-prompt-web-mvp.md` for the full scope rationale and
 `../../.claude/reference/api/` for the coding conventions this app follows.
 
 ## Setup
@@ -43,14 +48,24 @@ The API listens on `http://localhost:8000`. `apps/web` expects it there by defau
 - `app/main.py` — FastAPI app, CORS, the `DoclyvoError` → JSON error-shape exception handler.
 - `app/config.py` — all configuration (`pydantic-settings`, reads `.env`).
 - `app/core/` — cross-tool infrastructure: the error hierarchy, the per-request temp
-  workspace lifecycle (`app/core/files.py`), and the single LibreOffice subprocess wrapper
-  every Office-conversion tool calls through (`app/core/libreoffice.py`).
+  workspace lifecycle (`app/core/files.py`), the single LibreOffice subprocess wrapper every
+  Office-conversion tool calls through (`app/core/libreoffice.py`), the optional-bearer-token
+  dependency (`app/core/auth.py`), and the async SQLAlchemy engine/session + append-only
+  audit-log writer (`app/core/database.py`, `app/core/audit.py`) that only `sign`'s
+  authenticated path ever touches.
+- `app/shared/models.py` — cross-tool SQLAlchemy models (currently just `AuditLogEntry`) —
+  per `.claude/reference/api/skills/project_structure.md`, tables shared across tools don't
+  live in a single feature's folder.
 - `app/features/<tool>/` — one folder per PDF operation (`merge`, `split`, `compress`,
-  `rotate`, `reorder`, `watermark`, `protect`, `ocr`, `pdf_to_word`), each with a thin
+  `rotate`, `reorder`, `watermark`, `protect`, `ocr`, `pdf_to_word`, `sign`), each with a thin
   `router.py` and the actual work in `service.py`. See
   `.claude/reference/api/skills/pdf_processing.md` for the isolation rules.
 - `assets/fonts/DejaVuSans-Bold.ttf` — bundled so `watermark` can render Turkish characters
   (İ, ı, ğ, ş) correctly; reportlab's built-in Helvetica only covers Latin-1, not Turkish.
+  `assets/fonts/Caveat-SemiBold.ttf` is the same idea for `sign`'s "type" mode (OFL license in
+  `Caveat-OFL.txt` next to it).
+- `migrations/` — Alembic, async-aware (`migrations/env.py` builds its engine from
+  `get_settings().database_url`). One revision so far: `audit_log_entries`.
 
 Every endpoint accepts `multipart/form-data`, writes uploads into a per-request temp
 directory, and returns the processed file directly (`split` returns a `.zip` of one PDF per
@@ -62,6 +77,21 @@ call is offloaded to a thread pool (`starlette.concurrency.run_in_threadpool`) s
 take real wall-clock seconds, and `pdf-to-word`'s LibreOffice subprocess is natively async
 (`asyncio.create_subprocess_exec`) — neither blocks the event loop for other requests.
 
+## Local Postgres (sign's audit-log path)
+
+Only needed if you're touching `sign`'s authenticated hash + audit-log path — every other
+endpoint, and `sign` itself when called anonymously, works with no database at all.
+
+```bash
+docker compose up -d
+uv run alembic upgrade head
+```
+
+`DATABASE_URL` in `.env.example` points at this local container. Unset (the default in
+production today) is a valid, supported state — see the "critical design decision" note in
+`app/features/sign/router.py`'s call site: the database is only ever touched inside
+`if user_id is not None:`, never as a blanket per-request dependency.
+
 ## Data & retention
 
 Files never touch a database or a persistent disk location — they live in `TEMP_DIR`
@@ -70,14 +100,15 @@ There is currently no job history and nothing to back up.
 
 ## Deferred to a later phase
 
-- **PostgreSQL / job history / docker-compose.** The stack decision in the root `ROADMAP.md`
-  includes PostgreSQL, but Phase A's operations are synchronous and stateless — there is
-  nothing yet for a database to store. Wiring up SQLAlchemy + Alembic + `docker-compose.yml`
-  is deferred to whichever Phase B feature first needs persistent job/history records, per
-  `../../ROADMAP.md`'s open work list. Standing up an unused Postgres container today would
-  just be dead weight.
-- Redact, signature mode with signer invites/consent/hash-sealing + an append-only audit log,
-  accounts/billing — see `../../docs/build-prompt-web-mvp.md` for the full deferred list.
+- **Hosting Postgres.** The local dev path (`docker-compose.yml` + Alembic, above) is done,
+  but `sign`'s authenticated path is unreachable in production today — no login system issues
+  a bearer credential, so `user_id` is always `None` there. Provisioning a managed Postgres on
+  Render today would be exactly the dead weight `../../docs/deployment.md` already warns
+  about; do that once a real login system makes the path reachable.
+- Signer invites, multi-party consent workflow, accounts/billing — `sign` today is
+  self-sign-only, matching `design/Sign.dc.html`. See `../../docs/build-prompt-web-mvp.md` and
+  `../../ROADMAP.md`'s Phase B entry for the full deferred list.
+- Redact — no design, no scope decision made on it yet.
 - `watermark`'s "keep layout" idea and any richer OCR/PDF-to-Word options were deliberately
   left out rather than shipped as a non-functional toggle — see the design vs. implementation
   note in `../../ROADMAP.md`'s Phase A entry.
@@ -99,6 +130,12 @@ uv run pytest
   ```bash
   uv run pytest -m integration
   ```
+
+`sign`'s audit-log write follows the same split: `tests/features/sign/test_router.py`
+monkeypatches `record_audit_log_entry` (same style as `OcrService.recognize`) so the default
+run needs no real Postgres, and `tests/integration/test_audit_log.py` (also
+`@pytest.mark.integration`) writes a real row — bring up the local Postgres first (see "Local
+Postgres" above).
 
 Fixture PDFs live in `tests/fixtures/`, checked in rather than generated at test time.
 Regenerate them with:

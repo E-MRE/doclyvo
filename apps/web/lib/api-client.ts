@@ -28,10 +28,15 @@ async function postForFile(
   path: string,
   formData: FormData,
   defaultFilename: string,
+  authToken?: string,
 ): Promise<ApiFileResult> {
   let response: Response;
   try {
-    response = await fetch(`${API_BASE_URL}${path}`, { method: "POST", body: formData });
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      method: "POST",
+      body: formData,
+      headers: authToken ? { Authorization: `Bearer ${authToken}` } : undefined,
+    });
   } catch {
     throw new ApiError("service_unavailable", "Doclyvo sunucusuna ulaşılamadı.", 503);
   }
@@ -141,4 +146,34 @@ export async function convertPdfToWord(file: File): Promise<ApiFileResult> {
   const formData = new FormData();
   formData.append("file", file);
   return postForFile("/tools/pdf-to-word", formData, "converted.docx");
+}
+
+export interface SignPlacement {
+  pageNumber: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export async function signPdf(
+  file: File,
+  mode: "draw" | "type" | "upload",
+  placement: SignPlacement,
+  signatureText?: string,
+  signatureImage?: File,
+  authToken?: string,
+): Promise<ApiFileResult> {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("mode", mode);
+  formData.append("page_number", String(placement.pageNumber));
+  formData.append("x", String(placement.x));
+  formData.append("y", String(placement.y));
+  formData.append("width", String(placement.width));
+  formData.append("height", String(placement.height));
+  if (signatureText) formData.append("signature_text", signatureText);
+  if (signatureImage) formData.append("signature_image", signatureImage);
+  // once login ships, read the session token here (e.g. cookies()) and pass it through
+  return postForFile("/tools/sign", formData, "signed.pdf", authToken);
 }

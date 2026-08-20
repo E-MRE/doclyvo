@@ -105,6 +105,29 @@ that work locally (per `apps/api/README.md`) work in the hosted container too �
 needed, only deploy config. PostgreSQL is explicitly not part of this: still no database
 integration anywhere in `apps/api`, so there's nothing to host yet.
 
+## Sign — self-sign slice (Phase B.1 — done, 2026-08-20)
+
+The first Phase B feature, and the first `apps/api` endpoint to touch a database. Scope is
+deliberately narrower than the "signature-with-consent-and-hash + audit log" description above:
+self-sign only (draw/type/upload a signature, place it on the page, download) — no signer
+invites, no multi-party consent workflow, matching `design/Sign.dc.html`/`MobileSign.dc.html`
+exactly. What makes it more than a tenth stateless tool:
+
+- `apps/api` gained `app/core/auth.py` (`get_optional_user_id`, a real `HTTPBearer` seam that
+  resolves to `None` on every request today since nothing issues a credential yet — there is
+  no login system, this is scaffolding for one) and its first database integration:
+  SQLAlchemy 2.0 async + Alembic + a local `docker-compose.yml` for Postgres (see
+  `apps/api/README.md`). When a request carries a bearer credential, `sign` hash-seals the
+  output PDF (SHA-256) and writes an append-only row (`app/shared/models.py`'s
+  `AuditLogEntry`) to Postgres; anonymous requests — 100% of real traffic today — never touch
+  the database at all, by construction (not a `Depends()`, an imperative call gated on
+  `user_id is not None`).
+- `apps/web` gained the `sign` feature end-to-end and flipped `ToolGrid.tsx`'s "İmzala" tile
+  from a "Yakında" placeholder to a live link.
+- Hosting a hostname's-worth of managed Postgres is deliberately **not** part of this pass —
+  see `docs/deployment.md`'s "Not covered here": the authenticated path is unreachable in
+  production until a real login system exists to issue that bearer credential.
+
 ## Open / follow-up work
 
 - [x] Design Watermark, Protect, OCR, PDF to Word — done 2026-08-20, see `design/README.md`.
@@ -117,13 +140,18 @@ integration anywhere in `apps/api`, so there's nothing to host yet.
 - [x] Scaffold `apps/web` with `create-next-app` (TypeScript) — done, see Phase A above.
 - [ ] Scaffold `apps/native` with `flutter create`.
 - [x] Scaffold `apps/api` with FastAPI; wire up pikepdf — done, see Phase A above.
-- [ ] Phase B (deferred, not started): redact, signature-with-consent-and-hash + append-only
-      audit log, accounts/premium tier. Every other tool from the original scope is now built.
-- [ ] Design the PostgreSQL schema (job/history records first; user accounts later for the
-      premium tier).
+- [x] Sign — self-sign only (draw/type/upload + place + download), plus an optional-auth
+      hash + append-only audit-log path for whenever login exists — done 2026-08-20, see the
+      "Sign — self-sign slice" section above. Signer invites/multi-party consent, redact, and
+      accounts/premium tier are still not started.
+- [ ] Design the PostgreSQL schema for job/history records (separate from `sign`'s
+      `audit_log_entries`, which only covers the authenticated self-sign path); user accounts
+      schema still not designed either.
 - [x] Pick and configure the hosting provider for `apps/api` + `apps/web` — done 2026-08-20,
       Render free tier, see the "Hosting" section above and `docs/deployment.md`. PostgreSQL
-      hosting deliberately deferred — no database integration exists yet to host.
+      hosting deliberately still deferred — `sign`'s database integration exists but its
+      authenticated path is unreachable in production until login ships, per the "Sign —
+      self-sign slice" section above.
 - [ ] Next.js SEO strategy for the marketing/tool landing pages (SSR or static export).
 - [ ] Decide whether `apps/native` desktop should shell out to local LibreOffice/Ghostscript
       instead of calling the backend for some operations.

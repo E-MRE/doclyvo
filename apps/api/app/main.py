@@ -15,6 +15,7 @@ from app.features.pdf_to_word.router import router as pdf_to_word_router
 from app.features.protect.router import router as protect_router
 from app.features.reorder.router import router as reorder_router
 from app.features.rotate.router import router as rotate_router
+from app.features.sign.router import router as sign_router
 from app.features.split.router import router as split_router
 from app.features.watermark.router import router as watermark_router
 
@@ -40,6 +41,7 @@ app.include_router(watermark_router)
 app.include_router(protect_router)
 app.include_router(ocr_router)
 app.include_router(pdf_to_word_router)
+app.include_router(sign_router)
 
 
 @app.exception_handler(DoclyvoError)

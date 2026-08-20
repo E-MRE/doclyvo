@@ -27,6 +27,7 @@
 
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial,
     sans-serif;
+  --font-signature: var(--font-caveat), cursive;
 }
 
 body {

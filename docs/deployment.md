@@ -60,6 +60,13 @@ secrets into `render.yaml`.
 
 ## Not covered here
 
-PostgreSQL hosting is intentionally not part of this pass — `apps/api` has no database
-integration yet (see `ROADMAP.md`'s open work list). Add a Render Postgres instance and wire up
-`DATABASE_URL` when a Phase B feature actually needs persistent job/history records.
+PostgreSQL hosting is intentionally still not part of this pass. `apps/api` now has a database
+integration — the `sign` tool's authenticated hash + audit-log path (see `apps/api/README.md`)
+— but that path is unreachable in production today: no login system exists yet to issue the
+bearer credential that turns it on, so it never runs. Adding a Render Postgres instance now
+would be dead weight with nothing exercising it. When a real login system ships:
+
+1. Render dashboard → **New** → **Postgres**, on the free tier to start.
+2. Add the resulting connection string as `DATABASE_URL` on `doclyvo-api`'s env vars.
+3. Run `uv run alembic upgrade head` against it once (from a machine that can reach it, or a
+   one-off Render job) to create `audit_log_entries`.

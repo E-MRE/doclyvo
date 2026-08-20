@@ -44,3 +44,8 @@ def image_pdf_bytes() -> bytes:
 @pytest.fixture
 def encrypted_pdf_bytes() -> bytes:
     return (FIXTURES_DIR / "sample_encrypted.pdf").read_bytes()
+
+
+@pytest.fixture
+def signature_png_bytes() -> bytes:
+    return (FIXTURES_DIR / "sample_signature.png").read_bytes()

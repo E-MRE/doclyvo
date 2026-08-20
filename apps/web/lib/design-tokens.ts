@@ -21,3 +21,8 @@ export const DARK_COLORS = {
   text: "#F5F5F7",
   textSoft: "#98989D",
 } as const;
+
+// The signature canvas draws onto a transparent PNG that gets composited onto a white PDF
+// page — it must render as dark ink regardless of the app's light/dark theme, so it can't
+// use the accent/theme tokens above.
+export const SIGNATURE_INK_COLOR = "#1D1D1F";

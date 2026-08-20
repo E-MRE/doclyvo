@@ -4,10 +4,19 @@ import { useRef, useState } from "react";
 
 interface UploadDropzoneProps {
   multiple?: boolean;
+  accept?: string;
+  label?: string;
+  hint?: string;
   onFilesSelected: (files: File[]) => void;
 }
 
-export function UploadDropzone({ multiple = false, onFilesSelected }: UploadDropzoneProps) {
+export function UploadDropzone({
+  multiple = false,
+  accept = "application/pdf",
+  label = "Dosyalarını buraya bırak",
+  hint = "PDF · maksimum 100MB",
+  onFilesSelected,
+}: UploadDropzoneProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -32,10 +41,8 @@ export function UploadDropzone({ multiple = false, onFilesSelected }: UploadDrop
         isDragging ? "border-accent" : "border-border dark:border-border-dark"
       }`}
     >
-      <p className="mb-1 text-sm font-semibold">Dosyalarını buraya bırak</p>
-      <p className="mb-5 text-xs text-text-soft dark:text-text-soft-dark">
-        PDF · maksimum 100MB
-      </p>
+      <p className="mb-1 text-sm font-semibold">{label}</p>
+      <p className="mb-5 text-xs text-text-soft dark:text-text-soft-dark">{hint}</p>
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
@@ -46,7 +53,7 @@ export function UploadDropzone({ multiple = false, onFilesSelected }: UploadDrop
       <input
         ref={inputRef}
         type="file"
-        accept="application/pdf"
+        accept={accept}
         multiple={multiple}
         className="hidden"
         onChange={(event) => handleFiles(event.target.files)}

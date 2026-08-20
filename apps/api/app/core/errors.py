@@ -34,3 +34,11 @@ class ProcessingFailedError(DoclyvoError):
 
     def __init__(self) -> None:
         super().__init__("The document could not be processed. It may be corrupted or encrypted.")
+
+
+class PersistenceError(DoclyvoError):
+    code = "persistence_failed"
+    status_code = 503
+
+    def __init__(self) -> None:
+        super().__init__("The signed document could not be recorded. Please try again.")

@@ -22,8 +22,10 @@ def cleanup_workspace(workspace: Path) -> None:
     shutil.rmtree(workspace, ignore_errors=True)
 
 
-async def save_upload(upload: UploadFile, destination_dir: Path, settings: Settings) -> Path:
-    destination = destination_dir / f"{uuid.uuid4().hex}.pdf"
+async def save_upload(
+    upload: UploadFile, destination_dir: Path, settings: Settings, suffix: str = ".pdf"
+) -> Path:
+    destination = destination_dir / f"{uuid.uuid4().hex}{suffix}"
     max_size = settings.max_upload_size_mb * 1024 * 1024
     size = 0
     with destination.open("wb") as buffer:

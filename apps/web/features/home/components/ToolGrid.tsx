@@ -34,7 +34,7 @@ const TOOLS: ToolCard[] = [
   { id: "watermark", title: "Filigran Ekle", description: "Metin filigranı yerleştir.", href: "/tools/watermark" },
   { id: "ocr", title: "OCR", description: "Taranmış metni tanı.", href: "/tools/ocr" },
   { id: "protect", title: "Koru", description: "Şifre ile kilitle.", href: "/tools/protect" },
-  { id: "sign", title: "İmzala", description: "Elektronik imza ekle.", href: null },
+  { id: "sign", title: "İmzala", description: "Elektronik imza ekle.", href: "/tools/sign" },
 ];
 
 export function ToolGrid() {

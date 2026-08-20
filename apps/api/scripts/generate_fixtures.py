@@ -44,12 +44,23 @@ def _write_encrypted_pdf(source: Path, destination: Path) -> None:
         pdf.save(destination, encryption=encryption)
 
 
+def _write_signature_png(path: Path) -> None:
+    from PIL import ImageDraw
+
+    image = Image.new("RGBA", (300, 120), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(image)
+    points = [(20, 90), (80, 30), (140, 90), (200, 30), (260, 90)]
+    draw.line(points, fill=(29, 29, 31, 255), width=6)
+    image.save(path, format="PNG")
+
+
 def main() -> None:
     FIXTURES_DIR.mkdir(parents=True, exist_ok=True)
     simple_path = FIXTURES_DIR / "sample_simple.pdf"
     _write_text_pdf(simple_path, page_count=3)
     _write_image_pdf(FIXTURES_DIR / "sample_with_image.pdf")
     _write_encrypted_pdf(simple_path, FIXTURES_DIR / "sample_encrypted.pdf")
+    _write_signature_png(FIXTURES_DIR / "sample_signature.png")
 
 
 if __name__ == "__main__":
