@@ -35,6 +35,12 @@ const TOOLS: ToolCard[] = [
   { id: "ocr", title: "OCR", description: "Taranmış metni tanı.", href: "/tools/ocr" },
   { id: "protect", title: "Koru", description: "Şifre ile kilitle.", href: "/tools/protect" },
   { id: "sign", title: "İmzala", description: "Elektronik imza ekle.", href: "/tools/sign" },
+  {
+    id: "redact",
+    title: "Redakte Et",
+    description: "Hassas alanları kalıcı olarak karart.",
+    href: "/tools/redact",
+  },
 ];
 
 export function ToolGrid() {

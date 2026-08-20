@@ -19,6 +19,10 @@
   /* Microsoft Word's brand blue — not part of our palette, used only to badge a .docx output */
   --color-word-brand: #2b579a;
 
+  /* Fixed regardless of light/dark theme — a redaction box represents solid ink over a page,
+     not a themed UI surface, so it must not lighten in dark mode. */
+  --color-redact-ink: #141414;
+
   --radius-card: 16px;
   --radius-panel: 12px;
   --radius-capsule: 10px;

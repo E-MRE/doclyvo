@@ -9,7 +9,11 @@ PDF-to-Word — all synchronous request/response over HTTP, no job queue, no dat
 Phase B slice and the first endpoint to touch a database: when the request carries an
 `Authorization: Bearer` credential it hash-seals the signed PDF and writes an append-only
 audit-log row to PostgreSQL; anonymous requests (100% of real traffic today, since no login
-exists yet) stay exactly as stateless as the other nine tools. See
+exists yet) stay exactly as stateless as the other nine tools. **`redact`** is the second
+Phase B slice: true content removal (PyMuPDF's `add_redact_annot` + `apply_redactions`, not a
+cosmetic black-box overlay) over one or more caller-supplied regions, each `{page_number, x,
+y, width, height}` (normalized 0-1, top-left origin) in a JSON-encoded `regions` form field —
+stateless like the original nine, no database involved. See
 `../../docs/build-prompt-web-mvp.md` for the full scope rationale and
 `../../.claude/reference/api/` for the coding conventions this app follows.
 
@@ -59,9 +63,13 @@ The API listens on `http://localhost:8000`. `apps/web` expects it there by defau
   `.claude/reference/api/skills/project_structure.md`, tables shared across tools don't live
   in a single feature's folder.
 - `app/features/<tool>/` — one folder per PDF operation (`merge`, `split`, `compress`,
-  `rotate`, `reorder`, `watermark`, `protect`, `ocr`, `pdf_to_word`, `sign`), each with a thin
-  `router.py` and the actual work in `service.py`. See
-  `.claude/reference/api/skills/pdf_processing.md` for the isolation rules.
+  `rotate`, `reorder`, `watermark`, `protect`, `ocr`, `pdf_to_word`, `sign`, `redact`), each
+  with a thin `router.py` and the actual work in `service.py`. See
+  `.claude/reference/api/skills/pdf_processing.md` for the isolation rules. `redact` is the
+  one exception to the pikepdf-first norm: it uses PyMuPDF exclusively (already a dependency,
+  via `ocr`) since PyMuPDF's redaction annotations are what actually strip the underlying
+  text/graphics — pikepdf/reportlab's overlay technique the other tools share only draws on
+  top, which would leave the "redacted" content still extractable.
 - `assets/fonts/DejaVuSans-Bold.ttf` — bundled so `watermark` can render Turkish characters
   (İ, ı, ğ, ş) correctly; reportlab's built-in Helvetica only covers Latin-1, not Turkish.
   `assets/fonts/Caveat-SemiBold.ttf` is the same idea for `sign`'s "type" mode (OFL license in
@@ -119,7 +127,7 @@ reasoning, and knows exactly what to do once it stops being true.
 
 `Job` is intentionally separate from `AuditLogEntry`: the latter is `sign`'s hash-sealed,
 append-only compliance trail (a legal/audit concept from the original reference prompt);
-`Job` is a general activity-history concept meant to eventually cover all ten tools, with no
+`Job` is a general activity-history concept meant to eventually cover all eleven tools, with no
 hash-sealing or audit guarantees attached.
 
 ## Data & retention
@@ -139,10 +147,9 @@ so in practice there is still no job history anywhere and nothing to back up.
 - Signer invites, multi-party consent workflow, accounts/billing — `sign` today is
   self-sign-only, matching `design/Sign.dc.html`. See `../../docs/build-prompt-web-mvp.md` and
   `../../ROADMAP.md`'s Phase B entry for the full deferred list.
-- **Wiring `Job` history into the ten tools' routers.** The schema exists (see "Job history
-  schema" above) but nothing writes to it — deferred to whenever login ships, same as
+- **Wiring `Job` history into the eleven tools' routers.** The schema exists (see "Job
+  history schema" above) but nothing writes to it — deferred to whenever login ships, same as
   accounts/billing above, since it's the same missing dependency (a real `user_id`).
-- Redact — no design, no scope decision made on it yet.
 - `watermark`'s "keep layout" idea and any richer OCR/PDF-to-Word options were deliberately
   left out rather than shipped as a non-functional toggle — see the design vs. implementation
   note in `../../ROADMAP.md`'s Phase A entry.
@@ -175,6 +182,11 @@ table, not any application behavior. Both integration test modules pin
 `pytest.mark.asyncio(loop_scope="session")`: `app/core/database.py`'s cached engine needs one
 event loop shared across the whole integration run, not pytest-asyncio's default fresh loop
 per test function — see the comment at the top of either file.
+
+`redact`'s tests assert true content removal, not just a 200 response: `test_service.py`
+opens the output with PyMuPDF and asserts the fixture's page text is actually gone from a
+redacted page while still present on untouched pages — a black-box-overlay implementation
+would fail this test even though it would look identical in a screenshot.
 
 Fixture PDFs live in `tests/fixtures/`, checked in rather than generated at test time.
 Regenerate them with:

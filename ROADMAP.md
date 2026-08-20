@@ -138,8 +138,35 @@ has a full "Job history schema" section with the exact steps for wiring it in on
 ships — read that before touching this, rather than re-deriving the plan.
 
 Distinct from `sign`'s `AuditLogEntry` (Phase B.1, above): that one is a hash-sealed compliance
-trail specific to signing; `Job` is meant to eventually cover all ten tools with no hash-seal
-guarantee.
+trail specific to signing; `Job` is meant to eventually cover all eleven tools with no
+hash-seal guarantee.
+
+## Redact — true content removal (Phase B.2 — done, 2026-08-20)
+
+The second Phase B feature, and the eleventh tool overall. Scope decision made up front,
+before any code: **true content removal, not a cosmetic black-box overlay** — a redaction
+tool that leaves the underlying text/graphics extractable would be a real security failure,
+not a shortcut worth taking. Concretely:
+
+- `apps/api`'s `app/features/redact/` uses **PyMuPDF exclusively** (`page.add_redact_annot` +
+  `apply_redactions`) rather than the pikepdf/reportlab overlay technique every other tool
+  shares — that overlay only draws on top and would leave the original content recoverable.
+  The request takes a `regions` form field: a JSON array of `{page_number, x, y, width,
+  height}` (normalized 0-1, top-left origin — matches PyMuPDF's own page coordinate
+  convention, so the service applies them with no axis conversion, unlike `sign`'s
+  bottom-left-origin pikepdf path). Stateless like the original nine tools — no database.
+- `apps/api/tests/features/redact/test_service.py` asserts *true* removal: it extracts text
+  from the output PDF and checks the fixture's known text is actually gone from a redacted
+  page (and still present on untouched pages) — a fake overlay implementation would pass a
+  "returns 200" test but fail this one, which is the whole point of writing it this way.
+- `apps/web`'s `features/redact/components/RegionMarker.tsx` is a real pointer-drag rectangle
+  selector over the page preview (down → move → up), not a click-to-place fixed box like
+  `sign`'s stamp — multiple regions across multiple pages are tracked and individually
+  removable before submitting. `ToolGrid.tsx` gained a new "Redakte Et" tile (redact wasn't
+  in the original nine-tool scope, so there was no placeholder to flip).
+- Design done first, via the `design` skill: `design/Redact.dc.html` + `MobileRedact.dc.html`
+  were added to the existing Claude Design canvas before any code, matching how every other
+  tool in this project was designed before being built.
 
 ## Open / follow-up work
 
@@ -158,7 +185,9 @@ guarantee.
       "Sign — self-sign slice" section above.
 - [ ] Signer invites + multi-party consent workflow for Sign, beyond the self-sign slice
       shipped 2026-08-20 — no design beyond `Sign.dc.html`'s simplified scope, not started.
-- [ ] Redact — no design, no scope decision made on it yet.
+- [x] Redact — designed (`design/Redact.dc.html` + `MobileRedact.dc.html`) and built
+      end-to-end (true content removal via PyMuPDF, not a cosmetic overlay) — done
+      2026-08-20, see the "Redact — true content removal" section above.
 - [ ] Accounts / premium tier (real login, session issuance). `sign`'s
       `app/core/auth.py::get_optional_user_id` is a real seam but nothing issues a credential
       yet — this is the item that would make it reachable. Signer invites above and the
@@ -167,7 +196,7 @@ guarantee.
       models.py`'s `Job` model + its `jobs` Alembic migration, separate from `sign`'s
       `audit_log_entries` (that one's a hash-sealed compliance trail, not general history).
       See `apps/api/README.md`'s "Job history schema" section for the full write-up.
-- [ ] Wire `Job` history into the ten tools' routers. Schema-only by design (see the item
+- [ ] Wire `Job` history into the eleven tools' routers. Schema-only by design (see the item
       above) — there's no accounts system yet to show a history to, so nothing writes a `Job`
       row today. Depends on the "Accounts / premium tier" item above landing first; once it
       does, `apps/api/README.md`'s "Job history schema" section has the exact wiring steps.

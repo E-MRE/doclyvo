@@ -12,6 +12,7 @@
     { "file": "Protect.dc.html", "x": 13680, "y": 0, "w": 1440, "h": 900, "title": "PDF'i Koru" },
     { "file": "Ocr.dc.html", "x": 15200, "y": 0, "w": 1440, "h": 900, "title": "Metni Tanı (OCR)" },
     { "file": "PdfToWord.dc.html", "x": 16720, "y": 0, "w": 1440, "h": 900, "title": "PDF - Word" },
+    { "file": "Redact.dc.html", "x": 18240, "y": 0, "w": 1440, "h": 900, "title": "Redakte Et" },
 
     { "file": "MobileHome.dc.html", "x": 0, "y": 1140, "w": 390, "h": 900, "title": "Mobil - Ana Sayfa" },
     { "file": "MobileCompress.dc.html", "x": 470, "y": 1140, "w": 390, "h": 900, "title": "Mobil - Sıkıştır" },
@@ -25,8 +26,9 @@
     { "file": "MobileProtect.dc.html", "x": 4230, "y": 1140, "w": 390, "h": 900, "title": "Mobil - Koru" },
     { "file": "MobileOcr.dc.html", "x": 4700, "y": 1140, "w": 390, "h": 900, "title": "Mobil - OCR" },
     { "file": "MobilePdfToWord.dc.html", "x": 5170, "y": 1140, "w": 390, "h": 900, "title": "Mobil - PDF-Word" },
+    { "file": "MobileRedact.dc.html", "x": 5640, "y": 1140, "w": 390, "h": 900, "title": "Mobil - Redakte" },
 
-    { "file": "StyleGuide.dc.html", "x": 5640, "y": 1140, "w": 1200, "h": 1700, "title": "Tasarım Sistemi" }
+    { "file": "StyleGuide.dc.html", "x": 6110, "y": 1140, "w": 1200, "h": 1700, "title": "Tasarım Sistemi" }
   ],
   "launch": { "view": "canvas" }
 }

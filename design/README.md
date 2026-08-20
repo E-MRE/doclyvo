@@ -29,6 +29,12 @@ renders as one artboard on the canvas. `canvas.json` lays out their positions.
   plain text), with a recognized-text preview panel that appears once done (desktop)
 - `PdfToWord.dc.html` — the simplest of the four: a "keep layout" checkbox and a
   pdf-icon → arrow → docx-icon visual, no other settings (desktop)
+- `Redact.dc.html` — permanent, true-content-removal redaction (not a cosmetic overlay):
+  page navigation with a per-page "has marked regions" dot indicator, click-to-simulate
+  region marking (each region a solid dark box with a "×" remove button), a page-grouped
+  list of marked regions in the settings panel, and a persistent-but-calm permanence warning
+  ("bu alanların altındaki metin kalıcı olarak silinir, geri alınamaz") — the main action
+  button is disabled with zero regions marked (desktop)
 - `Mobile*.dc.html` — mobile (390px) counterparts of all of the above
 - `StyleGuide.dc.html` — color palette, typography, spacing/radius, component tokens, and a
   note aimed at AI agents picking up this project later
@@ -47,8 +53,8 @@ renders as one artboard on the canvas. `canvas.json` lays out their positions.
 - Buttons/icon buttons use `:active { transform: scale(0.97) }` for press feedback; top bars
   use `position: sticky` + `backdrop-filter: blur(20px) saturate(180%)`
 
-**Known gaps / not yet designed:** none of the tools listed in `docs/build-prompt-web-mvp.md`
-remain — every tool from the original scope now has a design. Any *new* tool added later
+**Known gaps / not yet designed:** none — every tool from the original scope, plus `Redact`
+(the first Phase B tool designed beyond `Sign`), now has a design. Any *new* tool added later
 should still adapt `Compress.dc.html`'s layout (file panel + settings panel + action button
 with idle/processing/done phases) rather than starting from scratch.
 

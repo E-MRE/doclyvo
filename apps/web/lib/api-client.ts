@@ -148,6 +148,32 @@ export async function convertPdfToWord(file: File): Promise<ApiFileResult> {
   return postForFile("/tools/pdf-to-word", formData, "converted.docx");
 }
 
+export interface RedactRegionInput {
+  pageNumber: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export async function redactPdf(file: File, regions: RedactRegionInput[]): Promise<ApiFileResult> {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append(
+    "regions",
+    JSON.stringify(
+      regions.map((region) => ({
+        page_number: region.pageNumber,
+        x: region.x,
+        y: region.y,
+        width: region.width,
+        height: region.height,
+      })),
+    ),
+  );
+  return postForFile("/tools/redact", formData, "redacted.pdf");
+}
+
 export interface SignPlacement {
   pageNumber: number;
   x: number;
