@@ -128,6 +128,19 @@ exactly. What makes it more than a tenth stateless tool:
   see `docs/deployment.md`'s "Not covered here": the authenticated path is unreachable in
   production until a real login system exists to issue that bearer credential.
 
+## Job history schema (Phase B — schema only, 2026-08-20)
+
+A general "what did I run" activity-history table (`app/shared/models.py`'s `Job`, plus its
+`jobs` Alembic migration) — designed, migrated, and left completely unwired: no tool's router
+writes to it. That's deliberate: without accounts, nothing could show a "history" back to
+anyone, so wiring the write now would be infrastructure with no consumer. `apps/api/README.md`
+has a full "Job history schema" section with the exact steps for wiring it in once login
+ships — read that before touching this, rather than re-deriving the plan.
+
+Distinct from `sign`'s `AuditLogEntry` (Phase B.1, above): that one is a hash-sealed compliance
+trail specific to signing; `Job` is meant to eventually cover all ten tools with no hash-seal
+guarantee.
+
 ## Open / follow-up work
 
 - [x] Design Watermark, Protect, OCR, PDF to Word — done 2026-08-20, see `design/README.md`.
@@ -142,11 +155,22 @@ exactly. What makes it more than a tenth stateless tool:
 - [x] Scaffold `apps/api` with FastAPI; wire up pikepdf — done, see Phase A above.
 - [x] Sign — self-sign only (draw/type/upload + place + download), plus an optional-auth
       hash + append-only audit-log path for whenever login exists — done 2026-08-20, see the
-      "Sign — self-sign slice" section above. Signer invites/multi-party consent, redact, and
-      accounts/premium tier are still not started.
-- [ ] Design the PostgreSQL schema for job/history records (separate from `sign`'s
-      `audit_log_entries`, which only covers the authenticated self-sign path); user accounts
-      schema still not designed either.
+      "Sign — self-sign slice" section above.
+- [ ] Signer invites + multi-party consent workflow for Sign, beyond the self-sign slice
+      shipped 2026-08-20 — no design beyond `Sign.dc.html`'s simplified scope, not started.
+- [ ] Redact — no design, no scope decision made on it yet.
+- [ ] Accounts / premium tier (real login, session issuance). `sign`'s
+      `app/core/auth.py::get_optional_user_id` is a real seam but nothing issues a credential
+      yet — this is the item that would make it reachable. Signer invites above and the
+      premium tier both depend on this landing first.
+- [x] Design the PostgreSQL schema for job/history records — done 2026-08-20: `app/shared/
+      models.py`'s `Job` model + its `jobs` Alembic migration, separate from `sign`'s
+      `audit_log_entries` (that one's a hash-sealed compliance trail, not general history).
+      See `apps/api/README.md`'s "Job history schema" section for the full write-up.
+- [ ] Wire `Job` history into the ten tools' routers. Schema-only by design (see the item
+      above) — there's no accounts system yet to show a history to, so nothing writes a `Job`
+      row today. Depends on the "Accounts / premium tier" item above landing first; once it
+      does, `apps/api/README.md`'s "Job history schema" section has the exact wiring steps.
 - [x] Pick and configure the hosting provider for `apps/api` + `apps/web` — done 2026-08-20,
       Render free tier, see the "Hosting" section above and `docs/deployment.md`. PostgreSQL
       hosting deliberately still deferred — `sign`'s database integration exists but its
