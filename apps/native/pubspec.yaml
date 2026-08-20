@@ -28,23 +28,30 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  flutter:
-    sdk: flutter
-
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  dio: ^5.11.0
+  easy_localization: ^3.0.8
+  envied: ^1.3.8
+  flutter:
+    sdk: flutter
+  flutter_bloc: ^9.1.1
+  get_it: ^9.2.1
+  go_router: ^17.5.0
+  json_annotation: ^4.12.0
+  pdf_manipulator: 4.1.0
 
 dev_dependencies:
+  # very_good_analysis (below) is the house lint baseline, activated in
+  # `analysis_options.yaml`. See that file for rule overrides.
+  build_runner: ^2.15.1
+  envied_generator: ^1.3.8
+  flutter_gen_runner: ^5.15.0
   flutter_test:
     sdk: flutter
-
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
-  flutter_lints: ^6.0.0
+  json_serializable: ^6.14.1
+  very_good_analysis: ^10.2.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -87,3 +94,10 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# flutter_gen_runner output config. `colors` and asset `integrations` are added
+# in P0-7 once assets/colors/colors.xml and real assets exist — see
+# NATIVE-TASKS.md.
+flutter_gen:
+  output: lib/generated/
+  line_length: 80
