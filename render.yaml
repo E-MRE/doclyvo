@@ -11,10 +11,10 @@ services:
     envVars:
       - key: ENVIRONMENT
         value: production
-      # Update this if doclyvo-web ends up on a different onrender.com subdomain
+      # Update this if doclyvo ends up on a different onrender.com subdomain
       # (name collision at service creation) — see docs/deployment.md.
       - key: CORS_ORIGINS
-        value: '["https://doclyvo-web.onrender.com"]'
+        value: '["https://doclyvo.onrender.com"]'
       - key: MAX_UPLOAD_SIZE_MB
         value: "100"
       - key: TEMP_DIR
@@ -27,7 +27,7 @@ services:
         value: "60"
 
   - type: web
-    name: doclyvo-web
+    name: doclyvo
     runtime: node
     plan: free
     region: oregon

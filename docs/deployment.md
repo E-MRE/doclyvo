@@ -17,7 +17,7 @@ of the three with a genuinely free web service tier, so it's the pick — see th
   limit. Fine for low-traffic personal use, not for real concurrent load — revisit the ROADMAP.md
   hosting decision if that changes.
 - Free services spin down after 15 minutes of inactivity; the next request pays a 30-60s
-  cold-start penalty. This applies to both `doclyvo-api` and `doclyvo-web`.
+  cold-start penalty. This applies to both `doclyvo-api` and `doclyvo`.
 - No persistent disk needed — `apps/api` was already designed stateless (per-request temp
   workspace, deleted after the response), which fits Render's free ephemeral filesystem exactly.
 
@@ -30,7 +30,7 @@ of the three with a genuinely free web service tier, so it's the pick — see th
   then `uv sync --frozen` for the Python deps. `soffice` is on `PATH` in this Debian-based image
   (unlike the macOS Homebrew cask), so `LIBREOFFICE_BINARY=soffice` — the same default as
   `.env.example` — just works.
-- **`doclyvo-web`** — `apps/web`, deployed as a native Render Node service (no Dockerfile
+- **`doclyvo`** — `apps/web`, deployed as a native Render Node service (no Dockerfile
   needed): `npm ci && npm run build`, then `npm run start`. Next.js reads Render's injected
   `$PORT` automatically.
 
@@ -42,12 +42,12 @@ of the three with a genuinely free web service tier, so it's the pick — see th
 3. Confirm and deploy. First build will be slow (LibreOffice install + image build); expect
    several minutes.
 4. **Check the assigned URLs.** `render.yaml` predicts `doclyvo-api.onrender.com` and
-   `doclyvo-web.onrender.com` (Render's `<service-name>.onrender.com` pattern) and bakes those
+   `doclyvo.onrender.com` (Render's `<service-name>.onrender.com` pattern) and bakes those
    into each other's env vars (`CORS_ORIGINS` on the API, `API_BASE_URL` on the web app). If
    either name was already taken and Render assigned a different subdomain, update the *other*
    service's env var in the Render dashboard to match, then redeploy that service.
 5. Verify: `curl https://doclyvo-api.onrender.com/health` → `{"status": "ok"}`, then open
-   `https://doclyvo-web.onrender.com` and run one tool end-to-end (Compress is the simplest,
+   `https://doclyvo.onrender.com` and run one tool end-to-end (Compress is the simplest,
    PDF-to-Word/OCR are the best test of the LibreOffice/Tesseract install actually working in
    the container).
 
