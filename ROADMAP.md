@@ -178,7 +178,8 @@ not a shortcut worth taking. Concretely:
       PDF-to-Word — done 2026-08-20, see Phase A above. This is what finally activated the
       LibreOffice headless integration deferred since Phase 0.
 - [x] Scaffold `apps/web` with `create-next-app` (TypeScript) — done, see Phase A above.
-- [ ] Scaffold `apps/native` with `flutter create`.
+- [x] Scaffold `apps/native` with `flutter create` — done 2026-08-21 (`com.doclyvo` org,
+      iOS/Android/macOS/Windows/Linux platforms). Bare template only, no features yet.
 - [x] Scaffold `apps/api` with FastAPI; wire up pikepdf — done, see Phase A above.
 - [x] Sign — self-sign only (draw/type/upload + place + download), plus an optional-auth
       hash + append-only audit-log path for whenever login exists — done 2026-08-20, see the
