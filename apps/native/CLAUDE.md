@@ -106,6 +106,26 @@ re-derive it):
   height, so `ToolCard`'s title/description carry `maxLines` + `TextOverflow.ellipsis`.
   Any text in a `Positioned`/`SizedBox`-constrained box needs the same.
 
+**Two more traps the width sweep does NOT catch** (found in P3A-7, both fixed
+across all tool screens — see the Decisions log in `../../NATIVE-TASKS.md`):
+
+- **`enabled` flags read outside a `BlocBuilder` go stale.** `_buildUploadPanel()`
+  runs from `build()`, and `build()` only re-runs on `setState` — a cubit emission
+  does not trigger one. Wrap the whole panel in one `BlocBuilder` and read `state`
+  from the builder, never `_cubit.state` from `build()`.
+- **No `LayoutBuilder` in anything that can render inside a tool screen's desktop
+  column.** That column is an `IntrinsicHeight(Row(...))`, and `IntrinsicHeight`
+  throws "LayoutBuilder does not support returning intrinsic dimensions" when it
+  tries to measure one. Use `FractionallySizedBox`/`FractionalTranslation` to turn
+  a fraction into a width.
+
+Both slipped past the sweeps for the same reason: **a width sweep pumps the empty
+state**, so it never renders the settings controls, the progress indicator or the
+result panel. Cover the non-empty states separately —
+`test/helpers/upload_panel_loading_harness.dart` drives a screen into Loading
+without any file picking, and `test/app/widgets/intrinsic_height_layout_test.dart`
+puts a shared panel widget in the desktop row shape.
+
 **Required for every new screen:** a width-sweep test like
 `test/features/home/presentation/pages/home_screen_responsive_test.dart` — pump the
 screen at 360/430/699/700/800/900/1024/1080/1200/1440/1920 via

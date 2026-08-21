@@ -1133,11 +1133,50 @@ Work these only after all 8 Phase 3A + 3 Phase 3B tools are done.
     disabled "Koru" button plus a hint rather than a post-submit error.
   - **The upload panel is wrapped in a single `BlocBuilder`, not just the
     lock badge.** `UploadDropzone`'s `enabled` flag is state-derived too;
-    reading `cubit.state` outside a builder (as the earlier tool screens do)
+    reading `cubit.state` outside a builder (as the earlier tool screens did)
     leaves it stale while the operation runs. Later tools should copy this
-    version. Worth back-porting to Compress/Split/Merge/Rotate/Reorder/
-    Watermark if anyone touches them.
+    version. Back-ported to the earlier screens the same day — see the entry
+    below.
   - **`ProtectLockStatus` got its own widget test.** The standard screen
     width-sweep only ever pumps the empty state — no file selected — so it
     never reaches the badge or the settings controls. The badge is covered
     directly at four widths × three tiers plus dark theme.
+
+- 2026-08-21 — **Two cross-cutting screen bugs, found while writing P3A-7 and
+  fixed for every tool.** Neither was caught by the existing width-sweep
+  tests, and the reason is the same for both: those sweeps pump the *empty*
+  state, where no file is selected — so they never render the settings
+  controls, the progress indicator or the result panel. Any future screen
+  test that only sweeps widths is testing about a third of the screen.
+  - **Stale `enabled` on the input panel.** `_buildUploadPanel()` read
+    `_cubit.state` directly, but it runs from `build()`, and `build()` only
+    re-runs on `setState` — which a cubit emission does not trigger. So
+    `UploadDropzone.enabled` was computed once and never updated: during an
+    operation the user could still drop a second file or hit remove, which
+    calls `cubit.reset()` while the first call is in flight, and the
+    in-flight call then lands a result for a file that is no longer selected.
+    **Confirmed affected: Split, Merge, Rotate, Reorder, Watermark.**
+    Compress was *not* — its `BlocConsumer` listener starts a fake-progress
+    ticker on Loading, and the ticker's `setState` recomputed the flag by
+    accident. Fix: one `BlocBuilder` around the whole panel on all six (the
+    accidental case included, so it survives the ticker being removed).
+    Rotate and Reorder fed the same stale flag to their page grids, so those
+    were unlocked mid-operation too. Guarded by
+    `test/features/<tool>/presentation/pages/<tool>_screen_loading_panel_test.dart`
+    plus `test/helpers/upload_panel_loading_harness.dart`.
+  - **`IntrinsicHeight` could not measure `ToolProgressIndicator`.** Every
+    tool screen's desktop branch is `IntrinsicHeight(Row(...))` so the two
+    cards match heights. `IntrinsicHeight` measures its children, and
+    measuring a `LayoutBuilder` throws *"LayoutBuilder does not support
+    returning intrinsic dimensions"* — which `_ProgressBar` used purely to
+    turn a fraction into a pixel width. Net effect: on the desktop layout the
+    screen threw during layout the moment processing started. Fix:
+    `FractionallySizedBox` + `FractionalTranslation` (which answer intrinsic
+    queries) instead of `LayoutBuilder`; the shimmer's sweep collapses to a
+    single constant once expressed as a fraction of its own width.
+    `ResultPanel`'s `_SizeBlock` used the same `LayoutBuilder` idiom and was
+    converted alongside it — that one is preventive, it was not reproduced as
+    a crash. Guarded by `test/app/widgets/intrinsic_height_layout_test.dart`.
+  - **Rule for new shared panel widgets:** no `LayoutBuilder` in anything that
+    can land inside a tool screen's desktop column. Use
+    `FractionallySizedBox`/`FractionalTranslation`.
