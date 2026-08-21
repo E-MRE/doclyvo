@@ -3,8 +3,9 @@
 Status (2026-08-21): **Phase 0 complete, Phase 1 complete (including P1-4/P1-5's
 responsive tier system and home tablet layout), Phase 2 complete (P2-1..P2-4),
 P3A-1 (Compress) complete, P3A-2 (Split) complete, P3A-3 (Merge) complete,
-P3A-4 (Rotate) complete, P3A-5 (Reorder) complete, P3A-6 (Watermark) complete.**
-Remaining: P3A-7, P3A-8, all of Phase 3B, all of Phase 4.
+P3A-4 (Rotate) complete, P3A-5 (Reorder) complete, P3A-6 (Watermark) complete,
+P3A-7 (Protect) complete.**
+Remaining: P3A-8, all of Phase 3B, all of Phase 4.
 
 **Purpose of this file:** each task below is meant to be handed to a **separate,
 fresh Claude Code session with empty conversation context**. A session working a
@@ -679,7 +680,7 @@ copy/behavior parity only — the native version does not call the API these
 | P3A-4 | Rotate ✅ done (2026-08-21) | `design/Rotate.dc.html`, `design/MobileRotate.dc.html` | `apps/web/features/rotate/components/` | render (thumbnails) + rotate | Per-page thumbnails via the same `PdfEngineService`, per-page angle state, rotate applied on submit. |
 | P3A-5 | Reorder ✅ done (2026-08-21) | `design/Reorder.dc.html`, `design/MobileReorder.dc.html` | `apps/web/features/reorder/components/` | render (thumbnails) + reorderPages | Per-page thumbnails; up/down arrow reordering. |
 | P3A-6 | Watermark ✅ done (2026-08-21) | `design/Watermark.dc.html`, `design/MobileWatermark.dc.html` | `apps/web/features/watermark/components/` | watermark | Text + position/opacity presets; live preview can reuse the thumbnail-render capability on page 1. |
-| P3A-7 | Protect | `design/Protect.dc.html`, `design/MobileProtect.dc.html` | `apps/web/features/protect/components/` | encrypt/decrypt | Password field (reveal toggle, generate) + permission checkboxes (no-print/no-copy/no-edit) — verify the package's encrypt API actually exposes per-permission flags, not just a password, before committing to that UI. |
+| P3A-7 | Protect ✅ done (2026-08-21) | `design/Protect.dc.html`, `design/MobileProtect.dc.html` | `apps/web/features/protect/components/` | encrypt (decrypt deliberately out of scope — see the Decisions log) | Password field (reveal toggle, generate) + permission checkboxes (no-print/no-copy/no-edit) — per-permission flags confirmed real in P0-11, so the design's three checkboxes ship as drawn. |
 | P3A-8 | Sign | `design/Sign.dc.html`, `design/MobileSign.dc.html` | `apps/web/features/sign/components/` | addImageStamp (or equivalent) for drawn/typed/uploaded signature placement | **Product decision needed at implementation time:** the existing `apps/web` Sign feature has an optional-auth hash + append-only audit-log path that inherently needs a backend (see `apps/api/README.md`'s Sign section). Moving visual signature placement client-side is straightforward; whether audit-log parity is in scope for native MVP or deferred is NOT decided here — pick one, record the choice in this file's Decisions log, don't silently drop or silently backend-call for it. |
 
 **Definition of done, per tool (applies to all 8):**
@@ -1098,3 +1099,45 @@ Work these only after all 8 Phase 3A + 3 Phase 3B tools are done.
   `SingleChildScrollView` to handle long error messages on narrow widths; the
   width-sweep test (12 widths, 360–1920px) confirms it holds even with very long
   Turkish text.
+- 2026-08-21 — **P3A-7 (Protect) done.** `lib/features/protect/` follows
+  P3A-6 (Watermark)'s shape — the closest precedent, since both are
+  "one file in, one file out, settings in the right-hand panel" tools with
+  no per-page grid. Decisions worth not re-litigating:
+  - **Protect is one-way: no decrypt/unlock mode.** `PdfEngineService`
+    exposes `removeProtection`, and P0-11 confirmed it works, but
+    `apps/web`'s Protect feature is protect-only and native MVP matches it.
+    `ProtectRepository` deliberately does not surface `removeProtection`, so
+    adding an unlock mode later is a visible interface change rather than a
+    silently-available path. If unlocking is ever wanted, it is a new task,
+    not a hidden branch of this screen.
+  - **Permissions are modelled as restrictions, and inverted at the edge.**
+    `ProtectPermission` is a 3-value enum (`noPrint`/`noCopy`/`noEdit`)
+    naming what the checkbox *takes away*, matching the design's "…engelle"
+    copy and `apps/web`'s `noPrint`/`noCopy`/`noEdit` flags. It flips to
+    `PdfProtectionOptions`' capability-shaped fields (`allowPrinting: !…`) in
+    exactly one place, the screen's `_startProtect`. The screen holds a
+    `Set<ProtectPermission>`, not three bools. Default is `{noPrint}` —
+    non-obvious, but it is what `apps/web` ships, so parity wins.
+  - **The password never enters a state object.** It lives in a
+    `TextEditingController` on the screen, so it cannot leak into a
+    `BlocObserver` log or an error-state message; `ProtectCubit` takes it
+    only as part of the `PdfProtectionOptions` it forwards. This is why
+    `ProtectCubit` looks thinner than the earlier tools' — there is
+    deliberately no `setPassword`.
+  - **`PasswordGenerator` mirrors `apps/web`'s generator exactly** — 9
+    characters, charset with the ambiguous `0/O/1/l/I` removed, `Random`
+    injectable so tests can pin it. Generating also reveals the field (as on
+    web): a password the user never sees is one they cannot write down, and
+    the result copy warns it is shown only once. Client-side minimum is 4,
+    matching the rule `apps/api` enforces for the web tool, surfaced as a
+    disabled "Koru" button plus a hint rather than a post-submit error.
+  - **The upload panel is wrapped in a single `BlocBuilder`, not just the
+    lock badge.** `UploadDropzone`'s `enabled` flag is state-derived too;
+    reading `cubit.state` outside a builder (as the earlier tool screens do)
+    leaves it stale while the operation runs. Later tools should copy this
+    version. Worth back-porting to Compress/Split/Merge/Rotate/Reorder/
+    Watermark if anyone touches them.
+  - **`ProtectLockStatus` got its own widget test.** The standard screen
+    width-sweep only ever pumps the empty state — no file selected — so it
+    never reaches the badge or the settings controls. The badge is covered
+    directly at four widths × three tiers plus dark theme.
