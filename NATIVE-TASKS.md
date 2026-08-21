@@ -11,14 +11,24 @@ Remaining: P3A-8, all of Phase 3B, all of Phase 4.
 fresh Claude Code session with empty conversation context**. A session working a
 task should:
 
-1. Read `apps/native/CLAUDE.md` first (auto-loaded when cwd is inside `apps/native`
-   — always do this even if it wasn't auto-injected, e.g. when cwd is the repo root).
-2. Read only this task's own section below.
-3. Read only the "Key inputs" files this task lists.
-4. Implement only what "Deliverables" lists, verify against "Definition of Done",
-   then stop — do not start the next task.
+1. Read the repo-root `CLAUDE.md` and then `apps/native/CLAUDE.md` (both are
+   auto-loaded when cwd is inside `apps/native` — always read them even if they
+   weren't auto-injected, e.g. when cwd is the repo root).
+2. Confirm the **codebase-memory MCP** index is current — `index_status(project:
+   "doclyvo")` compared against `git rev-parse HEAD` — and then use that server
+   (`search_graph`, `get_code_snippet`, `trace_path`, `get_architecture`,
+   `search_code`) as the default way to locate code, rather than grepping the tree.
+   Do **not** run a full re-index up front; the freshness check is enough. Full
+   protocol, including which tool answers which question, is in the "Code discovery"
+   section of the repo-root `CLAUDE.md`.
+3. Read only this task's own section below.
+4. Read only the "Key inputs" files this task lists.
+5. Implement only what "Deliverables" lists and verify against "Definition of Done".
+6. After committing, re-index once — `index_repository(repo_path: "<repo root>",
+   mode: "fast")` — then stop; do not start the next task. Skip the re-index only if
+   the task changed no Dart symbols (docs- or translation-only work).
 
-Do not skip step 1. All architecture rules (Cubit-only state management, GetIt
+Do not skip steps 1 and 2. All architecture rules (Cubit-only state management, GetIt
 behind `AppDependency`, Dio behind `NetworkService`, go_router, easy_localization,
 build_runner codegen, `final class` widgets, no hardcoded colors/spacing/strings)
 live there and in `.claude/reference/flutter/skills/*.md` — they are not repeated

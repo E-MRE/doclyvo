@@ -5,6 +5,16 @@ This file is auto-loaded by Claude Code whenever the working directory is inside
 any task from `../../NATIVE-TASKS.md` and execute it correctly without re-deriving
 the architecture from scratch.
 
+## Code discovery
+
+**Do not grep the tree to find code.** This repo is indexed in the codebase-memory
+MCP server as project `doclyvo`; query the graph first, check its freshness before
+you start, and re-index after you commit. The full protocol — the freshness check,
+the closing re-index, which tool answers which question, and what still has to be
+read from disk — is in the **"Code discovery: query the graph before you read
+files"** section of the repo-root `../../CLAUDE.md`, which is auto-loaded alongside
+this file. Read it before you start looking for anything.
+
 ## What this app is
 
 Doclyvo's mobile (iOS/Android) + desktop (macOS/Windows/Linux) PDF toolkit — one
@@ -163,6 +173,10 @@ Note that `pumpLocalized` defaults to a 1440x1024 surface and the raw
    `flutter analyze` and `flutter test` if the task touches testable code.
 7. Do not mark ROADMAP.md/NATIVE-TASKS.md checkboxes yourself unless the task
    explicitly says to — leave status updates to the orchestrating session.
+8. Once the change is committed, re-index:
+   `index_repository(repo_path: "<repo root>", mode: "fast")`. See "Code discovery"
+   in the repo-root `../../CLAUDE.md` — this is the step that keeps the next
+   session's graph usable.
 
 ## Do not
 
