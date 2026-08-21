@@ -21,6 +21,12 @@ final class ToolCard extends StatelessWidget {
   final bool horizontal;
   final bool showDescription;
 
+  /// Tool names are short enough for one line at every cell size.
+  static const int _titleMaxLines = 1;
+
+  /// Two lines is what `design/Main.dc.html` draws under each tool name.
+  static const int _descriptionMaxLines = 2;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -40,8 +46,13 @@ final class ToolCard extends StatelessWidget {
       ),
     );
 
+    // ToolGrid positions every card at a fixed cell height, so the text has
+    // to be bounded: at compact desktop widths a column is only ~150px wide
+    // and unclamped copy wraps past the cell instead of being clipped.
     final title = Text(
       tool.titleKey.tr(),
+      maxLines: _titleMaxLines,
+      overflow: TextOverflow.ellipsis,
       style: theme.textTheme.bodyMedium?.copyWith(
         fontWeight: featured ? FontWeight.w700 : FontWeight.w600,
         fontSize: featured && !horizontal ? Sizes.typeBody + 4 : null,
@@ -53,6 +64,8 @@ final class ToolCard extends StatelessWidget {
             padding: AppInsets.onlyTop4,
             child: Text(
               tool.descriptionKey.tr(),
+              maxLines: _descriptionMaxLines,
+              overflow: TextOverflow.ellipsis,
               style: theme.textTheme.labelMedium?.copyWith(
                 fontWeight: FontWeight.w400,
                 color: context.textSoftColor,

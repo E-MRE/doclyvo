@@ -59,13 +59,18 @@ final class HomeHeroSection extends StatelessWidget {
         ),
         if (!isMobile) ...[
           const SizedBox(height: Sizes.xl),
-          Row(
+          // Wrap, not Row: the hero only gets `flex: 6` of the row it shares
+          // with the upload card, so between the mobile breakpoint and the
+          // design width the two CTAs do not fit side by side. Wrapping lets
+          // the secondary one drop to its own line instead of overflowing.
+          Wrap(
+            spacing: Sizes.md,
+            runSpacing: Sizes.md,
             children: [
               PrimaryButton(
                 label: LocaleKeys.home_ctaStart.tr(),
                 onPressed: onBrowseTools,
               ),
-              const SizedBox(width: Sizes.md),
               SecondaryButton(
                 label: LocaleKeys.home_ctaViewAll.tr(),
                 onPressed: onBrowseTools,
