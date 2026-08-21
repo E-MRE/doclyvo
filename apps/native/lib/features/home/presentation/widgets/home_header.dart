@@ -7,6 +7,11 @@ import 'package:doclyvo/generated/localization/lang/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
+part 'home_header/_nav_link.dart';
+part 'home_header/_nav_links.dart';
+part 'home_header/_theme_toggle_button.dart';
+part 'home_header/_wordmark.dart';
+
 /// Sticky top bar of the home screen, in three tiers.
 ///
 /// `design/Main.dc.html` and `design/MobileHome.dc.html` only draw the two ends
@@ -52,112 +57,6 @@ final class HomeHeader extends StatelessWidget {
           const Spacer(),
           _ThemeToggleButton(themeService: themeService),
         ],
-      ),
-    );
-  }
-}
-
-/// Accent icon capsule plus the `doclyvo` word, the one element every tier
-/// keeps.
-final class _Wordmark extends StatelessWidget {
-  const _Wordmark({required this.isMobile});
-
-  final bool isMobile;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final capsuleSize = isMobile ? Sizes.xl + Sizes.xs : Sizes.xxl + Sizes.xs;
-
-    return Row(
-      children: [
-        Container(
-          width: capsuleSize,
-          height: capsuleSize,
-          decoration: BoxDecoration(
-            color: theme.colorScheme.primary,
-            borderRadius: BorderRadius.circular(Sizes.radiusSmall),
-          ),
-          child: Icon(
-            Icons.picture_as_pdf_outlined,
-            size: Sizes.lg,
-            color: theme.colorScheme.onPrimary,
-          ),
-        ),
-        const SizedBox(width: Sizes.sm),
-        Text(
-          LocaleKeys.appName.tr(),
-          style: theme.textTheme.headlineMedium?.copyWith(
-            fontSize: isMobile ? Sizes.typeBody + 2 : Sizes.typeH2,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// The five section labels, shown only on the widest tier.
-final class _NavLinks extends StatelessWidget {
-  const _NavLinks();
-
-  static const List<String> _labelKeys = [
-    LocaleKeys.home_navAllTools,
-    LocaleKeys.home_navConvert,
-    LocaleKeys.home_navEdit,
-    LocaleKeys.home_navOrganize,
-    LocaleKeys.home_navSecurity,
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      spacing: Sizes.xl,
-      children: [
-        for (final (index, labelKey) in _labelKeys.indexed)
-          _NavLink(labelKey: labelKey, emphasized: index == 0),
-      ],
-    );
-  }
-}
-
-final class _NavLink extends StatelessWidget {
-  const _NavLink({required this.labelKey, this.emphasized = false});
-
-  final String labelKey;
-  final bool emphasized;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Text(
-      labelKey.tr(),
-      style: theme.textTheme.bodyMedium?.copyWith(
-        fontSize: Sizes.typeLabel + 2,
-        fontWeight: FontWeight.w500,
-        color: emphasized
-            ? theme.colorScheme.onSurface
-            : context.textSoftColor,
-      ),
-    );
-  }
-}
-
-final class _ThemeToggleButton extends StatelessWidget {
-  const _ThemeToggleButton({required this.themeService});
-
-  final ThemeService themeService;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: themeService.toggleTheme,
-      tooltip: LocaleKeys.home_themeToggleTooltip.tr(),
-      icon: Icon(
-        context.isDarkMode
-            ? Icons.dark_mode_outlined
-            : Icons.light_mode_outlined,
-        color: context.textSoftColor,
       ),
     );
   }
