@@ -56,6 +56,10 @@ abstract class  LocaleKeys {
   static const upload_fileSize = 'upload.fileSize';
   static const upload_remove = 'upload.remove';
   static const upload_selectPdf = 'upload.selectPdf';
+  static const upload_dropzoneTitle = 'upload.dropzoneTitle';
+  static const upload_dropzoneHint = 'upload.dropzoneHint';
+  static const upload_dropzoneActive = 'upload.dropzoneActive';
+  static const upload_readFailed = 'upload.readFailed';
   static const upload = 'upload';
   static const progress_title = 'progress.title';
   static const progress_processing = 'progress.processing';

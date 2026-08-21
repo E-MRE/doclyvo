@@ -7,6 +7,8 @@ import 'package:doclyvo/core/network/dio_network_manager.dart';
 import 'package:doclyvo/core/network/network_service.dart';
 import 'package:doclyvo/core/pdf/pdf_engine_service.dart';
 import 'package:doclyvo/core/pdf/pdf_manipulator_engine_service.dart';
+import 'package:doclyvo/core/widgets/upload/file_picker_service.dart';
+import 'package:doclyvo/core/widgets/upload/platform_file_picker_manager.dart';
 import 'package:doclyvo/features/home/presentation/cubit/home_cubit.dart';
 
 mixin AppDependencyRegisterMixin {
@@ -31,7 +33,12 @@ mixin AppDependencyRegisterMixin {
         PdfManipulatorEngineService.new,
         dispose: (service) => service.dispose(),
       )
-      ..registerLazySingleton<ThemeService>(ThemeManager.new);
+      ..registerLazySingleton<ThemeService>(ThemeManager.new)
+      // Stateless — a single instance keeps every tool's dropzone on the same
+      // PDF-only validation rules.
+      ..registerLazySingleton<FilePickerService>(
+        PlatformFilePickerManager.new,
+      );
   }
 
   void _registerNetworkDependencies(DependencyInjector injector) {
