@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:doclyvo/app/app_dependency.dart';
+import 'package:doclyvo/app/constants/responsive_constants.dart';
 import 'package:doclyvo/app/extensions/build_context_extension.dart';
 import 'package:doclyvo/app/theme/theme_service.dart';
 import 'package:doclyvo/core/utils/constants/app_insets.dart';
@@ -49,6 +50,13 @@ final class _HomeScreenState extends State<HomeScreen> {
     final theme = Theme.of(context);
     final tier = context.screenTier;
     final isMobile = context.isMobile;
+    // Tablet stacks the hero and upload card full-width instead of sharing a
+    // Row, same as mobile — see the P1-5 Decisions log entry in
+    // NATIVE-TASKS.md for why splitting them into columns at 700-1080px was
+    // the original overflow trap. Tablet keeps desktop's padding/typography
+    // (HomeHeroSection/UploadPreviewCard already branch on `tier == mobile`,
+    // not `!= desktop`), so stacking here is the only change it needs.
+    final stackHeroAndUpload = tier != ScreenTier.desktop;
 
     return BlocProvider<HomeCubit>(
       create: (_) => AppDependency.injector.get<HomeCubit>(),
@@ -60,7 +68,7 @@ final class _HomeScreenState extends State<HomeScreen> {
             Expanded(
               child: SingleChildScrollView(
                 padding: isMobile ? AppInsets.all16 : AppInsets.all24,
-                child: isMobile
+                child: stackHeroAndUpload
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -75,7 +83,7 @@ final class _HomeScreenState extends State<HomeScreen> {
                           ),
                           const SizedBox(height: Sizes.xxl),
                           _ToolsSection(key: _toolsSectionKey, theme: theme),
-                          const SizedBox(height: Sizes.lg),
+                          SizedBox(height: isMobile ? Sizes.lg : Sizes.xl),
                           ToolGrid(tier: tier),
                         ],
                       )

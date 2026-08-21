@@ -797,3 +797,49 @@ Work these only after all 8 Phase 3A + 3 Phase 3B tools are done.
   `pdf_manipulator` import outside the engine file — P0-11's "only this file may
   import it" rule now actually holds for all of `lib/`. Features that need to
   re-prompt for a password should switch on `kind`, not parse the message.
+- 2026-08-21 — **P1-5 done: the four tablet layout decisions, binding on every
+  later screen unless it records a reason to deviate here.**
+  1. **Hero + upload card: stacked full-width, not a side-by-side Row.**
+     Splitting them into a 6:5 Row at 700-1080px gives each column only
+     ~320-490px — the exact narrowness that made the hero's CTAs overflow in
+     the first place (see the P1-2/P1-4 entries above). `HomeScreen` now
+     stacks them (`stackHeroAndUpload = tier != ScreenTier.desktop`) the same
+     way mobile does; only `desktop` keeps the Row.
+  2. **Tool grid: 3 columns, not 4 squeezed or 2 stretched.** 4 desktop
+     columns at 700-1080px produce ~150-240px cells, barely wider than
+     mobile's ~173px 2-column cells despite the extra chrome; 2 columns
+     wastes the headroom tablet actually has. 3 columns lands at ~207-333px
+     per cell. Compress keeps its "featured" treatment as a full-width
+     horizontal banner (`ToolGrid._tabletCells`) rather than desktop's 2x2
+     block, which would leave an awkward lone column beside it in a 3-wide
+     grid; Redact (the 11th tool, an odd one out either way) gets the same
+     full-width banner treatment for visual balance instead of a half-empty
+     row.
+  3. **Header: tablet keeps the nav links hidden (inherited from P1-4's
+     `showNavLinks = tier == desktop`, unchanged) but keeps desktop's
+     wordmark size and padding, not mobile's compact ones.** `HomeHeader`
+     already branched its sizing on `tier == mobile`, not `tier != desktop`,
+     so tablet already got this for free — no code change was needed here,
+     just confirming it's the intended rule and not an accident.
+  4. **Type scale and paddings: desktop's throughout, not mobile's or a
+     blend.** Once the hero stops sharing a row with the upload card, it has
+     the tablet's full content width (~652-1032px) to itself — plenty of
+     room for the 48px display headline and full spacing scale (24px
+     container padding, `Sizes.xl`/`xxl` gaps) desktop uses. `HomeHeroSection`
+     and `UploadPreviewCard` already branched on `tier == mobile`, so, like
+     decision 3, tablet inherited the desktop treatment automatically —
+     stacking was the only actual layout change this task made. The
+     takeaway for later screens: a widget that already keys its
+     typography/padding off `tier == mobile` rather than `tier != desktop`
+     usually does not need new tablet-specific styling, only a new
+     tablet-specific *arrangement* (Row vs. Column, column count) where one
+     applies.
+  Files changed: `lib/features/home/presentation/pages/home_screen.dart`
+  (stacking), `lib/features/home/presentation/widgets/tool_grid.dart` (3-column
+  tablet cells + per-tier `horizontal`/`showDescription`), and
+  `test/features/home/presentation/pages/home_screen_responsive_test.dart`
+  (asserts the hero/upload card are stacked at every non-desktop width and
+  side-by-side at desktop widths, on top of the existing no-overflow sweep).
+  `HomeHeader`, `HomeHeroSection`, and `UploadPreviewCard` needed no changes —
+  their existing `tier == mobile` branches already produced the desktop
+  treatment at the tablet tier once P1-4 introduced the three-tier enum.

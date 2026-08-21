@@ -10,6 +10,8 @@ import 'package:doclyvo/app/constants/responsive_constants.dart';
 import 'package:doclyvo/app/extensions/build_context_extension.dart';
 import 'package:doclyvo/app/theme/app_theme.dart';
 import 'package:doclyvo/features/home/presentation/pages/home_screen.dart';
+import 'package:doclyvo/features/home/presentation/widgets/home_hero_section.dart';
+import 'package:doclyvo/features/home/presentation/widgets/upload_preview_card.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -47,7 +49,36 @@ void main() {
       );
 
       expect(tester.takeException(), isNull);
-      expect(reportedTier, ResponsiveConstants.tierForWidth(width));
+      final tier = ResponsiveConstants.tierForWidth(width);
+      expect(reportedTier, tier);
+
+      // Tablet stacks the hero above the upload card full-width, like
+      // mobile — only desktop puts them side by side in a Row. See the
+      // P1-5 Decisions log entry in NATIVE-TASKS.md.
+      final heroTopLeft = tester.getTopLeft(find.byType(HomeHeroSection));
+      final uploadTopLeft = tester.getTopLeft(
+        find.byType(UploadPreviewCard),
+      );
+      if (tier == ScreenTier.desktop) {
+        expect(
+          heroTopLeft.dx,
+          lessThan(uploadTopLeft.dx),
+          reason: 'desktop should place the hero and upload card side by '
+              'side',
+        );
+      } else {
+        expect(
+          heroTopLeft.dx,
+          uploadTopLeft.dx,
+          reason: '$tier should stack the hero above the upload card at '
+              'the same left edge',
+        );
+        expect(
+          heroTopLeft.dy,
+          lessThan(uploadTopLeft.dy),
+          reason: '$tier should place the hero above the upload card',
+        );
+      }
     });
   }
 
