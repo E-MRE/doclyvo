@@ -16,9 +16,18 @@ import 'package:doclyvo/features/home/presentation/cubit/home_cubit.dart';
 import 'package:doclyvo/features/merge/data/repositories/merge_repository.dart';
 import 'package:doclyvo/features/merge/data/repositories/pdf_engine_merge_repository.dart';
 import 'package:doclyvo/features/merge/presentation/cubit/merge_cubit.dart';
+import 'package:doclyvo/features/reorder/data/repositories/pdf_engine_reorder_repository.dart';
+import 'package:doclyvo/features/reorder/data/repositories/reorder_repository.dart';
+import 'package:doclyvo/features/reorder/presentation/cubit/reorder_cubit.dart';
+import 'package:doclyvo/features/rotate/data/repositories/pdf_engine_rotate_repository.dart';
+import 'package:doclyvo/features/rotate/data/repositories/rotate_repository.dart';
+import 'package:doclyvo/features/rotate/presentation/cubit/rotate_cubit.dart';
 import 'package:doclyvo/features/split/data/repositories/pdf_engine_split_repository.dart';
 import 'package:doclyvo/features/split/data/repositories/split_repository.dart';
 import 'package:doclyvo/features/split/presentation/cubit/split_cubit.dart';
+import 'package:doclyvo/features/watermark/data/repositories/pdf_engine_watermark_repository.dart';
+import 'package:doclyvo/features/watermark/data/repositories/watermark_repository.dart';
+import 'package:doclyvo/features/watermark/presentation/cubit/watermark_cubit.dart';
 
 mixin AppDependencyRegisterMixin {
   void registerDependencies(DependencyInjector injector) {
@@ -81,6 +90,15 @@ mixin AppDependencyRegisterMixin {
       )
       ..registerFactory<MergeRepository>(
         () => PdfEngineMergeRepository(injector.get<PdfEngineService>()),
+      )
+      ..registerFactory<RotateRepository>(
+        () => PdfEngineRotateRepository(injector.get<PdfEngineService>()),
+      )
+      ..registerFactory<ReorderRepository>(
+        () => PdfEngineReorderRepository(injector.get<PdfEngineService>()),
+      )
+      ..registerFactory<WatermarkRepository>(
+        () => PdfEngineWatermarkRepository(injector.get<PdfEngineService>()),
       );
   }
 
@@ -95,6 +113,15 @@ mixin AppDependencyRegisterMixin {
       )
       ..registerFactory<MergeCubit>(
         () => MergeCubit(injector.get<MergeRepository>()),
+      )
+      ..registerFactory<RotateCubit>(
+        () => RotateCubit(injector.get<RotateRepository>()),
+      )
+      ..registerFactory<ReorderCubit>(
+        () => ReorderCubit(injector.get<ReorderRepository>()),
+      )
+      ..registerFactory<WatermarkCubit>(
+        () => WatermarkCubit(injector.get<WatermarkRepository>()),
       );
   }
 }
