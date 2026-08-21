@@ -3,6 +3,8 @@ import 'package:doclyvo/core/config/configurations.dart';
 import 'package:doclyvo/core/dependency/dependency_injector.dart';
 import 'package:doclyvo/core/network/dio_network_manager.dart';
 import 'package:doclyvo/core/network/network_service.dart';
+import 'package:doclyvo/core/pdf/pdf_engine_service.dart';
+import 'package:doclyvo/core/pdf/pdf_manipulator_engine_service.dart';
 
 mixin AppDependencyRegisterMixin {
   void registerDependencies(DependencyInjector injector) {
@@ -17,23 +19,31 @@ mixin AppDependencyRegisterMixin {
     _registerCubits(injector);
   }
 
-  void _registerCoreDependencies(DependencyInjector injector) {}
+  void _registerCoreDependencies(DependencyInjector injector) {
+    // The engine owns a worker and a loaded native binary — one shared
+    // instance for the whole app, created on first use by whichever tool
+    // needs it first.
+    injector.registerLazySingleton<PdfEngineService>(
+      PdfManipulatorEngineService.new,
+      dispose: (service) => service.dispose(),
+    );
+  }
 
   void _registerNetworkDependencies(DependencyInjector injector) {
-    injector.registerFactory<Dio>(
-      () => Dio(
-        BaseOptions(
-          baseUrl: Configurations.environmentProfile.baseUrl,
-          connectTimeout: const Duration(seconds: 32),
-          receiveTimeout: const Duration(seconds: 32),
-          sendTimeout: const Duration(seconds: 32),
+    injector
+      ..registerFactory<Dio>(
+        () => Dio(
+          BaseOptions(
+            baseUrl: Configurations.environmentProfile.baseUrl,
+            connectTimeout: const Duration(seconds: 32),
+            receiveTimeout: const Duration(seconds: 32),
+            sendTimeout: const Duration(seconds: 32),
+          ),
         ),
-      ),
-    );
-
-    injector.registerSingleton<NetworkService>(
-      DioNetworkManager(injector.get<Dio>()),
-    );
+      )
+      ..registerSingleton<NetworkService>(
+        DioNetworkManager(injector.get<Dio>()),
+      );
   }
 
   void _registerDevelopmentDependencies(DependencyInjector injector) {}

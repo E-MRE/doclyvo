@@ -565,3 +565,42 @@ Work these only after all 8 Phase 3A + 3 Phase 3B tools are done.
 - Sign's audit-log/hash parity (client-side signature placement vs. the existing
   web feature's optional backend-backed audit trail): **not yet decided** — see
   P3A-8's Notes column. Decide during that task, record the choice here.
+- 2026-08-21 — **P0-11 done, and it resolves three of this file's open questions
+  by reading `pdf_manipulator` 4.1.0's real API instead of its capability list.**
+  The engine's surface is `Pdf` + extensions (`PdfSugar`, `PdfStandalone`),
+  driven by `DataSource`/`DataSink` (`MemorySource`/`MemorySink` in memory,
+  `FileSource`/`FileSink` from the separate `package:pdf_manipulator/io.dart`
+  entry point). Every op returns a `PdfTask<T>` — a `Future` plus `cancel()`.
+  Findings that later tasks should not re-derive:
+  - **Protect (P3A-7) can keep its permission checkboxes.** `PdfEncryptionConfig`
+    takes a `PdfPermissions` object with per-flag control (`print`, `printHq`,
+    `modify`, `copy`, `annotate`, `fillForms`, `accessibility`, `assemble`), not
+    just a password — so no-print / no-copy / no-edit map to real restrictions.
+    `PdfProtectionOptions` collapses them to the design's three checkboxes.
+  - **Split (P3A-2) gets individual files, not a zip.** `pdf.split` asks for a
+    `DataSink` per chunk via a factory and never produces an archive;
+    `PdfEngineService.split` returns `List<Uint8List>` in document order.
+    Assembling an archive, if the Result panel wants one, is the feature's job.
+  - **Thumbnails are PNG bytes** (`RenderedPage.data`), sized via
+    `PdfRenderSize.thumbnail(n)`, streamed one page at a time — but the engine's
+    stream carries no page index, so `renderThumbnails` pairs each event with
+    the index it was asked for. Rotate/Reorder/Redact feed these straight into
+    `Image.memory`.
+- 2026-08-21 — **Decision: `PdfEngineService` is bytes-in / bytes-out**
+  (`Uint8List`), not file-path based. Keeps the interface free of `dart:io` (so
+  it works unchanged on web), matches how the Phase 2 dropzone and result panel
+  hand data around, and leaves reading the picked file / writing the output to
+  the feature edge. Trade-off accepted: whole documents sit in memory during an
+  operation. If a large-file problem shows up, add a file-backed overload here
+  rather than in a feature — the engine package already supports streaming via
+  `FileSource`/`FileSink`.
+- 2026-08-21 — **Decision: engine errors are translated, not re-exported.**
+  `PdfEngineException` (`lib/core/error/`) carries the engine's message plus a
+  `PdfEngineErrorKind` enum (passwordRequired, wrongPassword, corrupted,
+  pageOutOfRange, unsupported, cancelled, engineFailure), mapped from the
+  package's sealed `PdfError` hierarchy inside
+  `pdf_manipulator_engine_service.dart`. `BaseCubit.safeCall` now catches
+  `PdfEngineException` instead of `PdfError`, which was the last
+  `pdf_manipulator` import outside the engine file — P0-11's "only this file may
+  import it" rule now actually holds for all of `lib/`. Features that need to
+  re-prompt for a password should switch on `kind`, not parse the message.

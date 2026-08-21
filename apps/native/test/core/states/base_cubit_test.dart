@@ -1,7 +1,7 @@
+import 'package:doclyvo/core/error/pdf_engine_exception.dart';
 import 'package:doclyvo/core/error/response_exception.dart';
 import 'package:doclyvo/core/states/base_cubit.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pdf_manipulator/pdf_manipulator.dart';
 
 abstract class _TestState {
   const _TestState();
@@ -48,7 +48,10 @@ final class _TestCubit extends BaseCubit<_TestState> {
 
   Future<void> failWithPdfError() {
     return safeCall<int>(
-      action: () async => throw const PdfCorrupted('bad pdf bytes'),
+      action: () async => throw const PdfEngineException(
+        'bad pdf bytes',
+        kind: PdfEngineErrorKind.corrupted,
+      ),
       loadingState: const _TestLoading(),
       successState: (data) => _TestSuccess(value: data),
       errorState: (message) => _TestError(message: message),
@@ -94,7 +97,7 @@ void main() {
     await cubit.close();
   });
 
-  test('safeCall catches a pdf_manipulator failure (PdfError)', () async {
+  test('safeCall catches a client-side PDF engine failure', () async {
     final cubit = _TestCubit();
 
     await cubit.failWithPdfError();
