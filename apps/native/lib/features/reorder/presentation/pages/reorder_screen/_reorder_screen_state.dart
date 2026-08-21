@@ -194,30 +194,37 @@ final class _ReorderScreenState extends State<ReorderScreen> {
   Widget _buildUploadPanel(ScreenTier tier) {
     final file = _selectedFile;
 
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          UploadDropzone(
-            filePickerService: _filePickerService,
-            selectedFile: file,
-            onFileSelected: _onFileSelected,
-            onFileRemoved: _onFileRemoved,
-            tier: tier,
-            enabled: _cubit.state is! ReorderLoading,
-          ),
-          if (file != null && _pages.isNotEmpty) ...[
-            const SizedBox(height: Sizes.lg),
-            ReorderPageGrid(
-              entries: _pages,
-              onMoveLeft: _moveLeft,
-              onMoveRight: _moveRight,
+    // One BlocBuilder around the whole panel: the `enabled` flag below is
+    // state-derived, and reading `_cubit.state` outside a builder leaves it
+    // stale for the whole operation — the panel only rebuilds on setState,
+    // which a cubit emission does not trigger.
+    return BlocBuilder<ReorderCubit, ReorderState>(
+      bloc: _cubit,
+      builder: (context, state) => AppCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            UploadDropzone(
+              filePickerService: _filePickerService,
+              selectedFile: file,
+              onFileSelected: _onFileSelected,
+              onFileRemoved: _onFileRemoved,
               tier: tier,
-              enabled: _cubit.state is! ReorderLoading,
+              enabled: state is! ReorderLoading,
             ),
+            if (file != null && _pages.isNotEmpty) ...[
+              const SizedBox(height: Sizes.lg),
+              ReorderPageGrid(
+                entries: _pages,
+                onMoveLeft: _moveLeft,
+                onMoveRight: _moveRight,
+                tier: tier,
+                enabled: state is! ReorderLoading,
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

@@ -131,13 +131,20 @@ final class _CompressScreenState extends State<CompressScreen> {
   }
 
   Widget _buildUploadPanel(ScreenTier tier) {
-    return UploadDropzone(
-      filePickerService: _filePickerService,
-      selectedFile: _selectedFile,
-      onFileSelected: _onFileSelected,
-      onFileRemoved: _onFileRemoved,
-      tier: tier,
-      enabled: _cubit.state is! CompressLoading,
+    // One BlocBuilder around the whole panel: the `enabled` flag below is
+    // state-derived, and reading `_cubit.state` outside a builder leaves it
+    // stale for the whole operation — the panel only rebuilds on setState,
+    // which a cubit emission does not trigger.
+    return BlocBuilder<CompressCubit, CompressState>(
+      bloc: _cubit,
+      builder: (context, state) => UploadDropzone(
+        filePickerService: _filePickerService,
+        selectedFile: _selectedFile,
+        onFileSelected: _onFileSelected,
+        onFileRemoved: _onFileRemoved,
+        tier: tier,
+        enabled: state is! CompressLoading,
+      ),
     );
   }
 
@@ -165,7 +172,10 @@ final class _CompressScreenState extends State<CompressScreen> {
           onStart: _startCompress,
           onRetry: _startCompress,
           onDownload: (bytes) => unawaited(
-            _download(bytes, _outputFileName(_selectedFile?.name ?? 'dosya.pdf')),
+            _download(
+              bytes,
+              _outputFileName(_selectedFile?.name ?? 'dosya.pdf'),
+            ),
           ),
           onReset: _startNewOperation,
           outputFileNameOf: _outputFileName,

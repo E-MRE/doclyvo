@@ -142,24 +142,31 @@ final class _SplitScreenState extends State<SplitScreen> {
   Widget _buildUploadPanel(ScreenTier tier) {
     final file = _selectedFile;
 
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          UploadDropzone(
-            filePickerService: _filePickerService,
-            selectedFile: file,
-            onFileSelected: _onFileSelected,
-            onFileRemoved: _onFileRemoved,
-            tier: tier,
-            enabled: _cubit.state is! SplitLoading,
-          ),
-          if (file != null && _pageCount != null) ...[
-            const SizedBox(height: Sizes.lg),
-            SplitPageGrid(pageCount: _pageCount, tier: tier),
+    // One BlocBuilder around the whole panel: the `enabled` flag below is
+    // state-derived, and reading `_cubit.state` outside a builder leaves it
+    // stale for the whole operation — the panel only rebuilds on setState,
+    // which a cubit emission does not trigger.
+    return BlocBuilder<SplitCubit, SplitState>(
+      bloc: _cubit,
+      builder: (context, state) => AppCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            UploadDropzone(
+              filePickerService: _filePickerService,
+              selectedFile: file,
+              onFileSelected: _onFileSelected,
+              onFileRemoved: _onFileRemoved,
+              tier: tier,
+              enabled: state is! SplitLoading,
+            ),
+            if (file != null && _pageCount != null) ...[
+              const SizedBox(height: Sizes.lg),
+              SplitPageGrid(pageCount: _pageCount, tier: tier),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -176,7 +183,10 @@ final class _SplitScreenState extends State<SplitScreen> {
           onStart: _startSplit,
           onRetry: _startSplit,
           onDownload: (bytes) => unawaited(
-            _download(bytes, _outputFileName(_selectedFile?.name ?? 'dosya.pdf')),
+            _download(
+              bytes,
+              _outputFileName(_selectedFile?.name ?? 'dosya.pdf'),
+            ),
           ),
           onReset: _startNewOperation,
         ),

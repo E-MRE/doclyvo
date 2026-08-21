@@ -181,15 +181,22 @@ final class _MergeScreenState extends State<MergeScreen> {
   }
 
   Widget _buildFileListPanel(ScreenTier tier) {
+    // One BlocBuilder around the whole panel: the `enabled` flag below is
+    // state-derived, and reading `_cubit.state` outside a builder leaves it
+    // stale for the whole operation — the panel only rebuilds on setState,
+    // which a cubit emission does not trigger.
     return AppCard(
-      child: MergeFileList(
-        entries: _entries,
-        onAddFiles: () => unawaited(_addFiles()),
-        onMoveUp: _moveUp,
-        onMoveDown: _moveDown,
-        onRemove: _removeFile,
-        tier: tier,
-        enabled: _cubit.state is! MergeLoading,
+      child: BlocBuilder<MergeCubit, MergeState>(
+        bloc: _cubit,
+        builder: (context, state) => MergeFileList(
+          entries: _entries,
+          onAddFiles: () => unawaited(_addFiles()),
+          onMoveUp: _moveUp,
+          onMoveDown: _moveDown,
+          onRemove: _removeFile,
+          tier: tier,
+          enabled: state is! MergeLoading,
+        ),
       ),
     );
   }

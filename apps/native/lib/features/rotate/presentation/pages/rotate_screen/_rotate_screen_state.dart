@@ -25,8 +25,7 @@ final class _RotateScreenState extends State<RotateScreen> {
 
   int get _selectedCount => _pages.where((e) => e.selected).length;
 
-  bool get _canRotate =>
-      _selectedCount > 0 && _cubit.state is! RotateLoading;
+  bool get _canRotate => _selectedCount > 0 && _cubit.state is! RotateLoading;
 
   void _onFileSelected(PickedPdfFile file) {
     _cubit.reset();
@@ -209,31 +208,38 @@ final class _RotateScreenState extends State<RotateScreen> {
   Widget _buildUploadPanel(ScreenTier tier) {
     final file = _selectedFile;
 
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          UploadDropzone(
-            filePickerService: _filePickerService,
-            selectedFile: file,
-            onFileSelected: _onFileSelected,
-            onFileRemoved: _onFileRemoved,
-            tier: tier,
-            enabled: _cubit.state is! RotateLoading,
-          ),
-          if (file != null && _pages.isNotEmpty) ...[
-            const SizedBox(height: Sizes.lg),
-            RotatePageGrid(
-              entries: _pages,
-              angle: _angle,
-              onToggleEntry: _toggleEntry,
-              onToggleAll: _toggleAll,
+    // One BlocBuilder around the whole panel: the `enabled` flag below is
+    // state-derived, and reading `_cubit.state` outside a builder leaves it
+    // stale for the whole operation — the panel only rebuilds on setState,
+    // which a cubit emission does not trigger.
+    return BlocBuilder<RotateCubit, RotateState>(
+      bloc: _cubit,
+      builder: (context, state) => AppCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            UploadDropzone(
+              filePickerService: _filePickerService,
+              selectedFile: file,
+              onFileSelected: _onFileSelected,
+              onFileRemoved: _onFileRemoved,
               tier: tier,
-              enabled: _cubit.state is! RotateLoading,
+              enabled: state is! RotateLoading,
             ),
+            if (file != null && _pages.isNotEmpty) ...[
+              const SizedBox(height: Sizes.lg),
+              RotatePageGrid(
+                entries: _pages,
+                angle: _angle,
+                onToggleEntry: _toggleEntry,
+                onToggleAll: _toggleAll,
+                tier: tier,
+                enabled: state is! RotateLoading,
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -254,7 +260,10 @@ final class _RotateScreenState extends State<RotateScreen> {
           onStart: _startRotate,
           onRetry: _startRotate,
           onDownload: (bytes) => unawaited(
-            _download(bytes, _outputFileName(_selectedFile?.name ?? 'dosya.pdf')),
+            _download(
+              bytes,
+              _outputFileName(_selectedFile?.name ?? 'dosya.pdf'),
+            ),
           ),
           onReset: _startNewOperation,
         ),

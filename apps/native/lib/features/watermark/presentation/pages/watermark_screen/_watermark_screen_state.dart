@@ -189,30 +189,37 @@ final class _WatermarkScreenState extends State<WatermarkScreen> {
   Widget _buildUploadPanel(ScreenTier tier) {
     final file = _selectedFile;
 
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          UploadDropzone(
-            filePickerService: _filePickerService,
-            selectedFile: file,
-            onFileSelected: _onFileSelected,
-            onFileRemoved: _onFileRemoved,
-            tier: tier,
-            enabled: _cubit.state is! WatermarkLoading,
-          ),
-          if (file != null) ...[
-            const SizedBox(height: Sizes.lg),
-            WatermarkPreview(
-              text: _text,
-              position: _position,
-              opacity: _opacity,
-              pageThumbnail: _previewThumbnail,
+    // One BlocBuilder around the whole panel: the `enabled` flag below is
+    // state-derived, and reading `_cubit.state` outside a builder leaves it
+    // stale for the whole operation — the panel only rebuilds on setState,
+    // which a cubit emission does not trigger.
+    return BlocBuilder<WatermarkCubit, WatermarkState>(
+      bloc: _cubit,
+      builder: (context, state) => AppCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            UploadDropzone(
+              filePickerService: _filePickerService,
+              selectedFile: file,
+              onFileSelected: _onFileSelected,
+              onFileRemoved: _onFileRemoved,
               tier: tier,
+              enabled: state is! WatermarkLoading,
             ),
+            if (file != null) ...[
+              const SizedBox(height: Sizes.lg),
+              WatermarkPreview(
+                text: _text,
+                position: _position,
+                opacity: _opacity,
+                pageThumbnail: _previewThumbnail,
+                tier: tier,
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
