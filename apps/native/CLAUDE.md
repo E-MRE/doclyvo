@@ -77,7 +77,41 @@ files your task lists — don't guess. Summary:
   hardcoded `Colors.*`/`Color(0x...)` — go through the generated/theme color system.
   No hardcoded `EdgeInsets`/`BorderRadius` numbers — go through the spacing/radius
   token system (`Sizes`/`AppInsets`).
-- **Tests:** `test/` mirrors `lib/` directory structure exactly.
+- **Tests:** `test/` mirrors `lib/` directory structure exactly. Any widget test
+  that pumps a real screen goes through `test/helpers/widget_test_harness.dart`
+  (`initializeTestLocalization`, `registerAppDependencies`/`resetAppDependencies`,
+  `pumpLocalized(..., surfaceSize:)`) — hand-rolling `pumpWidget` +
+  `LocalizationWrapper` fails on GetIt, on `shared_preferences`, or on the
+  translation asset loading off the real event loop.
+
+## Responsive layout: the mid-width overflow trap (read before writing any screen)
+
+`ResponsiveConstants.mobileBreakpoint` is **700**, and screens pick their layout with
+a single `isMobile` bool. That means every width from 700px up renders the *desktop*
+branch — including a resized desktop window, a landscape tablet, and a split-view
+iPad, none of which are anywhere near the 1440px the designs in `design/*.dc.html`
+are drawn at. Desktop content laid out at 700–1100px overflows, and Flutter treats a
+`RenderFlex` overflow as an **error**, not as harmless clipping.
+
+This has already bitten three home-screen widgets (all fixed — copy the fix, don't
+re-derive it):
+
+- **A `Row` of buttons or nav items that must fit on one line.** Either add a third
+  tier that drops the optional items below a measured breakpoint (`HomeHeader` +
+  `ResponsiveConstants.headerNavBreakpoint`), or swap `Row` → `Wrap` with
+  `spacing`/`runSpacing` so items fall to a second line (`HomeHeroSection`'s CTAs).
+  Measure the real threshold — pump the widget inside `IntrinsicWidth` at a huge
+  surface and read `tester.getSize` — instead of guessing a round number.
+- **Text inside a fixed-height cell.** `ToolGrid` positions cards at a fixed cell
+  height, so `ToolCard`'s title/description carry `maxLines` + `TextOverflow.ellipsis`.
+  Any text in a `Positioned`/`SizedBox`-constrained box needs the same.
+
+**Required for every new screen:** a width-sweep test like
+`test/features/home/presentation/pages/home_screen_responsive_test.dart` — pump the
+screen at 360/430/699/700/800/900/1024/1080/1200/1440/1920 via
+`pumpLocalized(..., surfaceSize:)` and assert `tester.takeException()` is `null`.
+Note that `pumpLocalized` defaults to a 1440x1024 surface and the raw
+`flutter_test` default is 800x600; neither one on its own catches this class of bug.
 
 ## Design source
 

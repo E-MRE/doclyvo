@@ -1,8 +1,9 @@
 # Doclyvo Native (Flutter) — Task Breakdown
 
-Status: planning complete, implementation not started. `apps/native` is currently a
-bare `flutter create` scaffold (default counter-app template) — see
-`apps/native/README.md`.
+Status (2026-08-21): **Phase 0 complete, Phase 1 complete, P2-1 complete.** Next up
+is P1-4 → P1-5 (the responsive tier system and the home screen's tablet layout),
+which are cross-cutting prerequisites for everything still open — see the note under
+Phase 1. Remaining: P2-2…P2-4, all of Phase 3A/3B, all of Phase 4.
 
 **Purpose of this file:** each task below is meant to be handed to a **separate,
 fresh Claude Code session with empty conversation context**. A session working a
@@ -45,7 +46,9 @@ against the backend).
 
 **Dependency graph:** Phase 0 tasks are sequential (each builds on the last, except
 P0-11 which only needs P0-1+P0-3 and can be done any time after those). Phase 1
-depends on all of Phase 0. Phase 2 depends on Phase 0+1. Phase 3A tasks depend on
+depends on all of Phase 0. **P1-4 (responsive tier system) is a hard prerequisite for
+every task after it** — P2-2 onwards and all of Phase 3 build UI, and they must build
+it for three tiers, not two. Phase 2 depends on Phase 0+1. Phase 3A tasks depend on
 Phase 0+1+2 **and P0-11** specifically; Phase 3B tasks depend on Phase 0+1+2 **and
 P0-4** (network layer) specifically. Tasks within 3A or within 3B don't depend on
 each other — any order or parallel sessions, ordered simplest-first here. Phase 4
@@ -320,6 +323,11 @@ cards navigating to their route (routes already exist as placeholders from P0-8)
 **Definition of done:** layout matches both design files at their respective
 breakpoints; every tool card navigates correctly; theme toggle visible and working.
 
+**Done (2026-08-21), with a known defect:** the two-value `isMobile` responsive model
+this task shipped overflows at 700–1080px. Patched per-widget the same day; the root
+cause is fixed by **P1-4**, and the tablet layout it never had is **P1-5**. Do not
+copy P1-2's `isMobile` bool into a new screen.
+
 ### P1-3 — Home DI registration
 
 **Depends on:** P0-3, P1-1, P1-2.
@@ -332,6 +340,82 @@ the home screen to obtain it via `AppDependency`.
 **Definition of done:** no direct `HomeCubit()` construction in the widget tree;
 cubit obtained exclusively through DI.
 
+### P1-4 — Responsive tier system (mobile / tablet / desktop)
+
+**Depends on:** P0-7, P1-2. **Blocks: P2-2, P2-3, P2-4 and all of Phase 3** — those
+tasks build screens, and they must build them for three tiers. Do this one first.
+
+**Why this task exists.** P1-2 shipped the home screen with a single `isMobile` bool
+compared against `ResponsiveConstants.mobileBreakpoint` (700). That means *every*
+width from 700px up renders the desktop branch — a resized desktop window, a
+landscape tablet, an iPad split view — even though `design/*.dc.html` is drawn at
+1440px. Three home widgets overflowed because of it (`HomeHeader`,
+`HomeHeroSection`, `ToolCard`); they were patched individually on 2026-08-21, but the
+two-value bool is the root cause and it is about to be copied into 11 more tool
+screens. See the "mid-width overflow trap" section in `apps/native/CLAUDE.md`.
+
+**Key inputs:** `apps/native/CLAUDE.md` (the overflow-trap section — read it, the
+known fixes are listed there and must not be re-derived),
+`lib/app/constants/responsive_constants.dart`,
+`lib/features/home/presentation/` (all four widgets already carry a tier decision in
+some form), `test/features/home/presentation/pages/home_screen_responsive_test.dart`,
+`test/helpers/widget_test_harness.dart`.
+
+**Deliverables:**
+- `lib/app/constants/responsive_constants.dart`: a `ScreenTier` enum
+  (`mobile`, `tablet`, `desktop`) plus its boundaries. Keep the two numbers already
+  established and measured rather than inventing new ones: `mobile` below 700,
+  `tablet` 700–1080, `desktop` 1080 and up. `headerNavBreakpoint` (1080) becomes the
+  tablet/desktop boundary — fold it in, don't leave two constants meaning the same
+  thing.
+- `lib/app/extensions/build_context_extension.dart`: `ScreenTier get screenTier`
+  plus `bool get isMobile` / `isTablet` / `isDesktop` conveniences, so widgets stop
+  reading `MediaQuery.sizeOf(context).width` and comparing numbers themselves.
+- Replace the `isMobile` bool threaded through `HomeScreen` → `HomeHeader`,
+  `HomeHeroSection`, `UploadPreviewCard`, `ToolGrid`, `ToolCard` with the tier. Keep
+  the existing mobile and desktop output byte-for-byte identical; `tablet` may map to
+  the desktop branch for now — P1-5 designs it properly.
+- `UploadDropzone`'s `isCompact` bool (from P2-1) gets the same treatment.
+
+**Definition of done:**
+- No widget in `lib/` compares a raw width number any more — `grep -rn
+  "mobileBreakpoint\|sizeOf(context).width" lib/` only hits the extension and the
+  constants file.
+- `home_screen_responsive_test.dart` still passes at all 12 widths, and the sweep is
+  extended to assert the tier the extension reports at each one.
+- `flutter analyze` clean, `flutter test` green. No visual change at 390px or 1440px.
+
+### P1-5 — Home screen tablet layout
+
+**Depends on:** P1-4.
+
+**Why this task exists.** P1-4 gives the app a `tablet` tier but points it at the
+desktop layout. This task decides what tablet actually looks like — which is a design
+decision, not a refactor, which is why it is a separate session.
+
+**Key inputs:** `design/Main.dc.html` (desktop, 1440px), `design/MobileHome.dc.html`
+(mobile), `design/README.md`, `design/StyleGuide.dc.html`.
+
+**There is no tablet design export.** The canvas only has the two ends of the range.
+Derive the middle from them and **record every choice you make in the Decisions log
+at the bottom of this file**, so P2/P3 sessions follow the same rules instead of each
+inventing their own. The decisions the home screen forces:
+- Hero + upload card: side by side (desktop) or stacked (mobile)? The hero's `flex: 6`
+  share is what made its CTAs overflow at tablet widths.
+- Tool grid: 4 columns (desktop) or 2 (mobile), or 3? Does Compress stay a 2x2
+  featured card?
+- Header: `HomeHeader` already drops its nav links below 1080 — is that the intended
+  tablet header, or should tablet get a condensed nav?
+- Type scale and paddings: desktop's, mobile's, or something in between?
+
+**Deliverables:** the `tablet` branch of `lib/features/home/presentation/` widgets,
+plus new Decisions-log entries stating the four choices above as rules future
+screens must follow.
+
+**Definition of done:** home screen renders a deliberate tablet layout (not the
+desktop one squeezed) at 700–1079px; `home_screen_responsive_test.dart` green at all
+widths; the layout rules are written down in the Decisions log.
+
 ---
 
 ## Phase 2 — Shared tool-flow widgets
@@ -339,7 +423,13 @@ cubit obtained exclusively through DI.
 These are used by **all 11** Phase 3 tools (both 3A client-side and 3B
 backend-dependent) — get them right once here rather than duplicating per tool.
 
-### P2-1 — Upload dropzone widget
+**All four widgets must work at three tiers, not two.** Do P1-4 first. Every widget
+here takes the tier (not an `isMobile`/`isCompact` bool) and ships with a width-sweep
+test — see the "mid-width overflow trap" section in `apps/native/CLAUDE.md` for the
+known failure modes and their fixes, and `test/helpers/widget_test_harness.dart` for
+`pumpLocalized(..., surfaceSize:)`.
+
+### P2-1 — Upload dropzone widget ✅ done (2026-08-21)
 
 **Depends on:** P0-6, P0-7, P0-9.
 
@@ -354,6 +444,44 @@ mobile file-picker dialog; PDF-only validation).
 **Definition of done:** works via file-picker dialog on at least one mobile and one
 desktop target; rejects non-PDF files with a visible error; clear/remove resets
 state.
+
+**What actually shipped** (read this before wiring the dropzone into a tool screen —
+the paths and the widget's contract differ from the plan above):
+- `lib/core/widgets/upload/file_picker_service.dart` — abstract `FilePickerService`:
+  `pickPdf()` returns `null` when the user cancels (cancelling is not an error),
+  `resolveDroppedPath()` handles a desktop drop, `isPdfFileName()` is the shared
+  gate. Concrete `PlatformFilePickerManager` sits next to it. Registered in the DI
+  mixin as a lazy singleton — resolve it via `AppDependency.injector`, never
+  construct it.
+- `lib/core/widgets/upload/models/picked_pdf_file.dart` — `PickedPdfFile`
+  (`name`, `sizeInBytes`, `path`, `formattedSize`, lazy `readBytes()`). No
+  `PlatformFile`/`DropItem` type escapes the service, so `readBytes()` is what you
+  hand to `PdfEngineService`.
+- `lib/core/error/file_picker_exception.dart` — `FilePickerException` +
+  `FilePickerErrorKind` (`notPdf`, `unreadable`, `pickerFailure`).
+- **`lib/app/widgets/upload/upload_dropzone.dart` — note the path.** The plan said
+  `lib/core/widgets/upload/`, but the widget needs `PrimaryButton` and
+  `BuildContextExtension`, both in `lib/app/`, and `architecture.md` forbids `core/`
+  importing `app/`. The layer rule won; the service and model stayed in `core/`.
+  Owner approved the deviation on 2026-08-21.
+- The widget is **controlled**: the caller owns `selectedFile` and reacts to
+  `onFileSelected`/`onFileRemoved`. Only drag-hover and the validation error live in
+  its local state, so a tool cubit drives it. It also needs `filePickerService`
+  passed in — `core/` cannot reach `AppDependency` itself.
+- Drag-drop is wired only on macOS/Windows/Linux (`DropTarget` is not wrapped at all
+  on mobile). `desktop_drop` is **pinned to exactly 0.7.1** — 0.8.0's
+  `android/build.gradle` breaks `flutter build apk`. Do not bump it without running
+  that build.
+- `file_picker` is v12, whose API is `FilePicker.pickFile(...) → PlatformFile?`
+  (static, single-file) — not the `FilePicker.platform.pickFiles` +
+  `FilePickerResult` shape most examples online still show.
+- macOS needed `com.apple.security.files.user-selected.read-write` added to both
+  entitlements files; without it the sandbox blocks reading the picked file.
+
+**Still open from this task:** the dropzone is not attached to any screen yet (tool
+screens are Phase 3), so the file-picker dialog has only been verified to *build* on
+macOS and Android — nobody has clicked it on a real device. Verify it during the
+first Phase 3A tool. Its `isCompact` bool is also still a bool; P1-4 converts it.
 
 ### P2-2 — Progress indicator widget
 
@@ -375,7 +503,8 @@ callback for its operations; if not, use a brief simulated progress animation
 stays consistent across all 11 tools.
 
 **Definition of done:** bar animates smoothly, respects reduced-motion, percentage
-text matches bar fill, works for both a real async duration and a simulated one.
+text matches bar fill, works for both a real async duration and a simulated one;
+takes the tier from P1-4 (no `isMobile` bool) and ships a width-sweep test.
 
 ### P2-3 — Result panel widget
 
@@ -392,7 +521,9 @@ since Phase 3A files never leave the device).
 **Definition of done:** renders correctly with representative before/after data;
 download button triggers a callback (actual save-to-disk wiring happens per-tool in
 Phase 3, since the file bytes source differs between 3A/3B); auto-delete notice only
-appears when the result came from the backend.
+appears when the result came from the backend; takes the tier from P1-4 and ships a
+width-sweep test — the before/after comparison card is a `Row` of two blocks, which
+is the shape that overflows first at tablet widths (use `Wrap` or stack it).
 
 ### P2-4 — Error state widget
 
@@ -403,7 +534,9 @@ appears when the result came from the backend.
 **Deliverables:** `lib/core/widgets/errors/error_state_widget.dart` (icon, message,
 retry button, token-driven error color).
 
-**Definition of done:** retry callback fires; message accepts a localized string.
+**Definition of done:** retry callback fires; message accepts a localized string;
+takes the tier from P1-4 and ships a width-sweep test — a long error message is
+exactly the kind of content that overflows a fixed-height box at tablet widths.
 
 ---
 
@@ -443,6 +576,16 @@ copy/behavior parity only — the native version does not call the API these
 
 **Definition of done, per tool (applies to all 8):**
 - Screen reachable from its home-screen tool card (route already exists from P0-8).
+- **Laid out for all three tiers** (mobile / tablet / desktop) using P1-4's
+  `ScreenTier` — never a raw width comparison, never a two-value bool. Follow the
+  tablet rules P1-5 recorded in the Decisions log; if this tool's design needs a rule
+  that isn't there yet, add it there rather than deciding locally.
+- **A width-sweep test** at `test/features/<tool>/presentation/pages/` modelled on
+  `test/features/home/presentation/pages/home_screen_responsive_test.dart`: pump the
+  screen at 360/430/699/700/800/900/1024/1080/1200/1440/1920 via
+  `pumpLocalized(..., surfaceSize:)` and assert `tester.takeException()` is `null`.
+  Read `apps/native/CLAUDE.md`'s "mid-width overflow trap" section first — the three
+  recurring failure modes and their fixes are already written down there.
 - Upload → settings → processing → result/error flow all work with **zero network
   calls** — verify by testing in airplane mode.
 - Tool-specific settings match the design file's controls.
@@ -478,6 +621,8 @@ Same feature-module shape as Phase 3A, but the "data" layer is a repository call
 
 **Definition of done, per tool (applies to all 3):**
 - Screen reachable from its home-screen tool card.
+- **Laid out for all three tiers** and covered by a width-sweep test — identical
+  requirement to Phase 3A above, same reasoning, same reference test.
 - Upload → settings → processing → result/error flow all work against the real
   deployed `apps/api` backend (or a local instance) — not mocked.
 - Tool-specific settings match the design file's controls.
@@ -493,9 +638,9 @@ Same feature-module shape as Phase 3A, but the "data" layer is a repository call
 
 Work these only after all 8 Phase 3A + 3 Phase 3B tools are done.
 
-### P4-1 — Responsive & mobile layout pass
+### P4-1 — Responsive & three-tier layout pass
 
-**Depends on:** all Phase 3A + 3B. **Key inputs:** `.claude/reference/flutter/skills/responsive_rules.md`, all `design/Mobile*.dc.html`, `design/README.md` (filename truncation: 16 chars mobile / 24 desktop). **Deliverables/DoD:** every tool screen verified at phone and desktop widths; filename truncation applied consistently; touch targets ≥48dp on mobile.
+**Depends on:** all Phase 3A + 3B, P1-4, P1-5. **Key inputs:** `apps/native/CLAUDE.md`'s "mid-width overflow trap" section, the tablet rules in this file's Decisions log, all `design/Mobile*.dc.html`, `design/README.md` (filename truncation: 16 chars mobile / 24 desktop). **Deliverables/DoD:** every tool screen verified at **phone, tablet and desktop** widths — P1-4/P1-5 built the tier system and the home screen's tablet layout, this pass confirms all 11 tool screens actually honour them; every screen has a passing width-sweep test; `grep -rn "mobileBreakpoint\|sizeOf(context).width" lib/` still only hits the extension and the constants file; filename truncation applied consistently; touch targets ≥48dp on mobile and tablet.
 
 ### P4-2 — Dark mode complete pass
 
@@ -526,6 +671,54 @@ Work these only after all 8 Phase 3A + 3 Phase 3B tools are done.
 ## Decisions log
 
 *(append here as tasks make choices, so later sessions don't re-litigate them)*
+
+- 2026-08-21 — **P1-2's responsive model is a known defect, and P1-4/P1-5 exist to
+  fix it properly.** The home screen picks its layout from one `isMobile` bool
+  compared against `mobileBreakpoint` (700), so everything from 700px up renders the
+  desktop branch, which the `design/*.dc.html` exports draw at 1440px. Three widgets
+  overflowed as a result and were patched on the spot: `HomeHeader` gained a third
+  tier that drops its nav links below a *measured* 1080px
+  (`ResponsiveConstants.headerNavBreakpoint`; the full header's intrinsic width is
+  1017.25px), `HomeHeroSection`'s CTA `Row` became a `Wrap`, and `ToolCard`'s
+  title/description got `maxLines` + ellipsis because `ToolGrid` positions cards at a
+  fixed cell height. **These three fixes are the canonical patterns — later sessions
+  should copy them, not re-derive them**; they are written up in
+  `apps/native/CLAUDE.md` under "Responsive layout: the mid-width overflow trap",
+  together with the rule that a breakpoint must be *measured*
+  (`IntrinsicWidth` + `tester.getSize`) rather than guessed. Flutter treats a
+  `RenderFlex` overflow as an error, not as harmless clipping, and none of this is
+  visible in a 1440px manual check — hence the mandatory width-sweep test
+  (`test/features/home/presentation/pages/home_screen_responsive_test.dart`) now
+  required by every Phase 2/3 task's DoD.
+- 2026-08-21 — **Decision: three tiers, using the two boundaries already measured.**
+  `mobile` < 700, `tablet` 700–1080, `desktop` ≥ 1080, expressed as a `ScreenTier`
+  enum in P1-4. 700 is the pre-existing `mobileBreakpoint`; 1080 is
+  `headerNavBreakpoint`, chosen with headroom over the measured 1017.25px for longer
+  translations and larger system text scales. Picked over inventing round numbers
+  (960/1280) so the constants keep matching a real measurement. **Open:** what the
+  tablet tier actually *looks like* — there is no tablet design export, only the two
+  ends of the range. P1-5 decides it and must record the choices here.
+- 2026-08-21 — **P2-1 done.** Notable outcomes, all written up in full under the
+  task itself: the `UploadDropzone` widget lives in `lib/app/widgets/upload/`, not
+  the `lib/core/widgets/upload/` the plan named, because it needs `PrimaryButton` +
+  `BuildContextExtension` from `lib/app/` and `architecture.md` forbids `core/`
+  importing `app/` (owner approved; the service and model did stay in `core/`);
+  `desktop_drop` is pinned to exactly **0.7.1** because 0.8.0's Android gradle module
+  breaks `flutter build apk`; `file_picker` v12's API is
+  `FilePicker.pickFile(...) → PlatformFile?`, not the `FilePicker.platform.pickFiles`
+  + `FilePickerResult` shape older examples show; macOS needs
+  `com.apple.security.files.user-selected.read-write` in both entitlements files.
+- 2026-08-21 — **A widget-test harness now exists and every UI task should use it:**
+  `test/helpers/widget_test_harness.dart` (`initializeTestLocalization`,
+  `registerAppDependencies`/`resetAppDependencies`, `pumpLocalized(..., surfaceSize:)`).
+  It exists because three separate things bite any test that pumps a real screen:
+  screens resolve `ThemeService`/cubits from GetIt in `initState`,
+  `EasyLocalization.ensureInitialized` needs `SharedPreferences.setMockInitialValues`
+  first, and the translation asset loads off the *real* event loop so the pump has to
+  sit inside `tester.runAsync`. It also defaults the surface to 1440x1024, because
+  `flutter_test`'s own 800x600 default silently lands inside the tablet tier. The four
+  pre-existing tests that were failing for exactly these reasons were fixed on the
+  same day.
 
 - 2026-08-21 — Initial plan drafted: all 11 tools call `apps/api` over HTTP, no
   client-side PDF processing (matches `apps/native/README.md`'s original
