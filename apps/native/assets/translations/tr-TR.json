@@ -64,7 +64,8 @@
   "progress": {
     "title": "İşleniyor",
     "processing": "İşleniyor...",
-    "percent": "{percent}%"
+    "percent": "{percent}%",
+    "hint": "Bu işlem birkaç saniye sürebilir."
   },
   "result": {
     "title": "Tamamlandı",

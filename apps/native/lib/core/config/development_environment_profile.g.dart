@@ -14,5 +14,5 @@ final class _DevelopmentEnvironment {
 
   static const String clientId = 'doclyvo-mobile-dev';
 
-  static const String clientSecret = 'dev-secret-key';
+  static const String clientSecret = 'your-dev-secret-here';
 }

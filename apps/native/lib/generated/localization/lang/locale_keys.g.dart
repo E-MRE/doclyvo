@@ -64,6 +64,7 @@ abstract class  LocaleKeys {
   static const progress_title = 'progress.title';
   static const progress_processing = 'progress.processing';
   static const progress_percent = 'progress.percent';
+  static const progress_hint = 'progress.hint';
   static const progress = 'progress';
   static const result_title = 'result.title';
   static const result_success = 'result.success';

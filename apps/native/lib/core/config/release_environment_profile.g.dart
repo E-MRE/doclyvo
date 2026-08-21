@@ -10,9 +10,9 @@ part of 'release_environment_profile.dart';
 // ignore_for_file: type=lint
 // generated_from: ../../.env-templates/release.env
 final class _ReleaseEnvironment {
-  static const String baseUrl = 'https://api.doclyvo.com';
+  static const String baseUrl = 'https://doclyvo-api.onrender.com';
 
   static const String clientId = 'doclyvo-mobile-release';
 
-  static const String clientSecret = 'release-secret-key';
+  static const String clientSecret = 'your-release-secret-here';
 }

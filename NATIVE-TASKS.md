@@ -1,9 +1,8 @@
 # Doclyvo Native (Flutter) — Task Breakdown
 
-Status (2026-08-21): **Phase 0 complete, Phase 1 complete, P2-1 complete.** Next up
-is P1-4 → P1-5 (the responsive tier system and the home screen's tablet layout),
-which are cross-cutting prerequisites for everything still open — see the note under
-Phase 1. Remaining: P2-2…P2-4, all of Phase 3A/3B, all of Phase 4.
+Status (2026-08-21): **Phase 0 complete, Phase 1 complete (including P1-4/P1-5's
+responsive tier system and home tablet layout), P2-1 complete, P2-2 complete.**
+Remaining: P2-3, P2-4, all of Phase 3A/3B, all of Phase 4.
 
 **Purpose of this file:** each task below is meant to be handed to a **separate,
 fresh Claude Code session with empty conversation context**. A session working a
@@ -114,6 +113,34 @@ OCR, PDF-to-Word) call it — point it at the deployed backend for release and
 
 **Definition of done:** build_runner generates the env files without error;
 `Configurations` exposes the API base URL correctly for both profiles.
+
+**Fixed (2026-08-21).** The `.env-templates/` directory itself is gitignored
+(`.gitignore` line 30) — deliberately, this was never a bug, it's the same
+per-developer-local-secrets pattern as `apps/api/.env.example` and
+`apps/web/.env.example`. A committed **example** already existed at
+`.env-templates.example/{development,release}.env.example` documenting the
+expected keys — what was actually missing was the real, gitignored
+`.env-templates/` directory itself; nobody had run the one-time "copy the
+example, fill it in" step P0-2 should have documented but didn't. Created
+`.env-templates/development.env` and `.env-templates/release.env` at the **repo
+root** (not `apps/native/`) from that example, with one value corrected:
+`envied`'s `@Envied(path: '../../.env-templates/...')` is resolved relative to
+the **process's working directory** when `build_runner` runs (`apps/native/`),
+not relative to the annotated `.dart` file, so the path lands one level above
+`apps/native/` — worth spelling out since it's easy to misread as
+`apps/native/.env-templates/`. `CLIENT_ID`/`CLIENT_SECRET` stayed as the
+example's placeholder values (they're declared on `EnvironmentProfile` but
+unused anywhere else in `lib/` — this app has no OAuth/account system; revisit
+if/when they get an actual purpose). `BASE_URL` for release: the example had
+`https://api.doclyvo.com`, which does not resolve to anything found in this
+repo (no render.yaml/DNS reference) — used `https://doclyvo-api.onrender.com`
+instead, the actually-deployed URL per `docs/deployment.md`. If `api.doclyvo.com`
+is a real planned custom domain, update the `.example` file and this one
+together once it's live. Also: build_runner's own incremental cache doesn't
+treat the `.env` file as a tracked input, so after creating/editing it, a plain
+`dart run build_runner build --delete-conflicting-outputs` still served the
+stale cached error — `dart run build_runner clean` first, then build, is what
+actually picks up a new/changed `.env` file.
 
 ### P0-3 — Dependency injection skeleton
 
@@ -483,7 +510,7 @@ screens are Phase 3), so the file-picker dialog has only been verified to *build
 macOS and Android — nobody has clicked it on a real device. Verify it during the
 first Phase 3A tool. Its `isCompact` bool is also still a bool; P1-4 converts it.
 
-### P2-2 — Progress indicator widget
+### P2-2 — Progress indicator widget ✅ done (2026-08-21)
 
 **Depends on:** P0-6, P0-7.
 
@@ -505,6 +532,32 @@ stays consistent across all 11 tools.
 **Definition of done:** bar animates smoothly, respects reduced-motion, percentage
 text matches bar fill, works for both a real async duration and a simulated one;
 takes the tier from P1-4 (no `isMobile` bool) and ships a width-sweep test.
+
+**What actually shipped:** `lib/app/widgets/progress/progress_indicator.dart` —
+`ToolProgressIndicator` (bytes-in style, not `ProgressIndicator`: that name
+collides with Flutter's own `material.dart` class). Same layer deviation as
+`UploadDropzone` (P2-1): it needs `BuildContextExtension.textSoftColor`, and
+`core/` may not import `app/`, so it lives in `lib/app/widgets/`, not the
+`lib/core/widgets/` the plan named. `progress`/`label`/`hint`/`tier` are all
+caller-controlled; `label` defaults to `progress.processing` and `hint` to a new
+`progress.hint` key ("Bu işlem birkaç saniye sürebilir."), both added to
+`tr-TR.json`. Percentage and bar-fill width both animate via one
+`TweenAnimationBuilder<double>` (250ms, matching the web's bar-width transition)
+so they can never visually disagree. The shimmer sweep is a real
+`AnimationController` (`SingleTickerProviderStateMixin`, 1.3s loop, matching
+`apps/web`'s `animate-shimmer-sweep`) that is only `repeat()`-ed when
+`MediaQuery.disableAnimations` is false, checked in `didChangeDependencies` — not
+just visually hidden under reduced motion, actually stopped. **Test-writing note
+for later widgets with a looping `AnimationController`:** `pumpLocalized` ends in
+`pumpAndSettle`, which hangs forever against a repeating controller — width-sweep
+and static-content tests must force `MediaQuery(data: MediaQueryData
+(disableAnimations: true))` around the widget under test; a test that wants to
+verify the animation actually ticks has to hand-roll `pumpWidget` +
+`tester.runAsync` + explicit `tester.pump(duration)` calls instead of using the
+harness helper. See `test/app/widgets/progress/progress_indicator_test.dart`.
+Regenerating `LocaleKeys` initially failed because P0-2's `.env` files were
+missing — **fixed same-day, see the P0-2 section above** for the actual cause
+(a path-resolution gotcha in `envied`, not a missing task) and the fix.
 
 ### P2-3 — Result panel widget
 
@@ -752,9 +805,12 @@ Work these only after all 8 Phase 3A + 3 Phase 3B tools are done.
   revisited once the 8 client-side tools have shipped and proven the package out.
 - PDF preview/thumbnail rendering: resolved — `pdf_manipulator` covers this too
   (its "render pages" capability), no separate package needed.
-- API base URL for development: **not yet set** — decide in P0-2 (needs a
-  reachable `apps/api` instance, local or deployed; only matters for the 3 Phase
-  3B tools now).
+- API base URL for development: **resolved 2026-08-21** — `http://localhost:8000`
+  (matches `apps/api/README.md`'s default `uvicorn` port) for development,
+  `https://doclyvo-api.onrender.com` (per `docs/deployment.md`) for release. See
+  the P0-2 section's "Fixed" note for where these actually live
+  (`.env-templates/` at the repo root) and why the annotation's relative path is
+  easy to misread.
 - Sign's audit-log/hash parity (client-side signature placement vs. the existing
   web feature's optional backend-backed audit trail): **not yet decided** — see
   P3A-8's Notes column. Decide during that task, record the choice here.
@@ -843,3 +899,18 @@ Work these only after all 8 Phase 3A + 3 Phase 3B tools are done.
   `HomeHeader`, `HomeHeroSection`, and `UploadPreviewCard` needed no changes —
   their existing `tier == mobile` branches already produced the desktop
   treatment at the tablet tier once P1-4 introduced the three-tier enum.
+- 2026-08-21 — **P2-2 done.** `ToolProgressIndicator`
+  (`lib/app/widgets/progress/progress_indicator.dart`) followed P2-1's layer
+  deviation for the same reason (`BuildContextExtension` needed, `core/` can't
+  import `app/`). Along the way, `dart run build_runner build` failed
+  (`envied_generator`: missing `.env` files) because nobody had done P0-2's
+  local one-time setup — **fixed the same day, see the P0-2 section above**;
+  it was gitignored-local-secrets working as designed, not a broken task.
+  Separately: any widget with a *looping* `AnimationController` (this one's shimmer sweep)
+  cannot be tested through `pumpLocalized`, because it ends in `pumpAndSettle`,
+  which never returns against a repeating animation — force
+  `MediaQuery(data: MediaQueryData(disableAnimations: true))` around such a
+  widget in layout/content tests, and hand-roll `pumpWidget` + `runAsync` +
+  explicit `tester.pump(duration)` calls for the one test that wants to verify
+  the animation actually ticks. See
+  `test/app/widgets/progress/progress_indicator_test.dart`.
