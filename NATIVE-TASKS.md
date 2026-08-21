@@ -2,8 +2,8 @@
 
 Status (2026-08-21): **Phase 0 complete, Phase 1 complete (including P1-4/P1-5's
 responsive tier system and home tablet layout), P2-1 complete, P2-2 complete,
-P2-3 complete.**
-Remaining: P2-4, all of Phase 3A/3B, all of Phase 4.
+P2-3 complete, P2-4 complete.**
+Remaining: all of Phase 3A/3B, all of Phase 4.
 
 **Purpose of this file:** each task below is meant to be handed to a **separate,
 fresh Claude Code session with empty conversation context**. A session working a
@@ -616,7 +616,7 @@ re-derive them:
   the upload feature's file model just for its static formatting logic
   would be a heavier coupling than the four-line function it would save.
 
-### P2-4 — Error state widget
+### P2-4 — Error state widget ✅ done (2026-08-21)
 
 **Depends on:** P0-6, P0-7, P0-9.
 
@@ -628,6 +628,22 @@ retry button, token-driven error color).
 **Definition of done:** retry callback fires; message accepts a localized string;
 takes the tier from P1-4 and ships a width-sweep test — a long error message is
 exactly the kind of content that overflows a fixed-height box at tablet widths.
+
+**What actually shipped:** `ErrorStateWidget` lives in
+`lib/core/widgets/errors/error_state_widget.dart` as planned. The widget:
+- Takes `message` (required, accepts localized strings), `onRetry` (callback), and
+  `tier` (optional, defaults to desktop) as parameters.
+- Uses `theme.colorScheme.error` for the icon color and button background.
+- Handles responsive padding based on `tier` (mobile uses `Sizes.lg`, others use
+  `Sizes.xl`).
+- Wraps the text in a `ConstrainedBox` with a `maxWidth` to prevent long messages
+  from overflowing on narrow screens, plus a `SingleChildScrollView` for extra
+  safety.
+- Includes a simple `_RetryButton` (private stateful widget) that shows the error
+  color with a press-state visual feedback.
+- Test suite (`test/core/widgets/errors/error_state_widget_test.dart`) covers:
+  message display, retry callback firing, long message handling, mobile/desktop tier
+  rendering, and a 12-width responsive sweep (360–1920px) — all 18 tests pass.
 
 ---
 
@@ -963,3 +979,15 @@ Work these only after all 8 Phase 3A + 3 Phase 3B tools are done.
   needing `Wrap`. `beforeSizeInBytes`/`afterSizeInBytes` are optional and must
   come as a pair — omit both for tools with no meaningful before/after size
   (e.g. Merge).
+- 2026-08-21 — **P2-4 done.** `ErrorStateWidget`
+  (`lib/core/widgets/errors/error_state_widget.dart`) lives in `lib/core/widgets/`
+  as the task specified, not a layer deviation like P2-1/P2-2/P2-3. The widget is
+  simple enough (theme colors + basic layout) that it doesn't need `BuildContextExtension`
+  or other `app/` imports — it takes `tier` as a parameter instead of accessing it
+  via an extension. The retry button is a simple internal stateful widget with
+  press-state feedback (darkened background) — not a reuse of `PrimaryButton`,
+  which would create an unnecessary dependency if this widget ever needs to live in
+  `lib/core/` for a future split. Text is wrapped in `ConstrainedBox` +
+  `SingleChildScrollView` to handle long error messages on narrow widths; the
+  width-sweep test (12 widths, 360–1920px) confirms it holds even with very long
+  Turkish text.
