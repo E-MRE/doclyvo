@@ -7,6 +7,7 @@ import 'package:doclyvo/core/network/dio_network_manager.dart';
 import 'package:doclyvo/core/network/network_service.dart';
 import 'package:doclyvo/core/pdf/pdf_engine_service.dart';
 import 'package:doclyvo/core/pdf/pdf_manipulator_engine_service.dart';
+import 'package:doclyvo/features/home/presentation/cubit/home_cubit.dart';
 
 mixin AppDependencyRegisterMixin {
   void registerDependencies(DependencyInjector injector) {
@@ -56,5 +57,7 @@ mixin AppDependencyRegisterMixin {
 
   void _registerRepositories(DependencyInjector injector) {}
 
-  void _registerCubits(DependencyInjector injector) {}
+  void _registerCubits(DependencyInjector injector) {
+    injector.registerFactory<HomeCubit>(HomeCubit.new);
+  }
 }
