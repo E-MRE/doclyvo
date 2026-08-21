@@ -9,6 +9,9 @@ import 'package:doclyvo/core/pdf/pdf_engine_service.dart';
 import 'package:doclyvo/core/pdf/pdf_manipulator_engine_service.dart';
 import 'package:doclyvo/core/widgets/upload/file_picker_service.dart';
 import 'package:doclyvo/core/widgets/upload/platform_file_picker_manager.dart';
+import 'package:doclyvo/features/compress/data/repositories/compress_repository.dart';
+import 'package:doclyvo/features/compress/data/repositories/pdf_engine_compress_repository.dart';
+import 'package:doclyvo/features/compress/presentation/cubit/compress_cubit.dart';
 import 'package:doclyvo/features/home/presentation/cubit/home_cubit.dart';
 
 mixin AppDependencyRegisterMixin {
@@ -62,9 +65,17 @@ mixin AppDependencyRegisterMixin {
 
   void _registerReleaseDependencies(DependencyInjector injector) {}
 
-  void _registerRepositories(DependencyInjector injector) {}
+  void _registerRepositories(DependencyInjector injector) {
+    injector.registerFactory<CompressRepository>(
+      () => PdfEngineCompressRepository(injector.get<PdfEngineService>()),
+    );
+  }
 
   void _registerCubits(DependencyInjector injector) {
-    injector.registerFactory<HomeCubit>(HomeCubit.new);
+    injector
+      ..registerFactory<HomeCubit>(HomeCubit.new)
+      ..registerFactory<CompressCubit>(
+        () => CompressCubit(injector.get<CompressRepository>()),
+      );
   }
 }

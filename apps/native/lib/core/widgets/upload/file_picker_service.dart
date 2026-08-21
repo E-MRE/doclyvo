@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:doclyvo/core/error/file_picker_exception.dart';
 import 'package:doclyvo/core/widgets/upload/models/picked_pdf_file.dart';
 
@@ -31,4 +33,11 @@ abstract class FilePickerService {
   /// Whether [fileName] carries the `.pdf` extension, case-insensitively.
   bool isPdfFileName(String fileName) =>
       fileName.toLowerCase().endsWith('.$pdfExtension');
+
+  /// Writes a client-side tool's output [bytes] to disk as [fileName].
+  ///
+  /// Desktop shows a native file-save dialog; mobile hands the platform its
+  /// own save/share flow. Returns `false` when the user cancels — that is a
+  /// normal outcome, not a failure.
+  Future<bool> savePdf({required String fileName, required Uint8List bytes});
 }

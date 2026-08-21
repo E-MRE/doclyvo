@@ -82,5 +82,23 @@ abstract class  LocaleKeys {
   static const error_networkError = 'error.networkError';
   static const error_invalidFile = 'error.invalidFile';
   static const error = 'error';
+  static const compress_pageTitle = 'compress.pageTitle';
+  static const compress_pageSubtitle = 'compress.pageSubtitle';
+  static const compress_selectFileFirst = 'compress.selectFileFirst';
+  static const compress_qualitySectionTitle = 'compress.qualitySectionTitle';
+  static const compress_qualityLowTitle = 'compress.qualityLowTitle';
+  static const compress_qualityLowHint = 'compress.qualityLowHint';
+  static const compress_qualityRecommendedTitle = 'compress.qualityRecommendedTitle';
+  static const compress_qualityRecommendedHint = 'compress.qualityRecommendedHint';
+  static const compress_qualityHighTitle = 'compress.qualityHighTitle';
+  static const compress_qualityHighHint = 'compress.qualityHighHint';
+  static const compress_startAction = 'compress.startAction';
+  static const compress_processingAction = 'compress.processingAction';
+  static const compress_processingLabel = 'compress.processingLabel';
+  static const compress_resultMessage = 'compress.resultMessage';
+  static const compress_newOperation = 'compress.newOperation';
+  static const compress_changeFile = 'compress.changeFile';
+  static const compress_saveFailed = 'compress.saveFailed';
+  static const compress = 'compress';
 
 }

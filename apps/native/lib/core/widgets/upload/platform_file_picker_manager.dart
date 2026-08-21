@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:doclyvo/core/error/file_picker_exception.dart';
 import 'package:doclyvo/core/widgets/upload/file_picker_service.dart';
@@ -70,6 +71,26 @@ final class PlatformFilePickerManager extends FilePickerService {
         kind: FilePickerErrorKind.unreadable,
       );
     }
+  }
+
+  @override
+  Future<bool> savePdf({
+    required String fileName,
+    required Uint8List bytes,
+  }) async {
+    Uri? savedUri;
+    try {
+      savedUri = await FilePicker.saveFile(
+        fileName: fileName,
+        bytes: bytes,
+        mimeType: 'application/pdf',
+        allowedExtensions: const [FilePickerService.pdfExtension],
+        type: FileType.custom,
+      );
+    } on Exception catch (error) {
+      throw FilePickerException('$error');
+    }
+    return savedUri != null;
   }
 
   Future<PickedPdfFile> _toPickedFile(PlatformFile file) async {

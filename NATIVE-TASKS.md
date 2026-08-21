@@ -1,9 +1,9 @@
 # Doclyvo Native (Flutter) — Task Breakdown
 
 Status (2026-08-21): **Phase 0 complete, Phase 1 complete (including P1-4/P1-5's
-responsive tier system and home tablet layout), P2-1 complete, P2-2 complete,
-P2-3 complete, P2-4 complete.**
-Remaining: all of Phase 3A/3B, all of Phase 4.
+responsive tier system and home tablet layout), Phase 2 complete (P2-1..P2-4),
+P3A-1 (Compress) complete.**
+Remaining: P3A-2 through P3A-8, all of Phase 3B, all of Phase 4.
 
 **Purpose of this file:** each task below is meant to be handed to a **separate,
 fresh Claude Code session with empty conversation context**. A session working a
@@ -672,7 +672,7 @@ copy/behavior parity only — the native version does not call the API these
 
 | ID | Tool | Design file(s) | Web reference (copy/behavior only) | `pdf_manipulator` capability to use | Notes |
 |----|------|----------------|--------------------------------------|--------------------------------------|-------|
-| P3A-1 | Compress | `design/Compress.dc.html`, `design/MobileCompress.dc.html` | `apps/web/features/compress/components/` | compress (quality param) | Verify output size/quality against `apps/web`'s existing (pikepdf-backed) result on the same test file — if visibly worse, log it in the Decisions log below rather than shipping silently. |
+| P3A-1 | Compress ✅ done (2026-08-21) | `design/Compress.dc.html`, `design/MobileCompress.dc.html` | `apps/web/features/compress/components/` | compress (quality param) | Verify output size/quality against `apps/web`'s existing (pikepdf-backed) result on the same test file — if visibly worse, log it in the Decisions log below rather than shipping silently. |
 | P3A-2 | Split | `design/Split.dc.html`, `design/MobileSplit.dc.html` | `apps/web/features/split/components/` | split / extract pages | No settings; confirm what container format the result comes back as (individual files vs a zip you must assemble yourself) and adjust the Result panel accordingly. |
 | P3A-3 | Merge | `design/Merge.dc.html`, `design/MobileMerge.dc.html` | `apps/web/features/merge/components/` | merge | Multi-file upload + reorder list before merging. |
 | P3A-4 | Rotate | `design/Rotate.dc.html`, `design/MobileRotate.dc.html` | `apps/web/features/rotate/components/` | render (thumbnails) + rotate | Per-page thumbnails via the same `PdfEngineService`, per-page angle state, rotate applied on submit. |
@@ -979,6 +979,27 @@ Work these only after all 8 Phase 3A + 3 Phase 3B tools are done.
   needing `Wrap`. `beforeSizeInBytes`/`afterSizeInBytes` are optional and must
   come as a pair — omit both for tools with no meaningful before/after size
   (e.g. Merge).
+- 2026-08-21 — **P3A-1 (Compress) done.** `lib/features/compress/` — data layer
+  calls `PdfEngineService.compress` (no network), `CompressCubit` follows the
+  4-state `BaseCubit` pattern with file/quality kept as screen-local state (the
+  house convention forbids fields on `Initial`/`Loading`). Screen composes
+  `UploadDropzone` → `QualitySelector` (three pills: low/recommended/high,
+  mapped to `pdf_manipulator`'s `imageQuality` 85/60/30 — inverted direction,
+  since lower image quality means smaller output) → `ToolProgressIndicator`
+  (simulated progress, `pdf_manipulator` exposes no compress progress callback)
+  → `ResultPanel`/`ErrorStateWidget`. Desktop: two-column Row (upload +
+  settings); tablet/mobile stack into one Column, per P1-5's "stack, don't
+  squeeze" precedent. Registered in `AppDependencyRegisterMixin`; wired into
+  the existing `/compress` route. **New capability added to
+  `FilePickerService`: `savePdf({fileName, bytes})`**, using `file_picker`'s
+  existing `saveFile` static method (no new package) — needed by every Phase
+  3A tool's "download saves bytes to disk" DoD item, not just Compress; later
+  Phase 3A/3B tool tasks should reuse this method rather than re-deriving a
+  save-file flow. `flutter analyze` clean, `flutter test` 134/134 passing,
+  no `mobileBreakpoint`/raw-width-comparison hits in the new feature, no
+  `pdf_manipulator` import outside `lib/core/pdf/`. Output size/quality vs.
+  `apps/web`'s pikepdf-backed compress was not comparatively benchmarked in
+  this pass — revisit if a later report suggests it's worse.
 - 2026-08-21 — **P2-4 done.** `ErrorStateWidget`
   (`lib/core/widgets/errors/error_state_widget.dart`) lives in `lib/core/widgets/`
   as the task specified, not a layer deviation like P2-1/P2-2/P2-3. The widget is

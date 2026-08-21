@@ -30,6 +30,12 @@ final class _FakeFilePickerService extends FilePickerService {
   @override
   Future<PickedPdfFile> resolveDroppedPath(String path) async =>
       throw UnimplementedError();
+
+  @override
+  Future<bool> savePdf({
+    required String fileName,
+    required Uint8List bytes,
+  }) async => throw UnimplementedError();
 }
 
 PickedPdfFile _pdf({String name = 'rapor-2024.pdf', int size = 9017065}) =>

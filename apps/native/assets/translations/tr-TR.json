@@ -84,5 +84,24 @@
     "unknownError": "Bilinmeyen bir hata oluştu",
     "networkError": "Ağ hatası",
     "invalidFile": "Geçersiz dosya"
+  },
+  "compress": {
+    "pageTitle": "PDF Sıkıştır",
+    "pageSubtitle": "Dosya boyutunu kaliteyi koruyarak küçült.",
+    "selectFileFirst": "Sıkıştırma seçeneklerini görmek için önce bir PDF yükle.",
+    "qualitySectionTitle": "Sıkıştırma seviyesi",
+    "qualityLowTitle": "Düşük Sıkıştırma",
+    "qualityLowHint": "En yüksek kalite",
+    "qualityRecommendedTitle": "Önerilen",
+    "qualityRecommendedHint": "Kalite ve boyut dengesi",
+    "qualityHighTitle": "Yüksek Sıkıştırma",
+    "qualityHighHint": "En küçük boyut",
+    "startAction": "Sıkıştır",
+    "processingAction": "İşleniyor…",
+    "processingLabel": "Sıkıştırılıyor…",
+    "resultMessage": "{fileName} sıkıştırıldı ve indirilmeye hazır.",
+    "newOperation": "Yeni İşlem",
+    "changeFile": "Değiştir",
+    "saveFailed": "Dosya kaydedilemedi"
   }
 }
