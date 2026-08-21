@@ -1,6 +1,7 @@
 import 'package:doclyvo/app/constants/route_constants.dart';
 import 'package:doclyvo/app/utils/builders/transition_page_builder.dart';
 import 'package:doclyvo/app/widgets/placeholder_screen.dart';
+import 'package:doclyvo/features/home/presentation/pages/home_screen.dart';
 import 'package:go_router/go_router.dart';
 
 final router = GoRouter(
@@ -8,7 +9,7 @@ final router = GoRouter(
     GoRoute(
       path: RouteConstants.home,
       pageBuilder: (_, _) => TransitionPageBuilder.fadeTransition(
-        child: const PlaceholderScreen(title: 'Home'),
+        child: const HomeScreen(),
       ),
     ),
     GoRoute(
