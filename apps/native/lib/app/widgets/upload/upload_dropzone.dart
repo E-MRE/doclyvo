@@ -1,4 +1,5 @@
 import 'package:desktop_drop/desktop_drop.dart';
+import 'package:doclyvo/app/constants/responsive_constants.dart';
 import 'package:doclyvo/app/extensions/build_context_extension.dart';
 import 'package:doclyvo/app/widgets/buttons/primary_button.dart';
 import 'package:doclyvo/core/error/file_picker_exception.dart';
@@ -30,7 +31,7 @@ final class UploadDropzone extends StatefulWidget {
     required this.onFileSelected,
     this.selectedFile,
     this.onFileRemoved,
-    this.isCompact = false,
+    this.tier = ScreenTier.desktop,
     this.enabled = true,
     super.key,
   });
@@ -48,8 +49,9 @@ final class UploadDropzone extends StatefulWidget {
   /// Called when the user taps the remove button on the selected tile.
   final VoidCallback? onFileRemoved;
 
-  /// Tighter paddings and a smaller icon capsule, for mobile layouts.
-  final bool isCompact;
+  /// The current [ScreenTier]. Only `mobile` gets tighter paddings and a
+  /// smaller icon capsule — `tablet` maps to the desktop layout for now.
+  final ScreenTier tier;
 
   /// When `false`, picking and dropping are both ignored (e.g. while a tool is
   /// processing).
@@ -138,7 +140,7 @@ final class _UploadDropzoneState extends State<UploadDropzone> {
       children: [
         if (selectedFile == null)
           _IdleDropzone(
-            isCompact: widget.isCompact,
+            isCompact: widget.tier == ScreenTier.mobile,
             isDragging: _isDragging,
             isEnabled: _isInteractive,
             showDragHint: _supportsDragDrop,

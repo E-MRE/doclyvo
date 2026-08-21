@@ -1,3 +1,4 @@
+import 'package:doclyvo/app/constants/responsive_constants.dart';
 import 'package:doclyvo/app/extensions/build_context_extension.dart';
 import 'package:doclyvo/app/widgets/buttons/primary_button.dart';
 import 'package:doclyvo/app/widgets/buttons/secondary_button.dart';
@@ -9,17 +10,18 @@ import 'package:flutter/material.dart';
 
 final class HomeHeroSection extends StatelessWidget {
   const HomeHeroSection({
-    required this.isMobile,
+    required this.tier,
     required this.onBrowseTools,
     super.key,
   });
 
-  final bool isMobile;
+  final ScreenTier tier;
   final VoidCallback onBrowseTools;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isMobile = tier == ScreenTier.mobile;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

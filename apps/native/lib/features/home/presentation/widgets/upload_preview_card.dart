@@ -1,3 +1,4 @@
+import 'package:doclyvo/app/constants/responsive_constants.dart';
 import 'package:doclyvo/app/extensions/build_context_extension.dart';
 import 'package:doclyvo/app/widgets/buttons/primary_button.dart';
 import 'package:doclyvo/core/utils/constants/app_insets.dart';
@@ -8,17 +9,18 @@ import 'package:flutter/material.dart';
 
 final class UploadPreviewCard extends StatelessWidget {
   const UploadPreviewCard({
-    required this.isMobile,
+    required this.tier,
     required this.onSelectFile,
     super.key,
   });
 
-  final bool isMobile;
+  final ScreenTier tier;
   final VoidCallback onSelectFile;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isMobile = tier == ScreenTier.mobile;
 
     return Container(
       padding: isMobile ? AppInsets.all16 : AppInsets.all24,

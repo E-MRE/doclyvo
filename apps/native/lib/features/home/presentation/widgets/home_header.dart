@@ -18,22 +18,20 @@ import 'package:flutter/material.dart';
 /// contents.
 final class HomeHeader extends StatelessWidget {
   const HomeHeader({
-    required this.isMobile,
+    required this.tier,
     required this.themeService,
     super.key,
   });
 
-  final bool isMobile;
+  final ScreenTier tier;
   final ThemeService themeService;
 
   @override
   Widget build(BuildContext context) {
-    // Read the width the same way HomeScreen picks `isMobile`, so the two
-    // tier decisions can never disagree about what the window is doing.
-    final showNavLinks =
-        !isMobile &&
-        MediaQuery.sizeOf(context).width >=
-            ResponsiveConstants.headerNavBreakpoint;
+    final isMobile = tier == ScreenTier.mobile;
+    // Nav links only fit the full desktop header; the tablet tier keeps the
+    // slimmed-down contents, same as mobile.
+    final showNavLinks = tier == ScreenTier.desktop;
 
     return Container(
       padding: isMobile

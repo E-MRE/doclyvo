@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:doclyvo/app/app_dependency.dart';
-import 'package:doclyvo/app/constants/responsive_constants.dart';
 import 'package:doclyvo/app/extensions/build_context_extension.dart';
 import 'package:doclyvo/app/theme/theme_service.dart';
 import 'package:doclyvo/core/utils/constants/app_insets.dart';
@@ -48,8 +47,8 @@ final class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isMobile =
-        MediaQuery.sizeOf(context).width < ResponsiveConstants.mobileBreakpoint;
+    final tier = context.screenTier;
+    final isMobile = context.isMobile;
 
     return BlocProvider<HomeCubit>(
       create: (_) => AppDependency.injector.get<HomeCubit>(),
@@ -57,7 +56,7 @@ final class _HomeScreenState extends State<HomeScreen> {
         body: SafeArea(
         child: Column(
           children: [
-            HomeHeader(isMobile: isMobile, themeService: _themeService),
+            HomeHeader(tier: tier, themeService: _themeService),
             Expanded(
               child: SingleChildScrollView(
                 padding: isMobile ? AppInsets.all16 : AppInsets.all24,
@@ -66,18 +65,18 @@ final class _HomeScreenState extends State<HomeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           HomeHeroSection(
-                            isMobile: true,
+                            tier: tier,
                             onBrowseTools: _scrollToTools,
                           ),
                           const SizedBox(height: Sizes.xl),
                           UploadPreviewCard(
-                            isMobile: true,
+                            tier: tier,
                             onSelectFile: () {},
                           ),
                           const SizedBox(height: Sizes.xxl),
                           _ToolsSection(key: _toolsSectionKey, theme: theme),
                           const SizedBox(height: Sizes.lg),
-                          const ToolGrid(isMobile: true),
+                          ToolGrid(tier: tier),
                         ],
                       )
                     : Column(
@@ -88,7 +87,7 @@ final class _HomeScreenState extends State<HomeScreen> {
                               Expanded(
                                 flex: 6,
                                 child: HomeHeroSection(
-                                  isMobile: false,
+                                  tier: tier,
                                   onBrowseTools: _scrollToTools,
                                 ),
                               ),
@@ -96,7 +95,7 @@ final class _HomeScreenState extends State<HomeScreen> {
                               Expanded(
                                 flex: 5,
                                 child: UploadPreviewCard(
-                                  isMobile: false,
+                                  tier: tier,
                                   onSelectFile: () {},
                                 ),
                               ),
@@ -105,7 +104,7 @@ final class _HomeScreenState extends State<HomeScreen> {
                           const SizedBox(height: Sizes.xxl),
                           _ToolsSection(key: _toolsSectionKey, theme: theme),
                           const SizedBox(height: Sizes.xl),
-                          const ToolGrid(isMobile: false),
+                          ToolGrid(tier: tier),
                         ],
                       ),
               ),

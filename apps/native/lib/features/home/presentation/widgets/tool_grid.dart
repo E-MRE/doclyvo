@@ -1,3 +1,4 @@
+import 'package:doclyvo/app/constants/responsive_constants.dart';
 import 'package:doclyvo/core/utils/constants/sizes.dart';
 import 'package:doclyvo/features/home/domain/models/tool_definition.dart';
 import 'package:doclyvo/features/home/domain/tool_catalog.dart';
@@ -8,14 +9,14 @@ import 'package:go_router/go_router.dart';
 part 'tool_grid/_tool_cell.dart';
 
 final class ToolGrid extends StatelessWidget {
-  const ToolGrid({required this.isMobile, super.key});
+  const ToolGrid({required this.tier, super.key});
 
   static const double _desktopRowHeight = 150;
   static const double _mobileRowHeight = 120;
   static const int _desktopColumns = 4;
   static const int _mobileColumns = 2;
 
-  final bool isMobile;
+  final ScreenTier tier;
 
   List<_ToolCell> get _desktopCells => [
     _ToolCell(kToolCatalog[0], column: 0, row: 0, columnSpan: 2, rowSpan: 2),
@@ -47,6 +48,8 @@ final class ToolGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The tablet tier maps to the desktop grid for now — P1-5 designs its own.
+    final isMobile = tier == ScreenTier.mobile;
     final cells = isMobile ? _mobileCells : _desktopCells;
     final columns = isMobile ? _mobileColumns : _desktopColumns;
     final rowHeight = isMobile ? _mobileRowHeight : _desktopRowHeight;

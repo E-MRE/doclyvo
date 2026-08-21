@@ -6,6 +6,8 @@
 // reports them as errors rather than clipping quietly. Any new home widget
 // should stay green here.
 
+import 'package:doclyvo/app/constants/responsive_constants.dart';
+import 'package:doclyvo/app/extensions/build_context_extension.dart';
 import 'package:doclyvo/app/theme/app_theme.dart';
 import 'package:doclyvo/features/home/presentation/pages/home_screen.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -25,6 +27,8 @@ void main() {
 
   for (final width in widths) {
     testWidgets('lays out without overflowing at ${width}px', (tester) async {
+      ScreenTier? reportedTier;
+
       await pumpLocalized(
         tester,
         (context) => MaterialApp(
@@ -32,12 +36,18 @@ void main() {
           localizationsDelegates: context.localizationDelegates,
           supportedLocales: context.supportedLocales,
           locale: context.locale,
-          home: const HomeScreen(),
+          home: Builder(
+            builder: (innerContext) {
+              reportedTier = innerContext.screenTier;
+              return const HomeScreen();
+            },
+          ),
         ),
         surfaceSize: Size(width, 900),
       );
 
       expect(tester.takeException(), isNull);
+      expect(reportedTier, ResponsiveConstants.tierForWidth(width));
     });
   }
 

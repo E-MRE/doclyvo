@@ -28,7 +28,7 @@ void main() {
         locale: context.locale,
         home: Scaffold(
           body: HomeHeader(
-            isMobile: width < ResponsiveConstants.mobileBreakpoint,
+            tier: ResponsiveConstants.tierForWidth(width),
             themeService: ThemeManager(),
           ),
         ),
@@ -52,14 +52,14 @@ void main() {
   testWidgets('shows the nav links only at or above the nav breakpoint', (
     tester,
   ) async {
-    await pumpHeader(tester, width: ResponsiveConstants.headerNavBreakpoint);
+    await pumpHeader(tester, width: ResponsiveConstants.desktopBreakpoint);
     expect(find.text(LocaleKeys.home_navAllTools.tr()), findsOneWidget);
     expect(find.text(LocaleKeys.home_navSecurity.tr()), findsOneWidget);
   });
 
   testWidgets('drops the nav links on the compact tier but keeps the '
       'wordmark and theme toggle', (tester) async {
-    await pumpHeader(tester, width: ResponsiveConstants.headerNavBreakpoint - 1);
+    await pumpHeader(tester, width: ResponsiveConstants.desktopBreakpoint - 1);
 
     expect(find.text(LocaleKeys.home_navAllTools.tr()), findsNothing);
     expect(find.text(LocaleKeys.appName.tr()), findsOneWidget);
