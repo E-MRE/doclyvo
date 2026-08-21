@@ -2,8 +2,9 @@
 
 Status (2026-08-21): **Phase 0 complete, Phase 1 complete (including P1-4/P1-5's
 responsive tier system and home tablet layout), Phase 2 complete (P2-1..P2-4),
-P3A-1 (Compress) complete, P3A-2 (Split) complete, P3A-3 (Merge) complete.**
-Remaining: P3A-4 through P3A-8, all of Phase 3B, all of Phase 4.
+P3A-1 (Compress) complete, P3A-2 (Split) complete, P3A-3 (Merge) complete,
+P3A-4 (Rotate) complete, P3A-5 (Reorder) complete, P3A-6 (Watermark) complete.**
+Remaining: P3A-7, P3A-8, all of Phase 3B, all of Phase 4.
 
 **Purpose of this file:** each task below is meant to be handed to a **separate,
 fresh Claude Code session with empty conversation context**. A session working a
@@ -675,9 +676,9 @@ copy/behavior parity only — the native version does not call the API these
 | P3A-1 | Compress ✅ done (2026-08-21) | `design/Compress.dc.html`, `design/MobileCompress.dc.html` | `apps/web/features/compress/components/` | compress (quality param) | Verify output size/quality against `apps/web`'s existing (pikepdf-backed) result on the same test file — if visibly worse, log it in the Decisions log below rather than shipping silently. |
 | P3A-2 | Split ✅ done (2026-08-21) | `design/Split.dc.html`, `design/MobileSplit.dc.html` | `apps/web/features/split/components/` | split / extract pages | No settings; confirm what container format the result comes back as (individual files vs a zip you must assemble yourself) and adjust the Result panel accordingly. |
 | P3A-3 | Merge ✅ done (2026-08-21) | `design/Merge.dc.html`, `design/MobileMerge.dc.html` | `apps/web/features/merge/components/` | merge | Multi-file upload + reorder list before merging. |
-| P3A-4 | Rotate | `design/Rotate.dc.html`, `design/MobileRotate.dc.html` | `apps/web/features/rotate/components/` | render (thumbnails) + rotate | Per-page thumbnails via the same `PdfEngineService`, per-page angle state, rotate applied on submit. |
-| P3A-5 | Reorder | `design/Reorder.dc.html`, `design/MobileReorder.dc.html` | `apps/web/features/reorder/components/` | render (thumbnails) + reorderPages | Per-page thumbnails; up/down arrow reordering. |
-| P3A-6 | Watermark | `design/Watermark.dc.html`, `design/MobileWatermark.dc.html` | `apps/web/features/watermark/components/` | watermark | Text + position/opacity presets; live preview can reuse the thumbnail-render capability on page 1. |
+| P3A-4 | Rotate ✅ done (2026-08-21) | `design/Rotate.dc.html`, `design/MobileRotate.dc.html` | `apps/web/features/rotate/components/` | render (thumbnails) + rotate | Per-page thumbnails via the same `PdfEngineService`, per-page angle state, rotate applied on submit. |
+| P3A-5 | Reorder ✅ done (2026-08-21) | `design/Reorder.dc.html`, `design/MobileReorder.dc.html` | `apps/web/features/reorder/components/` | render (thumbnails) + reorderPages | Per-page thumbnails; up/down arrow reordering. |
+| P3A-6 | Watermark ✅ done (2026-08-21) | `design/Watermark.dc.html`, `design/MobileWatermark.dc.html` | `apps/web/features/watermark/components/` | watermark | Text + position/opacity presets; live preview can reuse the thumbnail-render capability on page 1. |
 | P3A-7 | Protect | `design/Protect.dc.html`, `design/MobileProtect.dc.html` | `apps/web/features/protect/components/` | encrypt/decrypt | Password field (reveal toggle, generate) + permission checkboxes (no-print/no-copy/no-edit) — verify the package's encrypt API actually exposes per-permission flags, not just a password, before committing to that UI. |
 | P3A-8 | Sign | `design/Sign.dc.html`, `design/MobileSign.dc.html` | `apps/web/features/sign/components/` | addImageStamp (or equivalent) for drawn/typed/uploaded signature placement | **Product decision needed at implementation time:** the existing `apps/web` Sign feature has an optional-auth hash + append-only audit-log path that inherently needs a backend (see `apps/api/README.md`'s Sign section). Moving visual signature placement client-side is straightforward; whether audit-log parity is in scope for native MVP or deferred is NOT decided here — pick one, record the choice in this file's Decisions log, don't silently drop or silently backend-call for it. |
 
@@ -1033,6 +1034,58 @@ Work these only after all 8 Phase 3A + 3 Phase 3B tools are done.
   should default to that pattern for any label/value `Row` rather than
   discovering the overflow fresh each time. `flutter analyze` clean,
   `flutter test` 183/183 passing (up from 159 after P3A-2).
+- 2026-08-21 — **P3A-4 (Rotate), P3A-5 (Reorder), and P3A-6 (Watermark) done,
+  built together in one session since all three share the "stream per-page
+  thumbnails via `PdfEngineService.renderThumbnails`" shape.** Notable
+  outcomes, applicable to any later Phase 3A/3B tool that also needs a
+  per-page grid:
+  - **`rotatePages`' `Map<int,int>` shape maps naturally onto "select pages,
+    then pick one shared angle"** (matching `apps/web`'s `RotateWorkspace`):
+    the screen builds `{for (i in selectedPages) i: angle.degrees}` rather
+    than tracking a per-page angle, so `RotatePageEntry` only needs a
+    `selected` bool, not a rotation value. `RotateAngle` is a 3-value enum
+    (90/180/270) following `CompressQuality`'s enum-with-`LocaleKeys`-getters
+    pattern.
+  - **No new thumbnail-grid abstraction was extracted for Rotate vs.
+    Reorder**, even though both stream thumbnails into a placeholder grid:
+    their per-tile chrome differs enough (Rotate: checkmark + selection
+    border + `AnimatedRotation` preview; Reorder: original-page badge +
+    left/right arrow row) that a shared base would mostly be parameter
+    plumbing. Each tool got its own `RotatePageGrid`/`ReorderPageGrid` +
+    `_PageTile` part file, following `SplitPageGrid`'s existing precedent of
+    one grid per tool. Both grids pick column count by tier — desktop 6 /
+    tablet 4 / mobile 3 — a new three-way split recorded here since neither
+    `SplitPageGrid` (which only had a two-way desktop/non-desktop check) nor
+    any earlier task fixed one.
+  - **Reorder reuses the up/down-arrow idiom `MergeFileList` established**,
+    just laid out left/right instead of vertically since pages sit in a grid
+    (`design/Reorder.dc.html`'s copy also mentions dragging — same "arrows
+    only" precedent as Merge's Decisions log entry, not re-litigated per
+    tool).
+  - **Watermark's engine call has no "diagonal" placement** —
+    `PdfWatermarkPlacement` only has `center`/`tiled`/four corners — so the
+    design's "Çapraz" preset is `placement: center` with `rotation: -30`
+    instead, matching `apps/web`'s `rotate(-30deg)` preview transform exactly.
+    `WatermarkPosition`/`WatermarkOpacity` are two small enums (mirroring
+    `CompressQuality`'s pattern) that translate the three design pills each
+    into `PdfWatermarkOptions` fields; opacity values (0.18/0.35/0.55) are
+    the same ones `apps/web`'s preview already uses.
+  - **`WatermarkRepository.renderFirstPageThumbnail` wraps
+    `PdfEngineService.renderThumbnails(pageIndexes: [0])`** rather than the
+    screen calling the stream API directly for a single page — keeps the
+    "one engine call, `Future`, not `Stream`" ergonomics for a tool that only
+    ever needs one page, and gives the cubit a passthrough method
+    symmetrical with `readPageCount`'s "metadata, not the tool's action,
+    swallow the exception" contract.
+  - Localization additions (`rotate.*`/`reorder.*`/`watermark.*`, 56 keys
+    total) were delegated to and written by a subagent, then the domain/
+    repository/cubit/screen code and all four tests-per-tool (cubit, thin-
+    adapter repository, DI registration, 11-width + dark-theme responsive
+    sweep) were delegated to separate subagents working from an exact API
+    spec, with this session reviewing and running `flutter analyze`/
+    `flutter test` before committing — no `lib/` bugs were found by any
+    reviewer. `flutter analyze` clean, `flutter test` 263/263 passing (up
+    from 183 before this session).
 - 2026-08-21 — **P2-4 done.** `ErrorStateWidget`
   (`lib/core/widgets/errors/error_state_widget.dart`) lives in `lib/core/widgets/`
   as the task specified, not a layer deviation like P2-1/P2-2/P2-3. The widget is
