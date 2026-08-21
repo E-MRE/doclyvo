@@ -2,8 +2,8 @@
 
 Status (2026-08-21): **Phase 0 complete, Phase 1 complete (including P1-4/P1-5's
 responsive tier system and home tablet layout), Phase 2 complete (P2-1..P2-4),
-P3A-1 (Compress) complete.**
-Remaining: P3A-2 through P3A-8, all of Phase 3B, all of Phase 4.
+P3A-1 (Compress) complete, P3A-2 (Split) complete.**
+Remaining: P3A-3 through P3A-8, all of Phase 3B, all of Phase 4.
 
 **Purpose of this file:** each task below is meant to be handed to a **separate,
 fresh Claude Code session with empty conversation context**. A session working a
@@ -673,7 +673,7 @@ copy/behavior parity only — the native version does not call the API these
 | ID | Tool | Design file(s) | Web reference (copy/behavior only) | `pdf_manipulator` capability to use | Notes |
 |----|------|----------------|--------------------------------------|--------------------------------------|-------|
 | P3A-1 | Compress ✅ done (2026-08-21) | `design/Compress.dc.html`, `design/MobileCompress.dc.html` | `apps/web/features/compress/components/` | compress (quality param) | Verify output size/quality against `apps/web`'s existing (pikepdf-backed) result on the same test file — if visibly worse, log it in the Decisions log below rather than shipping silently. |
-| P3A-2 | Split | `design/Split.dc.html`, `design/MobileSplit.dc.html` | `apps/web/features/split/components/` | split / extract pages | No settings; confirm what container format the result comes back as (individual files vs a zip you must assemble yourself) and adjust the Result panel accordingly. |
+| P3A-2 | Split ✅ done (2026-08-21) | `design/Split.dc.html`, `design/MobileSplit.dc.html` | `apps/web/features/split/components/` | split / extract pages | No settings; confirm what container format the result comes back as (individual files vs a zip you must assemble yourself) and adjust the Result panel accordingly. |
 | P3A-3 | Merge | `design/Merge.dc.html`, `design/MobileMerge.dc.html` | `apps/web/features/merge/components/` | merge | Multi-file upload + reorder list before merging. |
 | P3A-4 | Rotate | `design/Rotate.dc.html`, `design/MobileRotate.dc.html` | `apps/web/features/rotate/components/` | render (thumbnails) + rotate | Per-page thumbnails via the same `PdfEngineService`, per-page angle state, rotate applied on submit. |
 | P3A-5 | Reorder | `design/Reorder.dc.html`, `design/MobileReorder.dc.html` | `apps/web/features/reorder/components/` | render (thumbnails) + reorderPages | Per-page thumbnails; up/down arrow reordering. |
@@ -1000,6 +1000,19 @@ Work these only after all 8 Phase 3A + 3 Phase 3B tools are done.
   `pdf_manipulator` import outside `lib/core/pdf/`. Output size/quality vs.
   `apps/web`'s pikepdf-backed compress was not comparatively benchmarked in
   this pass — revisit if a later report suggests it's worse.
+- 2026-08-21 — **P3A-2 (Split) done.** `lib/features/split/` mirrors P3A-1's
+  structure. `PdfEngineService.split` confirmed to return `List<Uint8List>`
+  (one entry per page), matching P0-11's Decisions log entry, and
+  `design/Split.dc.html` shows a single "İndir (.zip)" button + one summary
+  card, not a per-file list — so the **repository layer zips the split output**
+  (added `archive` as a direct dependency, was already transitive) and hands
+  one zip's bytes straight to the existing `ResultPanel` unmodified (no new
+  multi-result widget needed). `FilePickerService` gained `saveZip()`
+  alongside P3A-1's `savePdf()` — later tools producing multiple output files
+  should reuse one of these two save methods rather than adding a third. No
+  settings step (per the design), so the flow is upload → processing →
+  result/error directly. `flutter analyze` clean, `flutter test` 159/159
+  passing (up from 134 after P3A-1).
 - 2026-08-21 — **P2-4 done.** `ErrorStateWidget`
   (`lib/core/widgets/errors/error_state_widget.dart`) lives in `lib/core/widgets/`
   as the task specified, not a layer deviation like P2-1/P2-2/P2-3. The widget is

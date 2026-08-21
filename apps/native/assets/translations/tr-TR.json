@@ -103,5 +103,22 @@
     "newOperation": "Yeni İşlem",
     "changeFile": "Değiştir",
     "saveFailed": "Dosya kaydedilemedi"
+  },
+  "split": {
+    "pageTitle": "PDF'i Sayfalara Ayır",
+    "pageSubtitle": "Her sayfayı ayrı bir PDF olarak indir.",
+    "selectFileFirst": "Ayırma seçeneklerini görmek için önce bir PDF yükle.",
+    "resultSectionTitle": "Sonuç",
+    "pageCountLabel": "Sayfa sayısı",
+    "outputLabel": "Çıkış",
+    "outputValue": "{count} ayrı PDF (.zip)",
+    "outputValueUnknown": "Ayrı PDF'ler (.zip)",
+    "startAction": "Sayfalara Ayır",
+    "processingAction": "İşleniyor…",
+    "processingLabel": "Ayrılıyor…",
+    "resultMessage": "{fileName} {count} sayfaya ayrıldı ve indirilmeye hazır.",
+    "newOperation": "Yeni İşlem",
+    "changeFile": "Değiştir",
+    "saveFailed": "Dosya kaydedilemedi"
   }
 }

@@ -13,6 +13,9 @@ import 'package:doclyvo/features/compress/data/repositories/compress_repository.
 import 'package:doclyvo/features/compress/data/repositories/pdf_engine_compress_repository.dart';
 import 'package:doclyvo/features/compress/presentation/cubit/compress_cubit.dart';
 import 'package:doclyvo/features/home/presentation/cubit/home_cubit.dart';
+import 'package:doclyvo/features/split/data/repositories/pdf_engine_split_repository.dart';
+import 'package:doclyvo/features/split/data/repositories/split_repository.dart';
+import 'package:doclyvo/features/split/presentation/cubit/split_cubit.dart';
 
 mixin AppDependencyRegisterMixin {
   void registerDependencies(DependencyInjector injector) {
@@ -66,9 +69,13 @@ mixin AppDependencyRegisterMixin {
   void _registerReleaseDependencies(DependencyInjector injector) {}
 
   void _registerRepositories(DependencyInjector injector) {
-    injector.registerFactory<CompressRepository>(
-      () => PdfEngineCompressRepository(injector.get<PdfEngineService>()),
-    );
+    injector
+      ..registerFactory<CompressRepository>(
+        () => PdfEngineCompressRepository(injector.get<PdfEngineService>()),
+      )
+      ..registerFactory<SplitRepository>(
+        () => PdfEngineSplitRepository(injector.get<PdfEngineService>()),
+      );
   }
 
   void _registerCubits(DependencyInjector injector) {
@@ -76,6 +83,9 @@ mixin AppDependencyRegisterMixin {
       ..registerFactory<HomeCubit>(HomeCubit.new)
       ..registerFactory<CompressCubit>(
         () => CompressCubit(injector.get<CompressRepository>()),
+      )
+      ..registerFactory<SplitCubit>(
+        () => SplitCubit(injector.get<SplitRepository>()),
       );
   }
 }

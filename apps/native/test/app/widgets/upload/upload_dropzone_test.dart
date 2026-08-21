@@ -36,6 +36,12 @@ final class _FakeFilePickerService extends FilePickerService {
     required String fileName,
     required Uint8List bytes,
   }) async => throw UnimplementedError();
+
+  @override
+  Future<bool> saveZip({
+    required String fileName,
+    required Uint8List bytes,
+  }) async => throw UnimplementedError();
 }
 
 PickedPdfFile _pdf({String name = 'rapor-2024.pdf', int size = 9017065}) =>

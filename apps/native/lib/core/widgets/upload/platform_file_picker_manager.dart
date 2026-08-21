@@ -93,6 +93,26 @@ final class PlatformFilePickerManager extends FilePickerService {
     return savedUri != null;
   }
 
+  @override
+  Future<bool> saveZip({
+    required String fileName,
+    required Uint8List bytes,
+  }) async {
+    Uri? savedUri;
+    try {
+      savedUri = await FilePicker.saveFile(
+        fileName: fileName,
+        bytes: bytes,
+        mimeType: 'application/zip',
+        allowedExtensions: const ['zip'],
+        type: FileType.custom,
+      );
+    } on Exception catch (error) {
+      throw FilePickerException('$error');
+    }
+    return savedUri != null;
+  }
+
   Future<PickedPdfFile> _toPickedFile(PlatformFile file) async {
     try {
       return PickedPdfFile(

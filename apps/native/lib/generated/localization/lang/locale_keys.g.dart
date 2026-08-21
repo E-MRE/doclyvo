@@ -100,5 +100,21 @@ abstract class  LocaleKeys {
   static const compress_changeFile = 'compress.changeFile';
   static const compress_saveFailed = 'compress.saveFailed';
   static const compress = 'compress';
+  static const split_pageTitle = 'split.pageTitle';
+  static const split_pageSubtitle = 'split.pageSubtitle';
+  static const split_selectFileFirst = 'split.selectFileFirst';
+  static const split_resultSectionTitle = 'split.resultSectionTitle';
+  static const split_pageCountLabel = 'split.pageCountLabel';
+  static const split_outputLabel = 'split.outputLabel';
+  static const split_outputValue = 'split.outputValue';
+  static const split_outputValueUnknown = 'split.outputValueUnknown';
+  static const split_startAction = 'split.startAction';
+  static const split_processingAction = 'split.processingAction';
+  static const split_processingLabel = 'split.processingLabel';
+  static const split_resultMessage = 'split.resultMessage';
+  static const split_newOperation = 'split.newOperation';
+  static const split_changeFile = 'split.changeFile';
+  static const split_saveFailed = 'split.saveFailed';
+  static const split = 'split';
 
 }

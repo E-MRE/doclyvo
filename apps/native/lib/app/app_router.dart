@@ -3,6 +3,7 @@ import 'package:doclyvo/app/utils/builders/transition_page_builder.dart';
 import 'package:doclyvo/app/widgets/placeholder_screen.dart';
 import 'package:doclyvo/features/compress/presentation/pages/compress_screen.dart';
 import 'package:doclyvo/features/home/presentation/pages/home_screen.dart';
+import 'package:doclyvo/features/split/presentation/pages/split_screen.dart';
 import 'package:go_router/go_router.dart';
 
 final router = GoRouter(
@@ -28,7 +29,7 @@ final router = GoRouter(
     GoRoute(
       path: RouteConstants.split,
       pageBuilder: (_, _) => TransitionPageBuilder.fadeTransition(
-        child: const PlaceholderScreen(title: 'Split'),
+        child: const SplitScreen(),
       ),
     ),
     GoRoute(

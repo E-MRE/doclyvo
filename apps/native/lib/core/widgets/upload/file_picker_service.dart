@@ -40,4 +40,13 @@ abstract class FilePickerService {
   /// own save/share flow. Returns `false` when the user cancels — that is a
   /// normal outcome, not a failure.
   Future<bool> savePdf({required String fileName, required Uint8List bytes});
+
+  /// Writes a client-side tool's multi-file output, already zipped into
+  /// [bytes], to disk as [fileName].
+  ///
+  /// Same contract as [savePdf] (native save dialog on desktop, the
+  /// platform's save/share flow on mobile, `false` on cancel) — added for
+  /// Split (P3A-2), whose result is several PDFs assembled into one archive
+  /// rather than a single PDF.
+  Future<bool> saveZip({required String fileName, required Uint8List bytes});
 }

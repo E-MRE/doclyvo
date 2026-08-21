@@ -28,6 +28,10 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  # Zip assembly for Split's multi-file result (design/Split.dc.html downloads
+  # one .zip, not N loose files) — was already resolving transitively via
+  # other deps, promoted to direct since a feature now imports it by name.
+  archive: ^4.1.0
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
