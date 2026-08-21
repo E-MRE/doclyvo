@@ -206,5 +206,26 @@
     "resultMessage": "{fileName} filigranlandı, {count} sayfaya uygulandı.",
     "newOperation": "Yeni İşlem",
     "saveFailed": "Dosya kaydedilemedi"
+  },
+  "protect": {
+    "pageTitle": "PDF'i Koru",
+    "pageSubtitle": "Şifre ve izinlerle belgeni koru.",
+    "selectFileFirst": "Şifre ve izin seçeneklerini görmek için önce bir PDF yükle.",
+    "lockStatusIdle": "Henüz korunmadı",
+    "lockStatusDone": "Belge şifreyle korunuyor",
+    "passwordSectionTitle": "Şifre",
+    "passwordFieldHint": "Belgeyi açmak için gereken şifre",
+    "passwordRevealToggle": "Göster/Gizle",
+    "passwordGenerate": "Yeni Şifre Oluştur",
+    "passwordTooShort": "Şifre en az {min} karakter olmalı.",
+    "permissionsSectionTitle": "İzinler",
+    "permissionNoPrint": "Yazdırmayı engelle",
+    "permissionNoCopy": "Kopyalamayı engelle",
+    "permissionNoEdit": "Düzenlemeyi engelle",
+    "startAction": "Koru",
+    "processingLabel": "Korunuyor…",
+    "resultMessage": "{fileName} korundu. Şifreyi güvenli bir yerde sakla, bu ekrandan sonra tekrar gösterilmez.",
+    "newOperation": "Yeni İşlem",
+    "saveFailed": "Dosya kaydedilemedi"
   }
 }

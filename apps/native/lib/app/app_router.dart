@@ -4,6 +4,7 @@ import 'package:doclyvo/app/widgets/placeholder_screen.dart';
 import 'package:doclyvo/features/compress/presentation/pages/compress_screen.dart';
 import 'package:doclyvo/features/home/presentation/pages/home_screen.dart';
 import 'package:doclyvo/features/merge/presentation/pages/merge_screen.dart';
+import 'package:doclyvo/features/protect/presentation/pages/protect_screen.dart';
 import 'package:doclyvo/features/reorder/presentation/pages/reorder_screen.dart';
 import 'package:doclyvo/features/rotate/presentation/pages/rotate_screen.dart';
 import 'package:doclyvo/features/split/presentation/pages/split_screen.dart';
@@ -57,7 +58,7 @@ final router = GoRouter(
     GoRoute(
       path: RouteConstants.protect,
       pageBuilder: (_, _) => TransitionPageBuilder.fadeTransition(
-        child: const PlaceholderScreen(title: 'Protect'),
+        child: const ProtectScreen(),
       ),
     ),
     GoRoute(

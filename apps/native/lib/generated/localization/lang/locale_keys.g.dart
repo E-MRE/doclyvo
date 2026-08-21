@@ -198,5 +198,25 @@ abstract class  LocaleKeys {
   static const watermark_newOperation = 'watermark.newOperation';
   static const watermark_saveFailed = 'watermark.saveFailed';
   static const watermark = 'watermark';
+  static const protect_pageTitle = 'protect.pageTitle';
+  static const protect_pageSubtitle = 'protect.pageSubtitle';
+  static const protect_selectFileFirst = 'protect.selectFileFirst';
+  static const protect_lockStatusIdle = 'protect.lockStatusIdle';
+  static const protect_lockStatusDone = 'protect.lockStatusDone';
+  static const protect_passwordSectionTitle = 'protect.passwordSectionTitle';
+  static const protect_passwordFieldHint = 'protect.passwordFieldHint';
+  static const protect_passwordRevealToggle = 'protect.passwordRevealToggle';
+  static const protect_passwordGenerate = 'protect.passwordGenerate';
+  static const protect_passwordTooShort = 'protect.passwordTooShort';
+  static const protect_permissionsSectionTitle = 'protect.permissionsSectionTitle';
+  static const protect_permissionNoPrint = 'protect.permissionNoPrint';
+  static const protect_permissionNoCopy = 'protect.permissionNoCopy';
+  static const protect_permissionNoEdit = 'protect.permissionNoEdit';
+  static const protect_startAction = 'protect.startAction';
+  static const protect_processingLabel = 'protect.processingLabel';
+  static const protect_resultMessage = 'protect.resultMessage';
+  static const protect_newOperation = 'protect.newOperation';
+  static const protect_saveFailed = 'protect.saveFailed';
+  static const protect = 'protect';
 
 }

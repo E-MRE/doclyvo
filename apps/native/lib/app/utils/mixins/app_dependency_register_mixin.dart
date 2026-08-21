@@ -16,6 +16,9 @@ import 'package:doclyvo/features/home/presentation/cubit/home_cubit.dart';
 import 'package:doclyvo/features/merge/data/repositories/merge_repository.dart';
 import 'package:doclyvo/features/merge/data/repositories/pdf_engine_merge_repository.dart';
 import 'package:doclyvo/features/merge/presentation/cubit/merge_cubit.dart';
+import 'package:doclyvo/features/protect/data/repositories/pdf_engine_protect_repository.dart';
+import 'package:doclyvo/features/protect/data/repositories/protect_repository.dart';
+import 'package:doclyvo/features/protect/presentation/cubit/protect_cubit.dart';
 import 'package:doclyvo/features/reorder/data/repositories/pdf_engine_reorder_repository.dart';
 import 'package:doclyvo/features/reorder/data/repositories/reorder_repository.dart';
 import 'package:doclyvo/features/reorder/presentation/cubit/reorder_cubit.dart';
@@ -99,6 +102,9 @@ mixin AppDependencyRegisterMixin {
       )
       ..registerFactory<WatermarkRepository>(
         () => PdfEngineWatermarkRepository(injector.get<PdfEngineService>()),
+      )
+      ..registerFactory<ProtectRepository>(
+        () => PdfEngineProtectRepository(injector.get<PdfEngineService>()),
       );
   }
 
@@ -122,6 +128,9 @@ mixin AppDependencyRegisterMixin {
       )
       ..registerFactory<WatermarkCubit>(
         () => WatermarkCubit(injector.get<WatermarkRepository>()),
+      )
+      ..registerFactory<ProtectCubit>(
+        () => ProtectCubit(injector.get<ProtectRepository>()),
       );
   }
 }
