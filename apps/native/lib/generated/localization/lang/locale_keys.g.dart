@@ -67,10 +67,12 @@ abstract class  LocaleKeys {
   static const progress_hint = 'progress.hint';
   static const progress = 'progress';
   static const result_title = 'result.title';
+  static const result_ready = 'result.ready';
   static const result_success = 'result.success';
   static const result_download = 'result.download';
   static const result_beforeSize = 'result.beforeSize';
   static const result_afterSize = 'result.afterSize';
+  static const result_pageCount = 'result.pageCount';
   static const result_saved = 'result.saved';
   static const result_autoDelete = 'result.autoDelete';
   static const result = 'result';

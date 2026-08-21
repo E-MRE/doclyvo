@@ -69,10 +69,12 @@
   },
   "result": {
     "title": "Tamamlandı",
+    "ready": "Dosyan hazır",
     "success": "İşlem başarıyla tamamlandı",
     "download": "İndir",
     "beforeSize": "Orijinal Boyut",
     "afterSize": "Yeni Boyut",
+    "pageCount": "{count} sayfa",
     "saved": "Kaydedildi",
     "autoDelete": "Dosya 24 saat sonra otomatik olarak silinecektir"
   },

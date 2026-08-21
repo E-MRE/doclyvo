@@ -1,8 +1,9 @@
 # Doclyvo Native (Flutter) — Task Breakdown
 
 Status (2026-08-21): **Phase 0 complete, Phase 1 complete (including P1-4/P1-5's
-responsive tier system and home tablet layout), P2-1 complete, P2-2 complete.**
-Remaining: P2-3, P2-4, all of Phase 3A/3B, all of Phase 4.
+responsive tier system and home tablet layout), P2-1 complete, P2-2 complete,
+P2-3 complete.**
+Remaining: P2-4, all of Phase 3A/3B, all of Phase 4.
 
 **Purpose of this file:** each task below is meant to be handed to a **separate,
 fresh Claude Code session with empty conversation context**. A session working a
@@ -559,7 +560,7 @@ Regenerating `LocaleKeys` initially failed because P0-2's `.env` files were
 missing — **fixed same-day, see the P0-2 section above** for the actual cause
 (a path-resolution gotcha in `envied`, not a missing task) and the fix.
 
-### P2-3 — Result panel widget
+### P2-3 — Result panel widget ✅ done (2026-08-21)
 
 **Depends on:** P0-6, P0-7, P0-9.
 
@@ -577,6 +578,43 @@ Phase 3, since the file bytes source differs between 3A/3B); auto-delete notice 
 appears when the result came from the backend; takes the tier from P1-4 and ships a
 width-sweep test — the before/after comparison card is a `Row` of two blocks, which
 is the shape that overflows first at tablet widths (use `Wrap` or stack it).
+
+**What actually shipped:** `lib/app/widgets/result/result_panel.dart` —
+`ResultPanel`. Same layer deviation as `UploadDropzone`/`ToolProgressIndicator`
+(P2-1/P2-2): it needs `BuildContextExtension` plus the `PrimaryButton`/
+`SecondaryButton`/`AppCard` widgets, all in `lib/app/`, and `core/` may not
+import `app/`, so it lives in `lib/app/widgets/`, not the `lib/core/widgets/`
+the plan named. Notable API choices, so later Phase 3 tool tasks don't
+re-derive them:
+- `message` (the tool-specific subtitle, e.g. "rapor-2024.pdf sıkıştırıldı ve
+  indirilmeye hazır.") is entirely caller-owned copy — the widget only owns
+  the fixed "Dosyan hazır" heading (new key `result.ready`). Each Phase 3
+  tool composes its own localized message the same way this plan already
+  expects tool-specific translation keys to be added per tool.
+- `beforeSizeInBytes`/`afterSizeInBytes` are asserted to be supplied together
+  or not at all — the comparison card (and its reduction/growth percent,
+  `-58%`/`+50%`) only renders when both are known, since not every tool has
+  a meaningful before/after (e.g. Merge combines multiple inputs).
+  `pageCount` is independently optional.
+- **The before/after `Row` never overflows at any width because both blocks
+  sit in `Expanded`, not a fixed width** — satisfies the DoD's `Wrap`-or-stack
+  requirement without actually needing `Wrap`; the width-sweep test (12
+  widths, 360-1920px) confirms it holds even with a long file name, a
+  secondary action, and the auto-delete notice all showing at once.
+- The download/secondary buttons deliberately keep `PrimaryButton`/
+  `SecondaryButton`'s existing intrinsic sizing (`Row(mainAxisSize: min)`
+  internally) rather than stretching the download button to fill the row like
+  `design/Result.dc.html` draws it — forcing that via `Expanded` would hand
+  `PrimaryButton` a tight width it doesn't have an `alignment` for, and it
+  would then left-align its icon+label instead of centering them. Neither
+  button has been used stretched anywhere else in the app, so this stayed
+  intrinsic-width (centered `Row` on tablet/desktop, stacked `Column` on
+  mobile) rather than changing a shared button's contract for one screen.
+  Revisit if a later tool screen genuinely needs a full-width primary action.
+- Byte formatting (`KB`/`MB`/`GB`) is a small private duplicate of
+  `PickedPdfFile.formattedSize`'s algorithm, not a shared import — pulling in
+  the upload feature's file model just for its static formatting logic
+  would be a heavier coupling than the four-line function it would save.
 
 ### P2-4 — Error state widget
 
@@ -914,3 +952,14 @@ Work these only after all 8 Phase 3A + 3 Phase 3B tools are done.
   explicit `tester.pump(duration)` calls for the one test that wants to verify
   the animation actually ticks. See
   `test/app/widgets/progress/progress_indicator_test.dart`.
+- 2026-08-21 — **P2-3 done.** `ResultPanel`
+  (`lib/app/widgets/result/result_panel.dart`) followed the same layer
+  deviation as P2-1/P2-2 (`BuildContextExtension` + `PrimaryButton`/
+  `SecondaryButton`/`AppCard` all live in `lib/app/`). Full detail is under the
+  task itself; the one rule later Phase 3 tool tasks should reuse is the
+  overflow fix for the before/after comparison card: put each size block in
+  an `Expanded`, never a fixed width, and the "`Row` of two blocks" shape the
+  task warned about stops being an overflow risk at any surface width without
+  needing `Wrap`. `beforeSizeInBytes`/`afterSizeInBytes` are optional and must
+  come as a pair — omit both for tools with no meaningful before/after size
+  (e.g. Merge).
