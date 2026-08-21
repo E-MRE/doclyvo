@@ -1,21 +1,19 @@
-import 'package:doclyvo/app/widgets/wrappers/localization_wrapper.dart';
+import 'package:doclyvo/features/home/presentation/pages/home_screen.dart';
 import 'package:doclyvo/main.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+import 'helpers/widget_test_harness.dart';
 
 void main() {
-  setUpAll(() async {
-    SharedPreferences.setMockInitialValues({});
-    await EasyLocalization.ensureInitialized();
-  });
+  setUpAll(initializeTestLocalization);
 
-  testWidgets('app boots to the home placeholder', (tester) async {
-    await tester.pumpWidget(
-      const LocalizationWrapper(child: DoclyvoApp()),
-    );
-    await tester.pumpAndSettle();
+  setUp(registerAppDependencies);
 
-    expect(find.text('Home'), findsWidgets);
+  tearDown(resetAppDependencies);
+
+  testWidgets('app boots to the home screen', (tester) async {
+    await pumpLocalized(tester, (_) => const DoclyvoApp());
+
+    expect(find.byType(HomeScreen), findsOneWidget);
   });
 }

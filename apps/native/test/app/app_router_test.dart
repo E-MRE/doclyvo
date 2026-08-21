@@ -2,26 +2,45 @@ import 'dart:async';
 
 import 'package:doclyvo/app/app_router.dart';
 import 'package:doclyvo/app/constants/route_constants.dart';
+import 'package:doclyvo/app/theme/app_theme.dart';
+import 'package:doclyvo/features/home/presentation/pages/home_screen.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/widget_test_harness.dart';
+
 void main() {
+  setUpAll(initializeTestLocalization);
+
   setUp(() {
+    registerAppDependencies();
     router.go(RouteConstants.home);
   });
 
-  testWidgets('boots to the home placeholder', (tester) async {
-    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
-    await tester.pumpAndSettle();
+  tearDown(resetAppDependencies);
 
-    expect(find.text('Home'), findsWidgets);
+  Future<void> pumpRouter(WidgetTester tester) => pumpLocalized(
+    tester,
+    (context) => MaterialApp.router(
+      routerConfig: router,
+      theme: AppTheme.light,
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
+    ),
+  );
+
+  testWidgets('boots to the home screen', (tester) async {
+    await pumpRouter(tester);
+
+    expect(find.byType(HomeScreen), findsOneWidget);
   });
 
   testWidgets('navigates to a tool route with a fade-in-up transition', (
     tester,
   ) async {
-    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
-    await tester.pumpAndSettle();
+    await pumpRouter(tester);
 
     unawaited(router.push(RouteConstants.compress));
     await tester.pump();
@@ -33,11 +52,8 @@ void main() {
     expect(find.text('Compress'), findsWidgets);
   });
 
-  testWidgets('back navigation returns to the previous route', (
-    tester,
-  ) async {
-    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
-    await tester.pumpAndSettle();
+  testWidgets('back navigation returns to the previous route', (tester) async {
+    await pumpRouter(tester);
 
     unawaited(router.push(RouteConstants.merge));
     await tester.pumpAndSettle();
@@ -46,6 +62,6 @@ void main() {
     router.pop();
     await tester.pumpAndSettle();
 
-    expect(find.text('Home'), findsWidgets);
+    expect(find.byType(HomeScreen), findsOneWidget);
   });
 }
