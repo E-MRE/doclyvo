@@ -28,6 +28,10 @@ final class _FakeFilePickerService extends FilePickerService {
   }
 
   @override
+  Future<List<PickedPdfFile>> pickMultiplePdfs({String? dialogTitle}) async =>
+      throw UnimplementedError();
+
+  @override
   Future<PickedPdfFile> resolveDroppedPath(String path) async =>
       throw UnimplementedError();
 

@@ -23,6 +23,17 @@ abstract class FilePickerService {
   /// PDF, or when the dialog itself fails.
   Future<PickedPdfFile?> pickPdf({String? dialogTitle});
 
+  /// Opens the platform's file-picker dialog, filtered to PDFs, allowing more
+  /// than one selection at once.
+  ///
+  /// Returns an empty list when the user cancels — same "not a failure"
+  /// contract as [pickPdf]. Throws [FilePickerException] with
+  /// [FilePickerErrorKind.notPdf] if any selected entry is not a readable
+  /// PDF, or [FilePickerErrorKind.pickerFailure] when the dialog itself
+  /// fails. Added for Merge (P3A-3), the first tool that needs more than one
+  /// input file at a time.
+  Future<List<PickedPdfFile>> pickMultiplePdfs({String? dialogTitle});
+
   /// Accepts a file path handed over by a desktop drag-drop.
   ///
   /// Throws [FilePickerException] with [FilePickerErrorKind.notPdf] for

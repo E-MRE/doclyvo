@@ -116,5 +116,28 @@ abstract class  LocaleKeys {
   static const split_changeFile = 'split.changeFile';
   static const split_saveFailed = 'split.saveFailed';
   static const split = 'split';
+  static const merge_pageTitle = 'merge.pageTitle';
+  static const merge_pageSubtitle = 'merge.pageSubtitle';
+  static const merge_fileListSectionTitle = 'merge.fileListSectionTitle';
+  static const merge_addFilesAction = 'merge.addFilesAction';
+  static const merge_emptyState = 'merge.emptyState';
+  static const merge_fileMeta = 'merge.fileMeta';
+  static const merge_moveUp = 'merge.moveUp';
+  static const merge_moveDown = 'merge.moveDown';
+  static const merge_removeFile = 'merge.removeFile';
+  static const merge_resultSectionTitle = 'merge.resultSectionTitle';
+  static const merge_fileCountLabel = 'merge.fileCountLabel';
+  static const merge_totalPagesLabel = 'merge.totalPagesLabel';
+  static const merge_outputLabel = 'merge.outputLabel';
+  static const merge_outputValue = 'merge.outputValue';
+  static const merge_minFilesHint = 'merge.minFilesHint';
+  static const merge_startAction = 'merge.startAction';
+  static const merge_processingAction = 'merge.processingAction';
+  static const merge_processingLabel = 'merge.processingLabel';
+  static const merge_resultMessage = 'merge.resultMessage';
+  static const merge_newOperation = 'merge.newOperation';
+  static const merge_pickFailed = 'merge.pickFailed';
+  static const merge_saveFailed = 'merge.saveFailed';
+  static const merge = 'merge';
 
 }

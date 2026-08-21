@@ -5,6 +5,7 @@ import 'package:doclyvo/app/constants/route_constants.dart';
 import 'package:doclyvo/app/theme/app_theme.dart';
 import 'package:doclyvo/features/compress/presentation/pages/compress_screen.dart';
 import 'package:doclyvo/features/home/presentation/pages/home_screen.dart';
+import 'package:doclyvo/features/merge/presentation/pages/merge_screen.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -61,7 +62,10 @@ void main() {
 
     unawaited(router.push(RouteConstants.merge));
     await tester.pumpAndSettle();
-    expect(find.text('Merge'), findsWidgets);
+    // Merge has a real screen now (P3A-3) instead of the placeholder, so
+    // this checks for the screen type rather than a literal "Merge"
+    // heading, which is no longer rendered anywhere on it.
+    expect(find.byType(MergeScreen), findsOneWidget);
 
     router.pop();
     await tester.pumpAndSettle();

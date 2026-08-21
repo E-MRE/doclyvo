@@ -13,6 +13,9 @@ import 'package:doclyvo/features/compress/data/repositories/compress_repository.
 import 'package:doclyvo/features/compress/data/repositories/pdf_engine_compress_repository.dart';
 import 'package:doclyvo/features/compress/presentation/cubit/compress_cubit.dart';
 import 'package:doclyvo/features/home/presentation/cubit/home_cubit.dart';
+import 'package:doclyvo/features/merge/data/repositories/merge_repository.dart';
+import 'package:doclyvo/features/merge/data/repositories/pdf_engine_merge_repository.dart';
+import 'package:doclyvo/features/merge/presentation/cubit/merge_cubit.dart';
 import 'package:doclyvo/features/split/data/repositories/pdf_engine_split_repository.dart';
 import 'package:doclyvo/features/split/data/repositories/split_repository.dart';
 import 'package:doclyvo/features/split/presentation/cubit/split_cubit.dart';
@@ -75,6 +78,9 @@ mixin AppDependencyRegisterMixin {
       )
       ..registerFactory<SplitRepository>(
         () => PdfEngineSplitRepository(injector.get<PdfEngineService>()),
+      )
+      ..registerFactory<MergeRepository>(
+        () => PdfEngineMergeRepository(injector.get<PdfEngineService>()),
       );
   }
 
@@ -86,6 +92,9 @@ mixin AppDependencyRegisterMixin {
       )
       ..registerFactory<SplitCubit>(
         () => SplitCubit(injector.get<SplitRepository>()),
+      )
+      ..registerFactory<MergeCubit>(
+        () => MergeCubit(injector.get<MergeRepository>()),
       );
   }
 }

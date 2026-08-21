@@ -2,8 +2,8 @@
 
 Status (2026-08-21): **Phase 0 complete, Phase 1 complete (including P1-4/P1-5's
 responsive tier system and home tablet layout), Phase 2 complete (P2-1..P2-4),
-P3A-1 (Compress) complete, P3A-2 (Split) complete.**
-Remaining: P3A-3 through P3A-8, all of Phase 3B, all of Phase 4.
+P3A-1 (Compress) complete, P3A-2 (Split) complete, P3A-3 (Merge) complete.**
+Remaining: P3A-4 through P3A-8, all of Phase 3B, all of Phase 4.
 
 **Purpose of this file:** each task below is meant to be handed to a **separate,
 fresh Claude Code session with empty conversation context**. A session working a
@@ -674,7 +674,7 @@ copy/behavior parity only — the native version does not call the API these
 |----|------|----------------|--------------------------------------|--------------------------------------|-------|
 | P3A-1 | Compress ✅ done (2026-08-21) | `design/Compress.dc.html`, `design/MobileCompress.dc.html` | `apps/web/features/compress/components/` | compress (quality param) | Verify output size/quality against `apps/web`'s existing (pikepdf-backed) result on the same test file — if visibly worse, log it in the Decisions log below rather than shipping silently. |
 | P3A-2 | Split ✅ done (2026-08-21) | `design/Split.dc.html`, `design/MobileSplit.dc.html` | `apps/web/features/split/components/` | split / extract pages | No settings; confirm what container format the result comes back as (individual files vs a zip you must assemble yourself) and adjust the Result panel accordingly. |
-| P3A-3 | Merge | `design/Merge.dc.html`, `design/MobileMerge.dc.html` | `apps/web/features/merge/components/` | merge | Multi-file upload + reorder list before merging. |
+| P3A-3 | Merge ✅ done (2026-08-21) | `design/Merge.dc.html`, `design/MobileMerge.dc.html` | `apps/web/features/merge/components/` | merge | Multi-file upload + reorder list before merging. |
 | P3A-4 | Rotate | `design/Rotate.dc.html`, `design/MobileRotate.dc.html` | `apps/web/features/rotate/components/` | render (thumbnails) + rotate | Per-page thumbnails via the same `PdfEngineService`, per-page angle state, rotate applied on submit. |
 | P3A-5 | Reorder | `design/Reorder.dc.html`, `design/MobileReorder.dc.html` | `apps/web/features/reorder/components/` | render (thumbnails) + reorderPages | Per-page thumbnails; up/down arrow reordering. |
 | P3A-6 | Watermark | `design/Watermark.dc.html`, `design/MobileWatermark.dc.html` | `apps/web/features/watermark/components/` | watermark | Text + position/opacity presets; live preview can reuse the thumbnail-render capability on page 1. |
@@ -1013,6 +1013,26 @@ Work these only after all 8 Phase 3A + 3 Phase 3B tools are done.
   settings step (per the design), so the flow is upload → processing →
   result/error directly. `flutter analyze` clean, `flutter test` 159/159
   passing (up from 134 after P3A-1).
+- 2026-08-21 — **P3A-3 (Merge) done.** `lib/features/merge/` mirrors P3A-1/
+  P3A-2's structure. **Multi-file upload was a new problem neither Compress
+  nor Split had**: `UploadDropzone` is single-file/controlled, and
+  `design/Merge.dc.html`/`MobileMerge.dc.html` draw no dropzone for this
+  screen at all — just a file list + "Dosya Ekle" button. Rather than
+  force-fit `UploadDropzone`, added `FilePickerService.pickMultiplePdfs()`
+  (abstract + `PlatformFilePickerManager` impl via `file_picker`'s
+  `pickFiles`) — later tools needing multi-file input should reuse this
+  rather than re-deriving it. Reordering is up/down icon buttons only (the
+  design's copy mentions drag-or-arrows but only arrows are implemented,
+  matching the Rotate/Reorder precedent already noted in this table). Merged
+  output has no meaningful "before" size (multiple inputs), so `ResultPanel`
+  is used with only `afterSizeInBytes`, same reasoning as P2-3's Decisions
+  log entry. **Width-sweep test caught a real overflow**: at 360px, a
+  label/value `Row` in the summary card pushed the value off-screen — fixed
+  by wrapping the label in `Expanded` + ellipsis, the same fix pattern P2-3
+  already used for `ResultPanel`'s own size-comparison row; later tools
+  should default to that pattern for any label/value `Row` rather than
+  discovering the overflow fresh each time. `flutter analyze` clean,
+  `flutter test` 183/183 passing (up from 159 after P3A-2).
 - 2026-08-21 — **P2-4 done.** `ErrorStateWidget`
   (`lib/core/widgets/errors/error_state_widget.dart`) lives in `lib/core/widgets/`
   as the task specified, not a layer deviation like P2-1/P2-2/P2-3. The widget is

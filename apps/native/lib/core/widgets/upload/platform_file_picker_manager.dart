@@ -41,6 +41,35 @@ final class PlatformFilePickerManager extends FilePickerService {
   }
 
   @override
+  Future<List<PickedPdfFile>> pickMultiplePdfs({String? dialogTitle}) async {
+    List<PlatformFile> files;
+    try {
+      files = await FilePicker.pickFiles(
+        dialogTitle: dialogTitle,
+        type: FileType.custom,
+        allowedExtensions: const [FilePickerService.pdfExtension],
+      );
+    } on Exception catch (error) {
+      throw FilePickerException('$error');
+    }
+
+    final picked = <PickedPdfFile>[];
+    for (final file in files) {
+      // Same escape-hatch guard as pickPdf: the dialog filters by extension,
+      // but Android content providers and "All files" pickers can still
+      // hand back something else.
+      if (!isPdfFileName(file.name)) {
+        throw FilePickerException(
+          'Picked file is not a PDF: ${file.name}',
+          kind: FilePickerErrorKind.notPdf,
+        );
+      }
+      picked.add(await _toPickedFile(file));
+    }
+    return picked;
+  }
+
+  @override
   Future<PickedPdfFile> resolveDroppedPath(String path) async {
     final name = _fileNameOf(path);
     if (!isPdfFileName(name)) {

@@ -120,5 +120,29 @@
     "newOperation": "Yeni İşlem",
     "changeFile": "Değiştir",
     "saveFailed": "Dosya kaydedilemedi"
+  },
+  "merge": {
+    "pageTitle": "PDF Birleştir",
+    "pageSubtitle": "Dosyaları istediğin sırada tek PDF'te topla.",
+    "fileListSectionTitle": "Sıra · oklarla değiştir",
+    "addFilesAction": "Dosya Ekle",
+    "emptyState": "Birleştirmek için en az iki PDF yükle.",
+    "fileMeta": "{pages} sayfa · {size}",
+    "moveUp": "Yukarı taşı",
+    "moveDown": "Aşağı taşı",
+    "removeFile": "Kaldır",
+    "resultSectionTitle": "Özet",
+    "fileCountLabel": "Dosya sayısı",
+    "totalPagesLabel": "Toplam sayfa",
+    "outputLabel": "Çıkış dosyası",
+    "outputValue": "1 PDF",
+    "minFilesHint": "Birleştirmek için en az iki PDF yükle.",
+    "startAction": "Birleştir",
+    "processingAction": "İşleniyor…",
+    "processingLabel": "Birleştiriliyor…",
+    "resultMessage": "{count} dosya birleştirildi ve indirilmeye hazır.",
+    "newOperation": "Yeni İşlem",
+    "pickFailed": "Dosyalar seçilemedi",
+    "saveFailed": "Dosya kaydedilemedi"
   }
 }
