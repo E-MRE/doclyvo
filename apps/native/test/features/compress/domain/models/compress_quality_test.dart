@@ -36,7 +36,6 @@ void main() {
     for (final quality in CompressQuality.values) {
       expect(quality.titleKey, isNotEmpty);
       expect(quality.hintKey, isNotEmpty);
-      expect(quality.illustrativePercent, startsWith('-'));
     }
   });
 }

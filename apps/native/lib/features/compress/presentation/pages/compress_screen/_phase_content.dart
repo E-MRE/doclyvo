@@ -55,10 +55,18 @@ final class _PhaseContent extends StatelessWidget {
 
     if (currentState is CompressSuccess) {
       final outputName = outputFileNameOf(file.name);
+      // The engine only has embedded raster images to give up, so a text-only
+      // PDF legitimately comes back the same size — the repository returns the
+      // original in that case. Saying "sıkıştırıldı" over an unchanged file is
+      // the bug the user hit, so the copy follows the actual outcome.
+      final wasReduced =
+          currentState.compressedSizeInBytes < currentState.originalSizeInBytes;
       return ResultPanel(
-        message: LocaleKeys.compress_resultMessage.tr(
-          namedArgs: {'fileName': file.name},
-        ),
+        message:
+            (wasReduced
+                    ? LocaleKeys.compress_resultMessage
+                    : LocaleKeys.compress_resultUnchangedMessage)
+                .tr(namedArgs: {'fileName': file.name}),
         fileName: outputName,
         beforeSizeInBytes: currentState.originalSizeInBytes,
         afterSizeInBytes: currentState.compressedSizeInBytes,

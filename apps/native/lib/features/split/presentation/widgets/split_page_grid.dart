@@ -1,5 +1,6 @@
 import 'package:doclyvo/app/constants/responsive_constants.dart';
 import 'package:doclyvo/app/extensions/build_context_extension.dart';
+import 'package:doclyvo/app/widgets/layout/tile_grid.dart';
 import 'package:doclyvo/core/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 
@@ -30,17 +31,13 @@ final class SplitPageGrid extends StatelessWidget {
     final visibleCount = count > maxTiles ? maxTiles : count;
     final crossAxisCount = tier == ScreenTier.desktop ? 6 : 4;
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
-        childAspectRatio: 3 / 4,
-        crossAxisSpacing: Sizes.sm,
-        mainAxisSpacing: Sizes.sm,
-      ),
-      itemCount: visibleCount,
-      itemBuilder: (context, index) => _PageTile(number: index + 1),
+    return TileGrid(
+      crossAxisCount: crossAxisCount,
+      childAspectRatio: 3 / 4,
+      children: [
+        for (var index = 0; index < visibleCount; index++)
+          _PageTile(number: index + 1),
+      ],
     );
   }
 }

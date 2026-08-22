@@ -1,6 +1,11 @@
 // Covers PdfEngineCompressRepository as a thin adapter: it must forward the
-// selected quality's imageQuality to PdfEngineService.compress unchanged and
-// hand back exactly what the engine returns.
+// selected quality's imageQuality to PdfEngineService.compress unchanged, and
+// it must never hand back a document bigger than the one it was given.
+//
+// That second rule is not hypothetical: the engine compresses embedded raster
+// images and then rewrites the file, so a text-only PDF comes back the same
+// size or a few bytes larger. Returning that as "compressed" is what made the
+// tool report a saving it had not made.
 
 import 'dart:typed_data';
 
@@ -116,6 +121,9 @@ final class _FakeEngine extends PdfEngineService {
 
 void main() {
   test("forwards the quality preset's imageQuality to the engine", () async {
+    // Smaller than the input, so the size guard below lets it through and this
+    // test stays about forwarding.
+    _FakeEngine.result = Uint8List.fromList([1, 2]);
     const repository = PdfEngineCompressRepository(_FakeEngine());
     final bytes = Uint8List.fromList([9, 8, 7]);
 
@@ -127,5 +135,47 @@ void main() {
     expect(_FakeEngine.lastBytes, same(bytes));
     expect(_FakeEngine.lastImageQuality, CompressQuality.high.imageQuality);
     expect(result, same(_FakeEngine.result));
+  });
+
+  test('returns the engine output when it is actually smaller', () async {
+    _FakeEngine.result = Uint8List.fromList([1, 2]);
+    const repository = PdfEngineCompressRepository(_FakeEngine());
+
+    final result = await repository.compress(
+      bytes: Uint8List.fromList([1, 2, 3, 4]),
+      quality: CompressQuality.recommended,
+    );
+
+    expect(result, same(_FakeEngine.result));
+  });
+
+  test('keeps the original when the engine cannot shrink it', () async {
+    _FakeEngine.result = Uint8List.fromList([1, 2, 3, 4]);
+    const repository = PdfEngineCompressRepository(_FakeEngine());
+    final bytes = Uint8List.fromList([1, 2, 3, 4]);
+
+    final result = await repository.compress(
+      bytes: bytes,
+      quality: CompressQuality.high,
+    );
+
+    expect(
+      result,
+      same(bytes),
+      reason: 'an equal-sized rewrite is not a compression',
+    );
+  });
+
+  test('keeps the original when the engine makes the file bigger', () async {
+    _FakeEngine.result = Uint8List.fromList([1, 2, 3, 4, 5, 6]);
+    const repository = PdfEngineCompressRepository(_FakeEngine());
+    final bytes = Uint8List.fromList([1, 2, 3]);
+
+    final result = await repository.compress(
+      bytes: bytes,
+      quality: CompressQuality.low,
+    );
+
+    expect(result, same(bytes));
   });
 }

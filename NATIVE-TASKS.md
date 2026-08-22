@@ -7,6 +7,12 @@ P3A-4 (Rotate) complete, P3A-5 (Reorder) complete, P3A-6 (Watermark) complete,
 P3A-7 (Protect) complete, P3A-8 (Sign) complete — **all of Phase 3A done.**
 Remaining: all of Phase 3B, all of Phase 4.
 
+A desktop run on 2026-08-22 turned up four shipped defects (Rotate/Split/Reorder
+crashing on file pick, Compress reporting a saving it had not made, the fake
+compression percentages, and `apps/web`'s 1MB Server-Action upload cap). All four
+are fixed — see the last entry in the Decisions log. Two of them were invisible to
+the test suite, so read that entry before writing new layout tests.
+
 **Purpose of this file:** each task below is meant to be handed to a **separate,
 fresh Claude Code session with empty conversation context**. A session working a
 task should:
@@ -1273,3 +1279,57 @@ Work these only after all 8 Phase 3A + 3 Phase 3B tools are done.
        model, not a workaround. See `signature_pad_test.dart`.
   - `flutter analyze` clean, `flutter test` **406/406** passing (up from 321
     after P3A-7).
+
+- **Desktop bug-fix pass, 2026-08-22 (from a real desktop run of the shipped
+  build, not from a task).** Four separate defects, all confirmed and fixed:
+  - **Rotate/Split/Reorder crashed the moment a file was picked** —
+    `debugThrowIfNotCheckingIntrinsics`. This is the P3A-7 `IntrinsicHeight`
+    trap in a second shape: the offender was not a `LayoutBuilder` but the page
+    grids' shrink-wrapped `GridView`. A `GridView` is a viewport, and a
+    viewport answers an intrinsic query by tripping that assert;
+    `shrinkWrap: true` does not help, `RenderShrinkWrappingViewport` refuses
+    intrinsics just as flatly. The grids only render once a file is picked,
+    which is why the width sweeps (empty state) never saw it. All three now use
+    the new `lib/app/widgets/layout/tile_grid.dart` — a `Column` of `Row`s of
+    `Expanded(AspectRatio(...))`, which `RenderFlex`/`RenderAspectRatio` can
+    both measure, with the last row padded so its tiles keep the column width.
+    **The general rule, now twice-proven: nothing that needs its own
+    constraints before it can size itself may render inside a tool screen's
+    desktop column.**
+  - **`test/app/widgets/intrinsic_height_layout_test.dart` was almost entirely
+    vacuous, which is why it did not catch the above.** It hand-rolled
+    `pumpWidget(EasyLocalization(...))` + a single `pump()`; past the first test
+    in the file the translation load never completed, so the tree rendered
+    *without the panel in it* and every `takeException() isNull` passed on an
+    empty screen. Rewritten onto `pumpLocalized`, which needed a new
+    `settle: false` option (the shimmer and the grid placeholders never go
+    idle, so `pumpAndSettle` times out on a healthy widget). Every case now
+    asserts its panel actually rendered — `expectPanel` is required, not
+    optional, precisely so this cannot regress. Reverting one grid to
+    `GridView` reproduces the reported assert, so the guard is real.
+  - **Compress reported a saving it had not made.** `pdf_manipulator`'s
+    `compress` is `optimizeImages` (embedded raster images ≥128px) plus a full
+    rewrite — a text-only PDF has nothing to give up, and the rewrite can come
+    back a few bytes *larger*. The engine wiring was correct; the dishonesty
+    was ours. `PdfEngineCompressRepository` now returns the original whenever
+    the engine cannot beat it (never hand back a bigger file), and the result
+    panel switches to `compress.resultUnchangedMessage` when the sizes did not
+    move. This is a **capability limit of the engine, not a bug to fix later**:
+    image-free PDFs are not compressible by this path.
+  - **The `-20%`/`-58%`/`-82%` figures on the quality presets are gone.** They
+    came straight from `design/Compress.dc.html` and were pure fiction — the
+    real reduction is unknowable before processing and depends entirely on the
+    file's image content. A number the tool cannot honour is worse than no
+    number, and `ResultPanel` already reports the true before/after. Deliberate
+    divergence from the design; `CompressQuality`'s doc comment records why.
+  - **`apps/web`: every tool threw "a server-side exception has occurred" on
+    any real PDF.** Uploads go through Server Actions (`features/*/actions.ts`),
+    and Next caps a Server Action body at **1MB** by default — the file never
+    reached our `try/catch`, it died in Next's own body parser, so the handled
+    `ok: false` path could not report it. `next.config.ts` now sets
+    `experimental.serverActions.bodySizeLimit: "100mb"`, matching
+    `apps/api`'s `max_upload_size_mb` so the backend's 413 stays the one place
+    a too-large file is rejected. Not compress-specific — it affected all
+    eleven tools.
+  - `flutter analyze` clean, `flutter test` **414/414** passing (up from 406);
+    `next build` clean.

@@ -1,6 +1,7 @@
 import 'package:doclyvo/app/constants/responsive_constants.dart';
 import 'package:doclyvo/app/extensions/build_context_extension.dart';
 import 'package:doclyvo/app/widgets/buttons/secondary_button.dart';
+import 'package:doclyvo/app/widgets/layout/tile_grid.dart';
 import 'package:doclyvo/core/utils/constants/sizes.dart';
 import 'package:doclyvo/features/rotate/domain/models/rotate_angle.dart';
 import 'package:doclyvo/features/rotate/domain/models/rotate_page_entry.dart';
@@ -83,21 +84,17 @@ final class RotatePageGrid extends StatelessWidget {
           ],
         ),
         const SizedBox(height: Sizes.md),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            childAspectRatio: 3 / 4,
-            crossAxisSpacing: Sizes.sm,
-            mainAxisSpacing: Sizes.sm,
-          ),
-          itemCount: entries.length,
-          itemBuilder: (context, index) => _PageTile(
-            entry: entries[index],
-            angle: angle,
-            onTap: enabled ? () => onToggleEntry(index) : null,
-          ),
+        TileGrid(
+          crossAxisCount: crossAxisCount,
+          childAspectRatio: 3 / 4,
+          children: [
+            for (final (index, entry) in entries.indexed)
+              _PageTile(
+                entry: entry,
+                angle: angle,
+                onTap: enabled ? () => onToggleEntry(index) : null,
+              ),
+          ],
         ),
       ],
     );

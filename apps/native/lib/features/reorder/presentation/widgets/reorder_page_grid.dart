@@ -1,5 +1,6 @@
 import 'package:doclyvo/app/constants/responsive_constants.dart';
 import 'package:doclyvo/app/extensions/build_context_extension.dart';
+import 'package:doclyvo/app/widgets/layout/tile_grid.dart';
 import 'package:doclyvo/core/utils/constants/sizes.dart';
 import 'package:doclyvo/features/reorder/domain/models/reorder_page_entry.dart';
 import 'package:doclyvo/generated/localization/lang/locale_keys.g.dart';
@@ -56,24 +57,20 @@ final class ReorderPageGrid extends StatelessWidget {
           ),
         ),
         const SizedBox(height: Sizes.md),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            childAspectRatio: 0.62,
-            crossAxisSpacing: Sizes.sm,
-            mainAxisSpacing: Sizes.sm,
-          ),
-          itemCount: entries.length,
-          itemBuilder: (context, index) => _PageTile(
-            entry: entries[index],
-            position: index + 1,
-            isFirst: index == 0,
-            isLast: index == entries.length - 1,
-            onMoveLeft: enabled ? () => onMoveLeft(index) : null,
-            onMoveRight: enabled ? () => onMoveRight(index) : null,
-          ),
+        TileGrid(
+          crossAxisCount: crossAxisCount,
+          childAspectRatio: 0.62,
+          children: [
+            for (final (index, entry) in entries.indexed)
+              _PageTile(
+                entry: entry,
+                position: index + 1,
+                isFirst: index == 0,
+                isLast: index == entries.length - 1,
+                onMoveLeft: enabled ? () => onMoveLeft(index) : null,
+                onMoveRight: enabled ? () => onMoveRight(index) : null,
+              ),
+          ],
         ),
       ],
     );

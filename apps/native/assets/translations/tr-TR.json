@@ -100,6 +100,7 @@
     "processingAction": "İşleniyor…",
     "processingLabel": "Sıkıştırılıyor…",
     "resultMessage": "{fileName} sıkıştırıldı ve indirilmeye hazır.",
+    "resultUnchangedMessage": "{fileName} zaten olabildiğince küçük — bu dosyada sıkıştırılacak görsel verisi bulunamadı, bu yüzden orijinali korundu.",
     "newOperation": "Yeni İşlem",
     "changeFile": "Değiştir",
     "saveFailed": "Dosya kaydedilemedi"

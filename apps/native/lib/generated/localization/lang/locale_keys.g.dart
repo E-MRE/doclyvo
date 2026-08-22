@@ -96,6 +96,7 @@ abstract class  LocaleKeys {
   static const compress_processingAction = 'compress.processingAction';
   static const compress_processingLabel = 'compress.processingLabel';
   static const compress_resultMessage = 'compress.resultMessage';
+  static const compress_resultUnchangedMessage = 'compress.resultUnchangedMessage';
   static const compress_newOperation = 'compress.newOperation';
   static const compress_changeFile = 'compress.changeFile';
   static const compress_saveFailed = 'compress.saveFailed';

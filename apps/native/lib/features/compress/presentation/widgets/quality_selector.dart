@@ -7,8 +7,11 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 /// The three compression-level pills from `design/Compress.dc.html`'s
-/// `isIdle` branch — a title, a hint, and an illustrative percent, with the
-/// selected pill outlined in the accent color.
+/// `isIdle` branch — a title and a hint, with the selected pill outlined in the
+/// accent color.
+///
+/// The design also prints a reduction percentage per preset. It is deliberately
+/// not rendered: see the note on [CompressQuality].
 final class QualitySelector extends StatelessWidget {
   const QualitySelector({
     required this.selected,
@@ -69,6 +72,10 @@ final class _QualityPill extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        // Without the percent on the right the pill no longer has a full-width
+        // Row inside it, so it has to claim the width itself — otherwise it
+        // shrink-wraps the copy and only the text is tappable.
+        width: double.infinity,
         padding: AppInsets.symmetricH16.add(AppInsets.symmetricV12),
         decoration: BoxDecoration(
           color: isSelected ? context.accentSoftColor : null,
@@ -80,34 +87,20 @@ final class _QualityPill extends StatelessWidget {
             width: 2,
           ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    quality.titleKey.tr(),
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    quality.hintKey.tr(),
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: context.textSoftColor,
-                    ),
-                  ),
-                ],
+            Text(
+              quality.titleKey.tr(),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
               ),
             ),
             Text(
-              quality.illustrativePercent,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: theme.colorScheme.primary,
+              quality.hintKey.tr(),
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: context.textSoftColor,
               ),
             ),
           ],

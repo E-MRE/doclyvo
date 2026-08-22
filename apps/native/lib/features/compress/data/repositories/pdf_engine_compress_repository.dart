@@ -15,7 +15,19 @@ final class PdfEngineCompressRepository implements CompressRepository {
   Future<Uint8List> compress({
     required Uint8List bytes,
     required CompressQuality quality,
-  }) {
-    return _engine.compress(bytes: bytes, imageQuality: quality.imageQuality);
+  }) async {
+    final compressed = await _engine.compress(
+      bytes: bytes,
+      imageQuality: quality.imageQuality,
+    );
+
+    // `pdf_manipulator`'s compress re-encodes embedded raster images and then
+    // rewrites the file. A PDF that carries little or no image data therefore
+    // has nothing to give up, and the rewrite can come back a few bytes
+    // *larger* than what went in. Handing that back as "compressed" is how the
+    // tool ended up shipping a file it had not shrunk, so the original wins
+    // whenever the engine cannot beat it — the screen compares the two sizes
+    // and says so plainly.
+    return compressed.length < bytes.length ? compressed : bytes;
   }
 }

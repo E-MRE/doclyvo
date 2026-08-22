@@ -51,10 +51,19 @@ const Size kDesktopTestSurface = Size(1440, 1024);
 /// [builder] receives a context below the `EasyLocalization` ancestor, so a
 /// `MaterialApp` it creates can read `context.localizationDelegates`. Pass
 /// [surfaceSize] to exercise a different breakpoint.
+///
+/// Pass `settle: false` for a tree that never goes idle — the progress bar's
+/// shimmer and the page grids' placeholder animations repeat forever, so
+/// `pumpAndSettle` times out on a perfectly healthy widget. The `runAsync`
+/// pump above still happens, which is the part that gets the Turkish copy in
+/// place, so the alternative of hand-rolling `pumpWidget(EasyLocalization(…))`
+/// is never the right call: past the first test in a file it silently renders
+/// nothing.
 Future<void> pumpLocalized(
   WidgetTester tester,
   WidgetBuilder builder, {
   Size surfaceSize = kDesktopTestSurface,
+  bool settle = true,
 }) async {
   tester.view
     ..physicalSize = surfaceSize
@@ -67,5 +76,10 @@ Future<void> pumpLocalized(
     await tester.pumpWidget(tree);
     await Future<void>.delayed(Duration.zero);
   });
-  await tester.pumpAndSettle();
+  if (settle) {
+    await tester.pumpAndSettle();
+  } else {
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+  }
 }
