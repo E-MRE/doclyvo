@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:doclyvo/core/error/file_picker_exception.dart';
 import 'package:doclyvo/core/widgets/upload/file_picker_service.dart';
+import 'package:doclyvo/core/widgets/upload/models/picked_image_file.dart';
 import 'package:doclyvo/core/widgets/upload/models/picked_pdf_file.dart';
 import 'package:file_picker/file_picker.dart';
 
@@ -67,6 +68,46 @@ final class PlatformFilePickerManager extends FilePickerService {
       picked.add(await _toPickedFile(file));
     }
     return picked;
+  }
+
+  @override
+  Future<PickedImageFile?> pickSignatureImage({String? dialogTitle}) async {
+    PlatformFile? file;
+    try {
+      file = await FilePicker.pickFile(
+        dialogTitle: dialogTitle,
+        type: FileType.custom,
+        allowedExtensions: const [FilePickerService.pngExtension],
+      );
+    } on Exception catch (error) {
+      throw FilePickerException('$error');
+    }
+
+    if (file == null) return null;
+
+    // Same escape-hatch guard as pickPdf: the dialog filters by extension, but
+    // Android content providers and "All files" pickers can still hand back
+    // something else.
+    if (!isPngFileName(file.name)) {
+      throw FilePickerException(
+        'Picked file is not a PNG: ${file.name}',
+        kind: FilePickerErrorKind.notPdf,
+      );
+    }
+
+    try {
+      return PickedImageFile(
+        name: file.name,
+        sizeInBytes: await file.length(),
+        path: file.path,
+        readBytes: file.readAsBytes,
+      );
+    } on Exception catch (error) {
+      throw FilePickerException(
+        '$error',
+        kind: FilePickerErrorKind.unreadable,
+      );
+    }
   }
 
   @override

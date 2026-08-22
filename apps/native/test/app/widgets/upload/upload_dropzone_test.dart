@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:doclyvo/app/widgets/upload/upload_dropzone.dart';
 import 'package:doclyvo/core/error/file_picker_exception.dart';
 import 'package:doclyvo/core/widgets/upload/file_picker_service.dart';
+import 'package:doclyvo/core/widgets/upload/models/picked_image_file.dart';
 import 'package:doclyvo/core/widgets/upload/models/picked_pdf_file.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +34,10 @@ final class _FakeFilePickerService extends FilePickerService {
 
   @override
   Future<PickedPdfFile> resolveDroppedPath(String path) async =>
+      throw UnimplementedError();
+
+  @override
+  Future<PickedImageFile?> pickSignatureImage({String? dialogTitle}) async =>
       throw UnimplementedError();
 
   @override

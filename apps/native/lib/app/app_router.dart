@@ -7,6 +7,7 @@ import 'package:doclyvo/features/merge/presentation/pages/merge_screen.dart';
 import 'package:doclyvo/features/protect/presentation/pages/protect_screen.dart';
 import 'package:doclyvo/features/reorder/presentation/pages/reorder_screen.dart';
 import 'package:doclyvo/features/rotate/presentation/pages/rotate_screen.dart';
+import 'package:doclyvo/features/sign/presentation/pages/sign_screen.dart';
 import 'package:doclyvo/features/split/presentation/pages/split_screen.dart';
 import 'package:doclyvo/features/watermark/presentation/pages/watermark_screen.dart';
 import 'package:go_router/go_router.dart';
@@ -64,7 +65,7 @@ final router = GoRouter(
     GoRoute(
       path: RouteConstants.sign,
       pageBuilder: (_, _) => TransitionPageBuilder.fadeTransition(
-        child: const PlaceholderScreen(title: 'Sign'),
+        child: const SignScreen(),
       ),
     ),
     GoRoute(

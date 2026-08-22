@@ -218,5 +218,30 @@ abstract class  LocaleKeys {
   static const protect_newOperation = 'protect.newOperation';
   static const protect_saveFailed = 'protect.saveFailed';
   static const protect = 'protect';
+  static const sign_pageTitle = 'sign.pageTitle';
+  static const sign_pageSubtitle = 'sign.pageSubtitle';
+  static const sign_selectFileFirst = 'sign.selectFileFirst';
+  static const sign_modeDraw = 'sign.modeDraw';
+  static const sign_modeType = 'sign.modeType';
+  static const sign_modeUpload = 'sign.modeUpload';
+  static const sign_drawHint = 'sign.drawHint';
+  static const sign_drawClear = 'sign.drawClear';
+  static const sign_typeHint = 'sign.typeHint';
+  static const sign_typeFieldHint = 'sign.typeFieldHint';
+  static const sign_uploadHint = 'sign.uploadHint';
+  static const sign_uploadAction = 'sign.uploadAction';
+  static const sign_uploadSelected = 'sign.uploadSelected';
+  static const sign_uploadFailed = 'sign.uploadFailed';
+  static const sign_placeAction = 'sign.placeAction';
+  static const sign_placementHint = 'sign.placementHint';
+  static const sign_pageIndicator = 'sign.pageIndicator';
+  static const sign_previousPage = 'sign.previousPage';
+  static const sign_nextPage = 'sign.nextPage';
+  static const sign_startAction = 'sign.startAction';
+  static const sign_processingLabel = 'sign.processingLabel';
+  static const sign_resultMessage = 'sign.resultMessage';
+  static const sign_newOperation = 'sign.newOperation';
+  static const sign_saveFailed = 'sign.saveFailed';
+  static const sign = 'sign';
 
 }

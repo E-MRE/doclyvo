@@ -25,6 +25,9 @@ import 'package:doclyvo/features/reorder/presentation/cubit/reorder_cubit.dart';
 import 'package:doclyvo/features/rotate/data/repositories/pdf_engine_rotate_repository.dart';
 import 'package:doclyvo/features/rotate/data/repositories/rotate_repository.dart';
 import 'package:doclyvo/features/rotate/presentation/cubit/rotate_cubit.dart';
+import 'package:doclyvo/features/sign/data/repositories/pdf_engine_sign_repository.dart';
+import 'package:doclyvo/features/sign/data/repositories/sign_repository.dart';
+import 'package:doclyvo/features/sign/presentation/cubit/sign_cubit.dart';
 import 'package:doclyvo/features/split/data/repositories/pdf_engine_split_repository.dart';
 import 'package:doclyvo/features/split/data/repositories/split_repository.dart';
 import 'package:doclyvo/features/split/presentation/cubit/split_cubit.dart';
@@ -105,6 +108,9 @@ mixin AppDependencyRegisterMixin {
       )
       ..registerFactory<ProtectRepository>(
         () => PdfEngineProtectRepository(injector.get<PdfEngineService>()),
+      )
+      ..registerFactory<SignRepository>(
+        () => PdfEngineSignRepository(injector.get<PdfEngineService>()),
       );
   }
 
@@ -131,6 +137,9 @@ mixin AppDependencyRegisterMixin {
       )
       ..registerFactory<ProtectCubit>(
         () => ProtectCubit(injector.get<ProtectRepository>()),
+      )
+      ..registerFactory<SignCubit>(
+        () => SignCubit(injector.get<SignRepository>()),
       );
   }
 }

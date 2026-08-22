@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:doclyvo/core/error/file_picker_exception.dart';
+import 'package:doclyvo/core/widgets/upload/models/picked_image_file.dart';
 import 'package:doclyvo/core/widgets/upload/models/picked_pdf_file.dart';
 
 /// Selecting a PDF from the device, however the platform offers it.
@@ -13,8 +14,15 @@ import 'package:doclyvo/core/widgets/upload/models/picked_pdf_file.dart';
 abstract class FilePickerService {
   const FilePickerService();
 
-  /// The single extension every tool accepts.
+  /// The single extension every tool accepts as its *document* input.
   static const String pdfExtension = 'pdf';
+
+  /// The only image extension accepted for a signature graphic.
+  ///
+  /// PNG only, matching `apps/web`'s `accept="image/png"`: a signature needs a
+  /// transparent background to sit on top of the page, which JPEG cannot
+  /// carry.
+  static const String pngExtension = 'png';
 
   /// Opens the platform's file-picker dialog, filtered to PDFs.
   ///
@@ -41,9 +49,23 @@ abstract class FilePickerService {
   /// path does not point at a readable file (e.g. a dropped folder).
   Future<PickedPdfFile> resolveDroppedPath(String path);
 
+  /// Opens the platform's file-picker dialog, filtered to PNG images.
+  ///
+  /// Returns `null` when the user cancels — same "not a failure" contract as
+  /// [pickPdf]. Throws [FilePickerException] with
+  /// [FilePickerErrorKind.notPdf] when the selection is not a PNG (the kind
+  /// enum names the common case, not the only one), or
+  /// [FilePickerErrorKind.pickerFailure] when the dialog itself fails. Added
+  /// for Sign (P3A-8), the first tool whose input is not a document.
+  Future<PickedImageFile?> pickSignatureImage({String? dialogTitle});
+
   /// Whether [fileName] carries the `.pdf` extension, case-insensitively.
   bool isPdfFileName(String fileName) =>
       fileName.toLowerCase().endsWith('.$pdfExtension');
+
+  /// Whether [fileName] carries the `.png` extension, case-insensitively.
+  bool isPngFileName(String fileName) =>
+      fileName.toLowerCase().endsWith('.$pngExtension');
 
   /// Writes a client-side tool's output [bytes] to disk as [fileName].
   ///

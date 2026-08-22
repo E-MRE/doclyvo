@@ -227,5 +227,31 @@
     "resultMessage": "{fileName} korundu. Şifreyi güvenli bir yerde sakla, bu ekrandan sonra tekrar gösterilmez.",
     "newOperation": "Yeni İşlem",
     "saveFailed": "Dosya kaydedilemedi"
+  },
+  "sign": {
+    "pageTitle": "PDF İmzala",
+    "pageSubtitle": "İmzanı oluştur, belgeye yerleştir.",
+    "selectFileFirst": "İmza seçeneklerini görmek için önce bir PDF yükle.",
+    "modeDraw": "Çiz",
+    "modeType": "Yaz",
+    "modeUpload": "Yükle",
+    "drawHint": "Parmağınla ya da trackpad ile imzanı çiz.",
+    "drawClear": "Temizle",
+    "typeHint": "Adını yaz, imza olarak yerleştirilir.",
+    "typeFieldHint": "Adını yaz",
+    "uploadHint": "İmza görselini yükle (PNG, şeffaf arka plan önerilir)",
+    "uploadAction": "Görsel Seç",
+    "uploadSelected": "{fileName} seçildi",
+    "uploadFailed": "İmza görseli okunamadı",
+    "placeAction": "Belgeye Yerleştir",
+    "placementHint": "İmza buraya yerleşecek",
+    "pageIndicator": "Sayfa {current} / {total}",
+    "previousPage": "Önceki sayfa",
+    "nextPage": "Sonraki sayfa",
+    "startAction": "İmzala",
+    "processingLabel": "İmzalanıyor…",
+    "resultMessage": "{fileName} imzalandı, imza {page}. sayfaya yerleştirildi.",
+    "newOperation": "Yeni İşlem",
+    "saveFailed": "Dosya kaydedilemedi"
   }
 }

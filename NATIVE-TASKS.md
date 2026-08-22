@@ -4,8 +4,8 @@ Status (2026-08-21): **Phase 0 complete, Phase 1 complete (including P1-4/P1-5's
 responsive tier system and home tablet layout), Phase 2 complete (P2-1..P2-4),
 P3A-1 (Compress) complete, P3A-2 (Split) complete, P3A-3 (Merge) complete,
 P3A-4 (Rotate) complete, P3A-5 (Reorder) complete, P3A-6 (Watermark) complete,
-P3A-7 (Protect) complete.**
-Remaining: P3A-8, all of Phase 3B, all of Phase 4.
+P3A-7 (Protect) complete, P3A-8 (Sign) complete — **all of Phase 3A done.**
+Remaining: all of Phase 3B, all of Phase 4.
 
 **Purpose of this file:** each task below is meant to be handed to a **separate,
 fresh Claude Code session with empty conversation context**. A session working a
@@ -691,7 +691,7 @@ copy/behavior parity only — the native version does not call the API these
 | P3A-5 | Reorder ✅ done (2026-08-21) | `design/Reorder.dc.html`, `design/MobileReorder.dc.html` | `apps/web/features/reorder/components/` | render (thumbnails) + reorderPages | Per-page thumbnails; up/down arrow reordering. |
 | P3A-6 | Watermark ✅ done (2026-08-21) | `design/Watermark.dc.html`, `design/MobileWatermark.dc.html` | `apps/web/features/watermark/components/` | watermark | Text + position/opacity presets; live preview can reuse the thumbnail-render capability on page 1. |
 | P3A-7 | Protect ✅ done (2026-08-21) | `design/Protect.dc.html`, `design/MobileProtect.dc.html` | `apps/web/features/protect/components/` | encrypt (decrypt deliberately out of scope — see the Decisions log) | Password field (reveal toggle, generate) + permission checkboxes (no-print/no-copy/no-edit) — per-permission flags confirmed real in P0-11, so the design's three checkboxes ship as drawn. |
-| P3A-8 | Sign | `design/Sign.dc.html`, `design/MobileSign.dc.html` | `apps/web/features/sign/components/` | addImageStamp (or equivalent) for drawn/typed/uploaded signature placement | **Product decision needed at implementation time:** the existing `apps/web` Sign feature has an optional-auth hash + append-only audit-log path that inherently needs a backend (see `apps/api/README.md`'s Sign section). Moving visual signature placement client-side is straightforward; whether audit-log parity is in scope for native MVP or deferred is NOT decided here — pick one, record the choice in this file's Decisions log, don't silently drop or silently backend-call for it. |
+| P3A-8 | Sign ✅ done (2026-08-21) | `design/Sign.dc.html`, `design/MobileSign.dc.html` | `apps/web/features/sign/components/` | addImageStamp (or equivalent) for drawn/typed/uploaded signature placement | **Product decision — resolved 2026-08-21: audit-log parity deferred, see the Decisions log.** The existing `apps/web` Sign feature has an optional-auth hash + append-only audit-log path that inherently needs a backend (see `apps/api/README.md`'s Sign section). Moving visual signature placement client-side is straightforward; whether audit-log parity is in scope for native MVP or deferred is NOT decided here — pick one, record the choice in this file's Decisions log, don't silently drop or silently backend-call for it. |
 
 **Definition of done, per tool (applies to all 8):**
 - Screen reachable from its home-screen tool card (route already exists from P0-8).
@@ -878,8 +878,8 @@ Work these only after all 8 Phase 3A + 3 Phase 3B tools are done.
   (`.env-templates/` at the repo root) and why the annotation's relative path is
   easy to misread.
 - Sign's audit-log/hash parity (client-side signature placement vs. the existing
-  web feature's optional backend-backed audit trail): **not yet decided** — see
-  P3A-8's Notes column. Decide during that task, record the choice here.
+  web feature's optional backend-backed audit trail): **decided 2026-08-21 in
+  P3A-8 — deferred, deliberately.** See that task's Decisions log entry below.
 - 2026-08-21 — **P0-11 done, and it resolves three of this file's open questions
   by reading `pdf_manipulator` 4.1.0's real API instead of its capability list.**
   The engine's surface is `Pdf` + extensions (`PdfSugar`, `PdfStandalone`),
@@ -1190,3 +1190,86 @@ Work these only after all 8 Phase 3A + 3 Phase 3B tools are done.
   - **Rule for new shared panel widgets:** no `LayoutBuilder` in anything that
     can land inside a tool screen's desktop column. Use
     `FractionallySizedBox`/`FractionalTranslation`.
+
+- 2026-08-21 — **P3A-8 (Sign) done, and it answers this file's last open
+  product question.** `lib/features/sign/` follows P3A-7 (Protect)'s shape
+  (one file in, one file out, settings in the right-hand panel, no per-page
+  grid). Decisions worth not re-litigating:
+  - **The product decision the task demanded: audit-log parity is deferred,
+    not silently dropped and not silently backend-called.** `apps/web`'s Sign
+    writes an append-only audit trail (plus a document hash) for signed-in
+    users, which needs auth *and* Postgres — see `apps/api/README.md`'s
+    "Local Postgres (sign's audit-log path)" section. Native has no login at
+    all, and calling `apps/api` from Sign would break the Phase 3A rule that
+    these eight tools work fully offline. So native Sign is **visual placement
+    only**: `SignRepository` deliberately exposes no hash or audit operation,
+    which makes adding one later a visible interface change rather than a
+    hidden branch. If audit-log parity is ever wanted on native it is a new
+    task gated on native auth, not a variation of this screen.
+  - **All three signature modes rasterize to PNG on-device, because
+    `addImageStamp` is the engine's only stamping primitive.** Unlike
+    `apps/api`'s reportlab overlay there is no "draw this text into the PDF"
+    path, so the typed mode cannot be passed through as text — it goes through
+    `SignatureImageRenderer.renderText`, and the drawn mode through
+    `renderStrokes`, both via `ui.PictureRecorder`. The renderer sits in
+    `domain/services/` (like `PasswordGenerator`) rather than inside a widget
+    so both modes are unit-testable without pumping a screen, and it shares
+    its `paintStrokes` with the on-screen pad's `CustomPainter` so what the
+    user drew and what gets stamped cannot drift apart.
+  - **No signature font ships with the app, so the typed mode is italic
+    system face, not the design's Caveat.** Both design exports set
+    `font-family:'Caveat'`, which would mean adding a font binary to
+    `assets/` and a `fonts:` block to `pubspec.yaml`. Deferred rather than
+    faked: italic + semibold at 96px reads as a signature, and the font is a
+    one-line follow-up if the owner wants exact design parity. This is the
+    only deliberate visual deviation from `design/Sign.dc.html`.
+  - **Placement is the design's fixed bottom-right box, with `apps/web`'s
+    exact fractions.** `SignaturePlacement.bottomRight` is
+    `x 0.6 / y 0.78 / w 0.32 / h 0.1` — byte-identical to `apps/web`'s
+    `PLACEMENT_BOX`, and `toStampArea` reproduces
+    `SignService._build_overlay`'s conversion (`y` fraction is from the page
+    **top**, `PdfStampArea.y` is from the **bottom**), so native and web put
+    the signature in the same spot. Neither design export draws a drag
+    handle and web has no free placement either, so a draggable box is a
+    later task. The conversion uses `PdfPageDimensions.effectiveWidth/Height`,
+    not the raw media box, so a page stored rotated still gets the box where
+    the user sees it.
+  - **The page preview is skeleton bars, not a rendered thumbnail.** Both
+    design exports and `apps/web` draw placeholder bars; since the placement
+    box is fixed, a real render would cost a page-render pass without telling
+    the user anything new. `renderThumbnails` is there if free placement ever
+    ships. The preview is a fixed-height box with the width derived from it
+    (3:4) rather than an `AspectRatio`, for the same reason the P3A-7 entry
+    above gives: it sits inside the desktop layout's `IntrinsicHeight` row.
+  - **New core capability: `FilePickerService.pickSignatureImage()` +
+    `PickedImageFile`.** Sign is the first tool whose input is not a
+    document, so it needed a picker that is not PDF-filtered. `PickedImageFile`
+    is a separate model on purpose — widening `PickedPdfFile` to mean "some
+    file" would quietly weaken the "this is a validated PDF" guarantee the
+    other ten tools and the dropzone rely on. PNG only, matching web's
+    `accept="image/png"`: a signature needs a transparent background.
+  - **A "Temizle" button was added to the draw pad even though the design has
+    none** — a signature pad with no way back from a bad stroke is unusable on
+    a touch screen. The pad's strokes are owned by the screen, not the pad, so
+    "Belgeye Yerleştir" can rasterize them without a `GlobalKey` round-trip.
+  - The screen follows P3A-7's fixed version of the two cross-cutting bugs from
+    the outset: one `BlocBuilder` around the whole input panel (no stale
+    `enabled`), and no `LayoutBuilder` anywhere that can land in the desktop
+    column.
+  - **Two test-harness traps this task hit, worth not rediscovering:**
+    1. **Rasterizing to PNG hangs a `flutter_test` forever unless it runs
+       inside `tester.runAsync`.** `Picture.toImage`/`Image.toByteData` go
+       through the engine's own task runner, which the fake async clock never
+       pumps — the test does not fail, it just never returns until the harness
+       kills it (this is what made the first attempt at
+       `signature_image_renderer_test.dart` look like an infinite loop). Same
+       reason `widget_test_harness.dart` wraps its translation load in
+       `runAsync`. The renderer itself is fine on-device.
+    2. **A widget whose state its parent owns needs a `StatefulBuilder` host
+       and a `pump()` between pointer moves.** `SignaturePad` reads its
+       strokes from props, so a test that drags without pumping feeds every
+       move the same stale list and only ever gets a one-point stroke. On a
+       device one move arrives per frame, so pumping per move is the faithful
+       model, not a workaround. See `signature_pad_test.dart`.
+  - `flutter analyze` clean, `flutter test` **406/406** passing (up from 321
+    after P3A-7).
