@@ -55,8 +55,10 @@ backend), with metadata in custom response headers (e.g. `X-Original-Size`,
 `X-Compressed-Size`) — NOT a JSON envelope. Configure Dio with
 `ResponseType.bytes` for these calls and read `response.headers` for metadata; do not
 assume `ApiResponseModel<TData>` JSON deserialization applies to tool-processing
-endpoints. Confirm exact field names by reading that tool's
-`apps/api/app/features/<tool>/router.py` + `schemas.py` before writing the repository.
+endpoints. Confirm exact field names for that tool's `router.py` + `schemas.py`
+with `search_graph`/`get_code_snippet` against project `doclyvo` first — that graph
+covers `apps/api` too, so this is a cross-service lookup, not a reason to open the
+file blind — falling back to `Read` only for what the graph doesn't resolve.
 
 ## Mandatory architecture (non-negotiable — enforced by `.claude/reference/flutter/`)
 

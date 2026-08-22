@@ -28,7 +28,11 @@ task should:
    protocol, including which tool answers which question, is in the "Code discovery"
    section of the repo-root `CLAUDE.md`.
 3. Read only this task's own section below.
-4. Read only the "Key inputs" files this task lists.
+4. Read only the "Key inputs" files this task lists. When a "Key inputs" entry
+   points at existing source code (e.g. a `lib/**/*.dart` file, or an
+   `apps/api/**/router.py`/`schemas.py` pair) rather than a reference/design doc,
+   look it up via `search_graph`/`get_code_snippet` first — that's what step 2 set
+   up — and reach for `Read` only for what the graph doesn't resolve.
 5. Implement only what "Deliverables" lists and verify against "Definition of Done".
 6. After committing, re-index once — `index_repository(repo_path: "<repo root>",
    mode: "fast")` — then stop; do not start the next task. Skip the re-index only if
@@ -737,6 +741,11 @@ Same feature-module shape as Phase 3A, but the "data" layer is a repository call
 - `.claude/reference/flutter/prompts/feature_creation_prompt.md`
 - Backend contract note in `apps/native/CLAUDE.md` (raw bytes + header metadata,
   not JSON)
+
+The "API contract" column names the backend files each task's contract comes from —
+look them up with `search_graph`/`get_code_snippet` (`trace_path(mode:
+"cross_service")` if you need to see the web client's matching call too) rather than
+opening them cold; fall back to `Read` only for what the graph doesn't resolve.
 
 | ID | Tool | Design file(s) | API contract | Web reference | Notes |
 |----|------|----------------|---------------|------------------------------------|-------|
